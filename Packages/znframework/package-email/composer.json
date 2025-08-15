@@ -1,0 +1,28 @@
+{
+    "name": "znframework/package-email",
+    "description": "ZN Framework Email Package",
+    "license": "MIT",
+    "homepage": "https://znframework.com",
+    "keywords": ["znframework", "email"],
+    "authors": [
+        {
+            "name": "Ozan Uykun",
+            "email": "ozan@znframework.com"
+        }
+    ],
+    "require": {
+        "php": ">=7.0.0",
+        "znframework/package-zerocore": ">=6.0",
+        "znframework/package-helpers": ">=6.0",
+        "znframework/package-security": ">=6.0",
+        "znframework/package-datatypes": ">=6.0",
+        "znframework/package-datetime": ">=6.0"
+
+	},
+    "autoload": {
+        "psr-4": {
+            "ZN\\Email\\": ""
+        }
+    },
+	"minimum-stability": "dev"
+}

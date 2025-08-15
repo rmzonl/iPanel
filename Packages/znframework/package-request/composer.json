@@ -1,0 +1,26 @@
+{
+    "name": "znframework/package-request",
+    "description": "ZN Framework Request Package",
+    "license": "MIT",
+    "homepage": "https://znframework.com",
+    "keywords": ["znframework", "request", "http", "method", "server", "env", "get", "post"],
+    "authors": [
+        {
+            "name": "Ozan Uykun",
+            "email": "ozan@znframework.com"
+        }
+    ],
+    "require": {
+        "php": ">=7.0.0",
+        "znframework/package-zerocore": ">=6.0",
+        "znframework/package-datatypes": ">=6.0",
+        "znframework/package-security": ">=6.0",
+        "znframework/package-protection": ">=6.0"
+	},
+    "autoload": {
+        "psr-4": {
+            "ZN\\Request\\": ""
+        }
+    },
+	"minimum-stability": "dev"
+}

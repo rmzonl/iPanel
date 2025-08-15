@@ -1,0 +1,34 @@
+{
+    "name": "znframework/package-database",
+    "description": "ZN Framework Database Package",
+    "license": "MIT",
+    "homepage": "https://znframework.com",
+    "keywords": ["znframework", "database"],
+    "authors": [
+        {
+            "name": "Ozan Uykun",
+            "email": "ozan@znframework.com"
+        }
+    ],
+    "require": {
+        "php": ">=7.0.0",
+        "znframework/package-zerocore": ">=6.0",
+        "znframework/package-security": ">=6.0",
+        "znframework/package-datatypes": ">=6.0",
+        "znframework/package-request": ">=6.0",
+        "znframework/package-response": ">=6.0",
+        "znframework/package-filesystem": ">=6.0",
+        "znframework/package-cache": ">=6.0",
+        "znframework/package-pagination": ">=6.0",
+        "znframework/package-helpers": ">=6.0",
+        "znframework/package-hypertext": ">=6.0",
+        "znframework/package-datetime": ">=6.0",
+        "znframework/package-protection": ">=6.0"
+	},
+    "autoload": {
+        "psr-4": {
+            "ZN\\Database\\": ""
+        }
+    },
+	"minimum-stability": "dev"
+}

@@ -1,0 +1,26 @@
+{
+    "name": "znframework/package-language",
+    "description": "ZN Framework Language Package",
+    "license": "MIT",
+    "homepage": "https://znframework.com",
+    "keywords": ["znframework", "ml", "language", "multi language"],
+    "authors": [
+        {
+            "name": "Ozan Uykun",
+            "email": "ozan@znframework.com"
+        }
+    ],
+    "require": {
+        "php": ">=7.0.0",
+        "znframework/package-zerocore": ">=6.0",
+        "znframework/package-hypertext": ">=6.0",
+        "znframework/package-pagination": ">=6.0",
+        "znframework/package-request": ">=6.0"
+	},
+    "autoload": {
+        "psr-4": {
+            "ZN\\Language\\": ""
+        }
+    },
+	"minimum-stability": "dev"
+}

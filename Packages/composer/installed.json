@@ -1,0 +1,1827 @@
+{
+    "packages": [
+        {
+            "name": "znframework/package-authentication",
+            "version": "8.21.0",
+            "version_normalized": "8.21.0.0",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/znframework/package-authentication.git",
+                "reference": "58c793262ad2e80d0747f563c266442bfa4e33e6"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/znframework/package-authentication/zipball/58c793262ad2e80d0747f563c266442bfa4e33e6",
+                "reference": "58c793262ad2e80d0747f563c266442bfa4e33e6",
+                "shasum": ""
+            },
+            "require": {
+                "php": ">=7.0.0",
+                "znframework/package-cryptography": ">=6.0",
+                "znframework/package-database": ">=6.0",
+                "znframework/package-email": ">=6.0",
+                "znframework/package-storage": ">=6.0",
+                "znframework/package-zerocore": ">=6.0"
+            },
+            "time": "2025-01-05T13:55:33+00:00",
+            "type": "library",
+            "installation-source": "dist",
+            "autoload": {
+                "psr-4": {
+                    "ZN\\Authentication\\": ""
+                }
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "MIT"
+            ],
+            "authors": [
+                {
+                    "name": "Ozan Uykun",
+                    "email": "ozan@znframework.com"
+                }
+            ],
+            "description": "ZN Framework Authentication",
+            "homepage": "https://znframework.com",
+            "keywords": [
+                "Authentication",
+                "znframework"
+            ],
+            "support": {
+                "issues": "https://github.com/znframework/package-authentication/issues",
+                "source": "https://github.com/znframework/package-authentication/tree/8.21.0"
+            },
+            "install-path": "../znframework/package-authentication"
+        },
+        {
+            "name": "znframework/package-authorization",
+            "version": "8.21.0",
+            "version_normalized": "8.21.0.0",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/znframework/package-authorization.git",
+                "reference": "4bb39a373e183c837bd35331b7cc253ea7c72d66"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/znframework/package-authorization/zipball/4bb39a373e183c837bd35331b7cc253ea7c72d66",
+                "reference": "4bb39a373e183c837bd35331b7cc253ea7c72d66",
+                "shasum": ""
+            },
+            "require": {
+                "php": ">=7.0.0",
+                "znframework/package-database": ">=6.0",
+                "znframework/package-protection": ">=6.0",
+                "znframework/package-zerocore": ">=6.0"
+            },
+            "time": "2025-01-05T14:02:46+00:00",
+            "type": "library",
+            "installation-source": "dist",
+            "autoload": {
+                "psr-4": {
+                    "ZN\\Authorization\\": ""
+                }
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "MIT"
+            ],
+            "authors": [
+                {
+                    "name": "Ozan Uykun",
+                    "email": "ozan@znframework.com"
+                }
+            ],
+            "description": "ZN Framework Authorization",
+            "homepage": "https://znframework.com",
+            "keywords": [
+                "authorization",
+                "znframework"
+            ],
+            "support": {
+                "issues": "https://github.com/znframework/package-authorization/issues",
+                "source": "https://github.com/znframework/package-authorization/tree/8.21.0"
+            },
+            "install-path": "../znframework/package-authorization"
+        },
+        {
+            "name": "znframework/package-buffering",
+            "version": "8.21.0",
+            "version_normalized": "8.21.0.0",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/znframework/package-buffering.git",
+                "reference": "a21a0a74ab8bd9b6f755c4d4bb1dd15e279f8582"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/znframework/package-buffering/zipball/a21a0a74ab8bd9b6f755c4d4bb1dd15e279f8582",
+                "reference": "a21a0a74ab8bd9b6f755c4d4bb1dd15e279f8582",
+                "shasum": ""
+            },
+            "require": {
+                "php": ">=7.0.0",
+                "znframework/package-storage": ">=6.0",
+                "znframework/package-zerocore": ">=6.0"
+            },
+            "time": "2025-01-05T14:02:58+00:00",
+            "type": "library",
+            "installation-source": "dist",
+            "autoload": {
+                "psr-4": {
+                    "ZN\\Buffering\\": ""
+                }
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "MIT"
+            ],
+            "authors": [
+                {
+                    "name": "Ozan Uykun",
+                    "email": "ozan@znframework.com"
+                }
+            ],
+            "description": "ZN Framework Buffering Package",
+            "homepage": "https://znframework.com",
+            "keywords": [
+                "buffering",
+                "znframework"
+            ],
+            "support": {
+                "issues": "https://github.com/znframework/package-buffering/issues",
+                "source": "https://github.com/znframework/package-buffering/tree/8.21.0"
+            },
+            "install-path": "../znframework/package-buffering"
+        },
+        {
+            "name": "znframework/package-cache",
+            "version": "8.21.0",
+            "version_normalized": "8.21.0.0",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/znframework/package-cache.git",
+                "reference": "e1b7c3c56eadf8748d6bc6f2f716ef91cdfd50f2"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/znframework/package-cache/zipball/e1b7c3c56eadf8748d6bc6f2f716ef91cdfd50f2",
+                "reference": "e1b7c3c56eadf8748d6bc6f2f716ef91cdfd50f2",
+                "shasum": ""
+            },
+            "require": {
+                "php": ">=7.0.0",
+                "znframework/package-buffering": ">=6.0",
+                "znframework/package-compression": ">=6.0",
+                "znframework/package-filesystem": ">=6.0",
+                "znframework/package-zerocore": ">=6.0"
+            },
+            "time": "2025-01-05T14:02:43+00:00",
+            "type": "library",
+            "installation-source": "dist",
+            "autoload": {
+                "psr-4": {
+                    "ZN\\Cache\\": ""
+                }
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "MIT"
+            ],
+            "authors": [
+                {
+                    "name": "Ozan Uykun",
+                    "email": "ozan@znframework.com"
+                }
+            ],
+            "description": "ZN Framework Cache",
+            "homepage": "https://znframework.com",
+            "keywords": [
+                "cache",
+                "znframework"
+            ],
+            "support": {
+                "issues": "https://github.com/znframework/package-cache/issues",
+                "source": "https://github.com/znframework/package-cache/tree/8.21.0"
+            },
+            "install-path": "../znframework/package-cache"
+        },
+        {
+            "name": "znframework/package-captcha",
+            "version": "8.22.0",
+            "version_normalized": "8.22.0.0",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/znframework/package-captcha.git",
+                "reference": "0a08c9cc81ca64c9e7b3024ec33b408c9047be73"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/znframework/package-captcha/zipball/0a08c9cc81ca64c9e7b3024ec33b408c9047be73",
+                "reference": "0a08c9cc81ca64c9e7b3024ec33b408c9047be73",
+                "shasum": ""
+            },
+            "require": {
+                "php": ">=7.0.0",
+                "znframework/package-cryptography": ">=6.0",
+                "znframework/package-image": ">=6.0",
+                "znframework/package-storage": ">=6.0",
+                "znframework/package-zerocore": ">=6.0"
+            },
+            "time": "2025-03-05T15:21:53+00:00",
+            "type": "library",
+            "installation-source": "dist",
+            "autoload": {
+                "psr-4": {
+                    "ZN\\Captcha\\": ""
+                }
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "MIT"
+            ],
+            "authors": [
+                {
+                    "name": "Ozan Uykun",
+                    "email": "ozan@znframework.com"
+                }
+            ],
+            "description": "ZN Framework Captcha Package",
+            "homepage": "https://znframework.com",
+            "keywords": [
+                "captcha",
+                "znframework"
+            ],
+            "support": {
+                "issues": "https://github.com/znframework/package-captcha/issues",
+                "source": "https://github.com/znframework/package-captcha/tree/8.22.0"
+            },
+            "install-path": "../znframework/package-captcha"
+        },
+        {
+            "name": "znframework/package-comparison",
+            "version": "8.21.0",
+            "version_normalized": "8.21.0.0",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/znframework/package-comparison.git",
+                "reference": "bece3ff1772f3a1f02e17d56e45085ce5cb3c252"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/znframework/package-comparison/zipball/bece3ff1772f3a1f02e17d56e45085ce5cb3c252",
+                "reference": "bece3ff1772f3a1f02e17d56e45085ce5cb3c252",
+                "shasum": ""
+            },
+            "require": {
+                "php": ">=7.0.0",
+                "znframework/package-zerocore": ">=6.0"
+            },
+            "time": "2025-01-05T13:55:58+00:00",
+            "type": "library",
+            "installation-source": "dist",
+            "autoload": {
+                "psr-4": {
+                    "ZN\\Comparison\\": ""
+                }
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "MIT"
+            ],
+            "authors": [
+                {
+                    "name": "Ozan Uykun",
+                    "email": "ozan@znframework.com"
+                }
+            ],
+            "description": "ZN Framework Comparison Package",
+            "homepage": "https://znframework.com",
+            "keywords": [
+                "comparison",
+                "znframework"
+            ],
+            "support": {
+                "issues": "https://github.com/znframework/package-comparison/issues",
+                "source": "https://github.com/znframework/package-comparison/tree/8.21.0"
+            },
+            "install-path": "../znframework/package-comparison"
+        },
+        {
+            "name": "znframework/package-compression",
+            "version": "8.21.0",
+            "version_normalized": "8.21.0.0",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/znframework/package-compression.git",
+                "reference": "bf6bde7e37028c8ea2a4bac684ac25e42aab522e"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/znframework/package-compression/zipball/bf6bde7e37028c8ea2a4bac684ac25e42aab522e",
+                "reference": "bf6bde7e37028c8ea2a4bac684ac25e42aab522e",
+                "shasum": ""
+            },
+            "require": {
+                "php": ">=7.0.0",
+                "znframework/package-filesystem": ">=6.0",
+                "znframework/package-zerocore": ">=6.0"
+            },
+            "time": "2025-01-05T13:56:02+00:00",
+            "type": "library",
+            "installation-source": "dist",
+            "autoload": {
+                "psr-4": {
+                    "ZN\\Compression\\": ""
+                }
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "MIT"
+            ],
+            "authors": [
+                {
+                    "name": "Ozan Uykun",
+                    "email": "ozan@znframework.com"
+                }
+            ],
+            "description": "ZN Framework Compression Package",
+            "homepage": "https://znframework.com",
+            "keywords": [
+                "compression",
+                "znframework"
+            ],
+            "support": {
+                "issues": "https://github.com/znframework/package-compression/issues",
+                "source": "https://github.com/znframework/package-compression/tree/8.21.0"
+            },
+            "install-path": "../znframework/package-compression"
+        },
+        {
+            "name": "znframework/package-console",
+            "version": "8.24.0",
+            "version_normalized": "8.24.0.0",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/znframework/package-console.git",
+                "reference": "f8b245a3e763718d779f9641d53904000208c46e"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/znframework/package-console/zipball/f8b245a3e763718d779f9641d53904000208c46e",
+                "reference": "f8b245a3e763718d779f9641d53904000208c46e",
+                "shasum": ""
+            },
+            "require": {
+                "php": ">=7.0.0",
+                "znframework/package-buffering": ">=6.0",
+                "znframework/package-cache": ">=6.0",
+                "znframework/package-crontab": ">=6.0",
+                "znframework/package-generator": ">=6.0",
+                "znframework/package-helpers": ">=6.0",
+                "znframework/package-protection": ">=6.0",
+                "znframework/package-zerocore": ">=6.0"
+            },
+            "time": "2025-03-07T08:45:51+00:00",
+            "type": "library",
+            "installation-source": "dist",
+            "autoload": {
+                "psr-4": {
+                    "ZN\\Console\\": ""
+                }
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "MIT"
+            ],
+            "authors": [
+                {
+                    "name": "Ozan Uykun",
+                    "email": "ozan@znframework.com"
+                }
+            ],
+            "description": "ZN Framework Console Package",
+            "homepage": "https://znframework.com",
+            "keywords": [
+                "console",
+                "znframework"
+            ],
+            "support": {
+                "issues": "https://github.com/znframework/package-console/issues",
+                "source": "https://github.com/znframework/package-console/tree/8.24.0"
+            },
+            "install-path": "../znframework/package-console"
+        },
+        {
+            "name": "znframework/package-crontab",
+            "version": "8.21.0",
+            "version_normalized": "8.21.0.0",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/znframework/package-crontab.git",
+                "reference": "86a4b9bbe528a3a4ddb47e8dc13f62f3d42933dd"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/znframework/package-crontab/zipball/86a4b9bbe528a3a4ddb47e8dc13f62f3d42933dd",
+                "reference": "86a4b9bbe528a3a4ddb47e8dc13f62f3d42933dd",
+                "shasum": ""
+            },
+            "require": {
+                "php": ">=7.0.0",
+                "znframework/package-datatypes": ">=6.0",
+                "znframework/package-filesystem": ">=6.0",
+                "znframework/package-prompt": ">=6.0",
+                "znframework/package-zerocore": ">=6.0"
+            },
+            "time": "2025-01-05T13:55:24+00:00",
+            "type": "library",
+            "installation-source": "dist",
+            "autoload": {
+                "psr-4": {
+                    "ZN\\Crontab\\": ""
+                }
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "MIT"
+            ],
+            "authors": [
+                {
+                    "name": "Ozan Uykun",
+                    "email": "ozan@znframework.com"
+                }
+            ],
+            "description": "ZN Framework Crontab Package",
+            "homepage": "https://znframework.com",
+            "keywords": [
+                "crontab",
+                "znframework"
+            ],
+            "support": {
+                "issues": "https://github.com/znframework/package-crontab/issues",
+                "source": "https://github.com/znframework/package-crontab/tree/8.21.0"
+            },
+            "install-path": "../znframework/package-crontab"
+        },
+        {
+            "name": "znframework/package-cryptography",
+            "version": "8.21.0",
+            "version_normalized": "8.21.0.0",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/znframework/package-cryptography.git",
+                "reference": "e1b60bb99752f2940a9633faf0a7c05cd936b92d"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/znframework/package-cryptography/zipball/e1b60bb99752f2940a9633faf0a7c05cd936b92d",
+                "reference": "e1b60bb99752f2940a9633faf0a7c05cd936b92d",
+                "shasum": ""
+            },
+            "require": {
+                "php": ">=7.0.0",
+                "znframework/package-zerocore": ">=6.0"
+            },
+            "time": "2022-06-22T15:53:50+00:00",
+            "type": "library",
+            "installation-source": "dist",
+            "autoload": {
+                "psr-4": {
+                    "ZN\\Cryptography\\": ""
+                }
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "MIT"
+            ],
+            "authors": [
+                {
+                    "name": "Ozan Uykun",
+                    "email": "ozan@znframework.com"
+                }
+            ],
+            "description": "ZN Framework Cryptography Package",
+            "homepage": "https://znframework.com",
+            "keywords": [
+                "cryptography",
+                "znframework"
+            ],
+            "support": {
+                "issues": "https://github.com/znframework/package-cryptography/issues",
+                "source": "https://github.com/znframework/package-cryptography/tree/8.21.0"
+            },
+            "install-path": "../znframework/package-cryptography"
+        },
+        {
+            "name": "znframework/package-database",
+            "version": "8.21.0",
+            "version_normalized": "8.21.0.0",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/znframework/package-database.git",
+                "reference": "1caf8673e9b49a9bb8c18243c3c90cf7dcd93e04"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/znframework/package-database/zipball/1caf8673e9b49a9bb8c18243c3c90cf7dcd93e04",
+                "reference": "1caf8673e9b49a9bb8c18243c3c90cf7dcd93e04",
+                "shasum": ""
+            },
+            "require": {
+                "php": ">=7.0.0",
+                "znframework/package-cache": ">=6.0",
+                "znframework/package-datatypes": ">=6.0",
+                "znframework/package-datetime": ">=6.0",
+                "znframework/package-filesystem": ">=6.0",
+                "znframework/package-helpers": ">=6.0",
+                "znframework/package-hypertext": ">=6.0",
+                "znframework/package-pagination": ">=6.0",
+                "znframework/package-protection": ">=6.0",
+                "znframework/package-request": ">=6.0",
+                "znframework/package-response": ">=6.0",
+                "znframework/package-security": ">=6.0",
+                "znframework/package-zerocore": ">=6.0"
+            },
+            "time": "2025-01-05T14:02:09+00:00",
+            "type": "library",
+            "installation-source": "dist",
+            "autoload": {
+                "psr-4": {
+                    "ZN\\Database\\": ""
+                }
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "MIT"
+            ],
+            "authors": [
+                {
+                    "name": "Ozan Uykun",
+                    "email": "ozan@znframework.com"
+                }
+            ],
+            "description": "ZN Framework Database Package",
+            "homepage": "https://znframework.com",
+            "keywords": [
+                "database",
+                "znframework"
+            ],
+            "support": {
+                "issues": "https://github.com/znframework/package-database/issues",
+                "source": "https://github.com/znframework/package-database/tree/8.21.0"
+            },
+            "install-path": "../znframework/package-database"
+        },
+        {
+            "name": "znframework/package-datatypes",
+            "version": "8.21.0",
+            "version_normalized": "8.21.0.0",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/znframework/package-datatypes.git",
+                "reference": "6adc6ea9eb935fbf3c9fcc6081c1d225ddd5ed03"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/znframework/package-datatypes/zipball/6adc6ea9eb935fbf3c9fcc6081c1d225ddd5ed03",
+                "reference": "6adc6ea9eb935fbf3c9fcc6081c1d225ddd5ed03",
+                "shasum": ""
+            },
+            "require": {
+                "php": ">=7.0.0",
+                "znframework/package-zerocore": ">=6.0"
+            },
+            "time": "2025-01-05T14:02:01+00:00",
+            "type": "library",
+            "installation-source": "dist",
+            "autoload": {
+                "psr-4": {
+                    "ZN\\DataTypes\\": ""
+                }
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "MIT"
+            ],
+            "authors": [
+                {
+                    "name": "Ozan Uykun",
+                    "email": "ozan@znframework.com"
+                }
+            ],
+            "description": "ZN Framework Datatypes Package",
+            "homepage": "https://znframework.com",
+            "keywords": [
+                "datatypes",
+                "znframework"
+            ],
+            "support": {
+                "issues": "https://github.com/znframework/package-datatypes/issues",
+                "source": "https://github.com/znframework/package-datatypes/tree/8.21.0"
+            },
+            "install-path": "../znframework/package-datatypes"
+        },
+        {
+            "name": "znframework/package-datetime",
+            "version": "8.21.0",
+            "version_normalized": "8.21.0.0",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/znframework/package-datetime.git",
+                "reference": "0336b3fdd5e4dfd8281688d7410fba6bd0fcb86c"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/znframework/package-datetime/zipball/0336b3fdd5e4dfd8281688d7410fba6bd0fcb86c",
+                "reference": "0336b3fdd5e4dfd8281688d7410fba6bd0fcb86c",
+                "shasum": ""
+            },
+            "require": {
+                "php": ">=7.0.0",
+                "znframework/package-helpers": ">=6.0",
+                "znframework/package-zerocore": ">=6.0"
+            },
+            "time": "2025-01-05T14:02:16+00:00",
+            "type": "library",
+            "installation-source": "dist",
+            "autoload": {
+                "psr-4": {
+                    "ZN\\DateTime\\": ""
+                }
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "MIT"
+            ],
+            "authors": [
+                {
+                    "name": "Ozan Uykun",
+                    "email": "ozan@znframework.com"
+                }
+            ],
+            "description": "ZN Framework Datetime Package",
+            "homepage": "https://znframework.com",
+            "keywords": [
+                "datetime",
+                "znframework"
+            ],
+            "support": {
+                "issues": "https://github.com/znframework/package-datetime/issues",
+                "source": "https://github.com/znframework/package-datetime/tree/8.21.0"
+            },
+            "install-path": "../znframework/package-datetime"
+        },
+        {
+            "name": "znframework/package-email",
+            "version": "8.24.1",
+            "version_normalized": "8.24.1.0",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/znframework/package-email.git",
+                "reference": "75addf6a69c264a523f416e750b32ca7e1ed5234"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/znframework/package-email/zipball/75addf6a69c264a523f416e750b32ca7e1ed5234",
+                "reference": "75addf6a69c264a523f416e750b32ca7e1ed5234",
+                "shasum": ""
+            },
+            "require": {
+                "php": ">=7.0.0",
+                "znframework/package-datatypes": ">=6.0",
+                "znframework/package-datetime": ">=6.0",
+                "znframework/package-helpers": ">=6.0",
+                "znframework/package-security": ">=6.0",
+                "znframework/package-zerocore": ">=6.0"
+            },
+            "time": "2025-03-28T05:54:47+00:00",
+            "type": "library",
+            "installation-source": "dist",
+            "autoload": {
+                "psr-4": {
+                    "ZN\\Email\\": ""
+                }
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "MIT"
+            ],
+            "authors": [
+                {
+                    "name": "Ozan Uykun",
+                    "email": "ozan@znframework.com"
+                }
+            ],
+            "description": "ZN Framework Email Package",
+            "homepage": "https://znframework.com",
+            "keywords": [
+                "email",
+                "znframework"
+            ],
+            "support": {
+                "issues": "https://github.com/znframework/package-email/issues",
+                "source": "https://github.com/znframework/package-email/tree/8.24.1"
+            },
+            "install-path": "../znframework/package-email"
+        },
+        {
+            "name": "znframework/package-event-handler",
+            "version": "8.21.0",
+            "version_normalized": "8.21.0.0",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/znframework/package-event-handler.git",
+                "reference": "4ef8410c4c49754cbc6a402ddd2427e152c0eeba"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/znframework/package-event-handler/zipball/4ef8410c4c49754cbc6a402ddd2427e152c0eeba",
+                "reference": "4ef8410c4c49754cbc6a402ddd2427e152c0eeba",
+                "shasum": ""
+            },
+            "require": {
+                "php": ">=7.0.0",
+                "znframework/package-zerocore": ">=6.0"
+            },
+            "time": "2025-01-05T14:03:04+00:00",
+            "type": "library",
+            "installation-source": "dist",
+            "autoload": {
+                "psr-4": {
+                    "ZN\\EventHandler\\": ""
+                }
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "MIT"
+            ],
+            "authors": [
+                {
+                    "name": "Ozan Uykun",
+                    "email": "ozan@znframework.com"
+                }
+            ],
+            "description": "ZN Framework Event Handler Package",
+            "homepage": "https://znframework.com",
+            "keywords": [
+                "event-handler",
+                "events",
+                "znframework"
+            ],
+            "support": {
+                "issues": "https://github.com/znframework/package-event-handler/issues",
+                "source": "https://github.com/znframework/package-event-handler/tree/8.21.0"
+            },
+            "install-path": "../znframework/package-event-handler"
+        },
+        {
+            "name": "znframework/package-filesystem",
+            "version": "8.21.0",
+            "version_normalized": "8.21.0.0",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/znframework/package-filesystem.git",
+                "reference": "efe5dc57cda2d473e8e59b35882f40b2306bc2ac"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/znframework/package-filesystem/zipball/efe5dc57cda2d473e8e59b35882f40b2306bc2ac",
+                "reference": "efe5dc57cda2d473e8e59b35882f40b2306bc2ac",
+                "shasum": ""
+            },
+            "require": {
+                "php": ">=7.0.0",
+                "znframework/package-cryptography": ">=6.0",
+                "znframework/package-datatypes": ">=6.0",
+                "znframework/package-helpers": ">=6.0",
+                "znframework/package-request": ">=6.0",
+                "znframework/package-zerocore": ">=6.0"
+            },
+            "time": "2025-01-05T13:54:16+00:00",
+            "type": "library",
+            "installation-source": "dist",
+            "autoload": {
+                "psr-4": {
+                    "ZN\\Filesystem\\": ""
+                }
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "MIT"
+            ],
+            "authors": [
+                {
+                    "name": "Ozan Uykun",
+                    "email": "ozan@znframework.com"
+                }
+            ],
+            "description": "ZN Framework Filesystem Package",
+            "homepage": "https://znframework.com",
+            "keywords": [
+                "filesystem",
+                "znframework"
+            ],
+            "support": {
+                "issues": "https://github.com/znframework/package-filesystem/issues",
+                "source": "https://github.com/znframework/package-filesystem/tree/8.21.0"
+            },
+            "install-path": "../znframework/package-filesystem"
+        },
+        {
+            "name": "znframework/package-generator",
+            "version": "8.21.0",
+            "version_normalized": "8.21.0.0",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/znframework/package-generator.git",
+                "reference": "b4e051e9f12c04515ac0e0360956854fa9328f7a"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/znframework/package-generator/zipball/b4e051e9f12c04515ac0e0360956854fa9328f7a",
+                "reference": "b4e051e9f12c04515ac0e0360956854fa9328f7a",
+                "shasum": ""
+            },
+            "require": {
+                "php": ">=7.0.0",
+                "znframework/package-database": ">=6.0",
+                "znframework/package-datatypes": ">=6.0",
+                "znframework/package-filesystem": ">=6.0",
+                "znframework/package-zerocore": ">=6.0"
+            },
+            "time": "2025-01-05T14:02:39+00:00",
+            "type": "library",
+            "installation-source": "dist",
+            "autoload": {
+                "psr-4": {
+                    "ZN\\Generator\\": ""
+                }
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "MIT"
+            ],
+            "authors": [
+                {
+                    "name": "Ozan Uykun",
+                    "email": "ozan@znframework.com"
+                }
+            ],
+            "description": "ZN Framework Generator Package",
+            "homepage": "https://znframework.com",
+            "keywords": [
+                "generator",
+                "znframework"
+            ],
+            "support": {
+                "issues": "https://github.com/znframework/package-generator/issues",
+                "source": "https://github.com/znframework/package-generator/tree/8.21.0"
+            },
+            "install-path": "../znframework/package-generator"
+        },
+        {
+            "name": "znframework/package-helpers",
+            "version": "8.22.0",
+            "version_normalized": "8.22.0.0",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/znframework/package-helpers.git",
+                "reference": "e9aa2d4a83a438c69ff1c625c661ccc26674dcdd"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/znframework/package-helpers/zipball/e9aa2d4a83a438c69ff1c625c661ccc26674dcdd",
+                "reference": "e9aa2d4a83a438c69ff1c625c661ccc26674dcdd",
+                "shasum": ""
+            },
+            "require": {
+                "php": ">=7.0.0",
+                "znframework/package-database": ">=6.0",
+                "znframework/package-datatypes": ">=6.0",
+                "znframework/package-hypertext": ">=6.0",
+                "znframework/package-protection": ">=6.0",
+                "znframework/package-zerocore": ">=6.0"
+            },
+            "time": "2025-03-05T15:21:59+00:00",
+            "type": "library",
+            "installation-source": "dist",
+            "autoload": {
+                "psr-4": {
+                    "ZN\\Helpers\\": ""
+                }
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "MIT"
+            ],
+            "authors": [
+                {
+                    "name": "Ozan Uykun",
+                    "email": "ozan@znframework.com"
+                }
+            ],
+            "description": "ZN Framework Helpers Package",
+            "homepage": "https://znframework.com",
+            "keywords": [
+                "helpers",
+                "znframework"
+            ],
+            "support": {
+                "issues": "https://github.com/znframework/package-helpers/issues",
+                "source": "https://github.com/znframework/package-helpers/tree/8.22.0"
+            },
+            "install-path": "../znframework/package-helpers"
+        },
+        {
+            "name": "znframework/package-hypertext",
+            "version": "8.21.0",
+            "version_normalized": "8.21.0.0",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/znframework/package-hypertext.git",
+                "reference": "2e2defe2c16ba6a5c837bcb1aa33fa2d0d1d56e9"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/znframework/package-hypertext/zipball/2e2defe2c16ba6a5c837bcb1aa33fa2d0d1d56e9",
+                "reference": "2e2defe2c16ba6a5c837bcb1aa33fa2d0d1d56e9",
+                "shasum": ""
+            },
+            "require": {
+                "php": ">=7.0.0",
+                "znframework/package-authorization": ">=6.0",
+                "znframework/package-buffering": ">=6.0",
+                "znframework/package-database": ">=6.0",
+                "znframework/package-datatypes": ">=6.0",
+                "znframework/package-protection": ">=6.0",
+                "znframework/package-request": ">=6.0",
+                "znframework/package-storage": ">=6.0",
+                "znframework/package-validation": ">=6.0",
+                "znframework/package-zerocore": ">=6.0"
+            },
+            "time": "2025-01-05T14:02:12+00:00",
+            "type": "library",
+            "installation-source": "dist",
+            "autoload": {
+                "psr-4": {
+                    "ZN\\Hypertext\\": ""
+                }
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "MIT"
+            ],
+            "authors": [
+                {
+                    "name": "Ozan Uykun",
+                    "email": "ozan@znframework.com"
+                }
+            ],
+            "description": "ZN Framework Hypertext Package",
+            "homepage": "https://znframework.com",
+            "keywords": [
+                "Hypertext",
+                "form",
+                "html",
+                "znframework"
+            ],
+            "support": {
+                "issues": "https://github.com/znframework/package-hypertext/issues",
+                "source": "https://github.com/znframework/package-hypertext/tree/8.21.0"
+            },
+            "install-path": "../znframework/package-hypertext"
+        },
+        {
+            "name": "znframework/package-image",
+            "version": "8.22.0",
+            "version_normalized": "8.22.0.0",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/znframework/package-image.git",
+                "reference": "0738dbe5d039626f2c045c1ee4586c638964212d"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/znframework/package-image/zipball/0738dbe5d039626f2c045c1ee4586c638964212d",
+                "reference": "0738dbe5d039626f2c045c1ee4586c638964212d",
+                "shasum": ""
+            },
+            "require": {
+                "php": ">=7.0.0",
+                "znframework/package-helpers": ">=6.0",
+                "znframework/package-zerocore": ">=6.0"
+            },
+            "time": "2025-03-05T15:22:04+00:00",
+            "type": "library",
+            "installation-source": "dist",
+            "autoload": {
+                "psr-4": {
+                    "ZN\\Image\\": ""
+                }
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "MIT"
+            ],
+            "authors": [
+                {
+                    "name": "Ozan Uykun",
+                    "email": "ozan@znframework.com"
+                }
+            ],
+            "description": "ZN Framework Image Package",
+            "homepage": "https://znframework.com",
+            "keywords": [
+                "gd",
+                "image",
+                "thumbnail",
+                "znframework"
+            ],
+            "support": {
+                "issues": "https://github.com/znframework/package-image/issues",
+                "source": "https://github.com/znframework/package-image/tree/8.22.0"
+            },
+            "install-path": "../znframework/package-image"
+        },
+        {
+            "name": "znframework/package-language",
+            "version": "8.21.0",
+            "version_normalized": "8.21.0.0",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/znframework/package-language.git",
+                "reference": "a78aa6f68748542525d82805745b74bdeafa1088"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/znframework/package-language/zipball/a78aa6f68748542525d82805745b74bdeafa1088",
+                "reference": "a78aa6f68748542525d82805745b74bdeafa1088",
+                "shasum": ""
+            },
+            "require": {
+                "php": ">=7.0.0",
+                "znframework/package-hypertext": ">=6.0",
+                "znframework/package-pagination": ">=6.0",
+                "znframework/package-request": ">=6.0",
+                "znframework/package-zerocore": ">=6.0"
+            },
+            "time": "2025-01-05T14:02:33+00:00",
+            "type": "library",
+            "installation-source": "dist",
+            "autoload": {
+                "psr-4": {
+                    "ZN\\Language\\": ""
+                }
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "MIT"
+            ],
+            "authors": [
+                {
+                    "name": "Ozan Uykun",
+                    "email": "ozan@znframework.com"
+                }
+            ],
+            "description": "ZN Framework Language Package",
+            "homepage": "https://znframework.com",
+            "keywords": [
+                "language",
+                "ml",
+                "multi language",
+                "znframework"
+            ],
+            "support": {
+                "issues": "https://github.com/znframework/package-language/issues",
+                "source": "https://github.com/znframework/package-language/tree/8.21.0"
+            },
+            "install-path": "../znframework/package-language"
+        },
+        {
+            "name": "znframework/package-pagination",
+            "version": "8.21.0",
+            "version_normalized": "8.21.0.0",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/znframework/package-pagination.git",
+                "reference": "752c205cb8c5ef4043d0c55160a6a95d99d6e419"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/znframework/package-pagination/zipball/752c205cb8c5ef4043d0c55160a6a95d99d6e419",
+                "reference": "752c205cb8c5ef4043d0c55160a6a95d99d6e419",
+                "shasum": ""
+            },
+            "require": {
+                "php": ">=7.0.0",
+                "znframework/package-request": ">=6.0",
+                "znframework/package-zerocore": ">=6.0"
+            },
+            "time": "2025-01-05T13:54:56+00:00",
+            "type": "library",
+            "installation-source": "dist",
+            "autoload": {
+                "psr-4": {
+                    "ZN\\Pagination\\": ""
+                }
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "MIT"
+            ],
+            "authors": [
+                {
+                    "name": "Ozan Uykun",
+                    "email": "ozan@znframework.com"
+                }
+            ],
+            "description": "ZN Framework Pagination Package",
+            "homepage": "https://znframework.com",
+            "keywords": [
+                "pagination",
+                "znframework"
+            ],
+            "support": {
+                "issues": "https://github.com/znframework/package-pagination/issues",
+                "source": "https://github.com/znframework/package-pagination/tree/8.21.0"
+            },
+            "install-path": "../znframework/package-pagination"
+        },
+        {
+            "name": "znframework/package-payment",
+            "version": "8.21.0",
+            "version_normalized": "8.21.0.0",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/znframework/package-payment.git",
+                "reference": "8deef7a0d8874ab9d720096e5b58d1cd2d69c078"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/znframework/package-payment/zipball/8deef7a0d8874ab9d720096e5b58d1cd2d69c078",
+                "reference": "8deef7a0d8874ab9d720096e5b58d1cd2d69c078",
+                "shasum": ""
+            },
+            "require": {
+                "php": ">=7.0.0",
+                "znframework/package-datatypes": ">=6.0",
+                "znframework/package-datetime": ">=6.0",
+                "znframework/package-request": ">=6.0",
+                "znframework/package-services": ">=6.0",
+                "znframework/package-zerocore": ">=6.0"
+            },
+            "time": "2025-01-05T14:02:53+00:00",
+            "type": "library",
+            "installation-source": "dist",
+            "autoload": {
+                "psr-4": {
+                    "ZN\\Payment\\": ""
+                }
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "MIT"
+            ],
+            "authors": [
+                {
+                    "name": "Ozan Uykun",
+                    "email": "ozan@znframework.com"
+                }
+            ],
+            "description": "ZN Framework Payment Gateway Package",
+            "homepage": "https://znframework.com",
+            "keywords": [
+                "gateway",
+                "payment gateway",
+                "znframework"
+            ],
+            "support": {
+                "issues": "https://github.com/znframework/package-payment/issues",
+                "source": "https://github.com/znframework/package-payment/tree/8.21.0"
+            },
+            "install-path": "../znframework/package-payment"
+        },
+        {
+            "name": "znframework/package-prompt",
+            "version": "8.21.0",
+            "version_normalized": "8.21.0.0",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/znframework/package-prompt.git",
+                "reference": "86e66b203c7d955f383bf570d469b033779bf3e1"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/znframework/package-prompt/zipball/86e66b203c7d955f383bf570d469b033779bf3e1",
+                "reference": "86e66b203c7d955f383bf570d469b033779bf3e1",
+                "shasum": ""
+            },
+            "require": {
+                "php": ">=7.0.0",
+                "znframework/package-buffering": ">=6.0",
+                "znframework/package-remote": ">=6.0",
+                "znframework/package-zerocore": ">=6.0"
+            },
+            "time": "2022-12-29T17:22:11+00:00",
+            "type": "library",
+            "installation-source": "dist",
+            "autoload": {
+                "psr-4": {
+                    "ZN\\Prompt\\": ""
+                }
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "MIT"
+            ],
+            "authors": [
+                {
+                    "name": "Ozan Uykun",
+                    "email": "ozan@znframework.com"
+                }
+            ],
+            "description": "ZN Framework Prompt Package",
+            "homepage": "https://znframework.com",
+            "keywords": [
+                "prompt",
+                "znframework"
+            ],
+            "support": {
+                "issues": "https://github.com/znframework/package-prompt/issues",
+                "source": "https://github.com/znframework/package-prompt/tree/8.21.0"
+            },
+            "install-path": "../znframework/package-prompt"
+        },
+        {
+            "name": "znframework/package-protection",
+            "version": "8.21.0",
+            "version_normalized": "8.21.0.0",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/znframework/package-protection.git",
+                "reference": "ad726282767b09edbaf16e06473bca0c35e0e2b2"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/znframework/package-protection/zipball/ad726282767b09edbaf16e06473bca0c35e0e2b2",
+                "reference": "ad726282767b09edbaf16e06473bca0c35e0e2b2",
+                "shasum": ""
+            },
+            "require": {
+                "php": ">=7.0.0",
+                "znframework/package-zerocore": ">=6.0"
+            },
+            "time": "2025-01-05T13:55:48+00:00",
+            "type": "library",
+            "installation-source": "dist",
+            "autoload": {
+                "psr-4": {
+                    "ZN\\Protection\\": ""
+                }
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "MIT"
+            ],
+            "authors": [
+                {
+                    "name": "Ozan Uykun",
+                    "email": "ozan@znframework.com"
+                }
+            ],
+            "description": "ZN Framework Protection Package",
+            "homepage": "https://znframework.com",
+            "keywords": [
+                "protection",
+                "znframework"
+            ],
+            "support": {
+                "issues": "https://github.com/znframework/package-protection/issues",
+                "source": "https://github.com/znframework/package-protection/tree/8.21.0"
+            },
+            "install-path": "../znframework/package-protection"
+        },
+        {
+            "name": "znframework/package-remote",
+            "version": "8.21.0",
+            "version_normalized": "8.21.0.0",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/znframework/package-remote.git",
+                "reference": "397430bb354897c54de6d741c2f6c4b712b16e6a"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/znframework/package-remote/zipball/397430bb354897c54de6d741c2f6c4b712b16e6a",
+                "reference": "397430bb354897c54de6d741c2f6c4b712b16e6a",
+                "shasum": ""
+            },
+            "require": {
+                "php": ">=7.0.0",
+                "znframework/package-zerocore": ">=6.0"
+            },
+            "time": "2025-01-05T13:55:51+00:00",
+            "type": "library",
+            "installation-source": "dist",
+            "autoload": {
+                "psr-4": {
+                    "ZN\\Remote\\": ""
+                }
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "MIT"
+            ],
+            "authors": [
+                {
+                    "name": "Ozan Uykun",
+                    "email": "ozan@znframework.com"
+                }
+            ],
+            "description": "ZN Framework Remote Package",
+            "homepage": "https://znframework.com",
+            "keywords": [
+                "ftp",
+                "remote",
+                "ssh",
+                "znframework"
+            ],
+            "support": {
+                "issues": "https://github.com/znframework/package-remote/issues",
+                "source": "https://github.com/znframework/package-remote/tree/8.21.0"
+            },
+            "install-path": "../znframework/package-remote"
+        },
+        {
+            "name": "znframework/package-request",
+            "version": "8.21.0",
+            "version_normalized": "8.21.0.0",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/znframework/package-request.git",
+                "reference": "153a0fb8b985cb8ac2ddbb2fdd2ecef8fc2c7434"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/znframework/package-request/zipball/153a0fb8b985cb8ac2ddbb2fdd2ecef8fc2c7434",
+                "reference": "153a0fb8b985cb8ac2ddbb2fdd2ecef8fc2c7434",
+                "shasum": ""
+            },
+            "require": {
+                "php": ">=7.0.0",
+                "znframework/package-datatypes": ">=6.0",
+                "znframework/package-protection": ">=6.0",
+                "znframework/package-security": ">=6.0",
+                "znframework/package-zerocore": ">=6.0"
+            },
+            "time": "2025-01-05T13:54:09+00:00",
+            "type": "library",
+            "installation-source": "dist",
+            "autoload": {
+                "psr-4": {
+                    "ZN\\Request\\": ""
+                }
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "MIT"
+            ],
+            "authors": [
+                {
+                    "name": "Ozan Uykun",
+                    "email": "ozan@znframework.com"
+                }
+            ],
+            "description": "ZN Framework Request Package",
+            "homepage": "https://znframework.com",
+            "keywords": [
+                "env",
+                "get",
+                "http",
+                "method",
+                "post",
+                "request",
+                "server",
+                "znframework"
+            ],
+            "support": {
+                "issues": "https://github.com/znframework/package-request/issues",
+                "source": "https://github.com/znframework/package-request/tree/8.21.0"
+            },
+            "install-path": "../znframework/package-request"
+        },
+        {
+            "name": "znframework/package-response",
+            "version": "8.21.0",
+            "version_normalized": "8.21.0.0",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/znframework/package-response.git",
+                "reference": "d8f9c0795853636db8d8d1a89c49d65041b07399"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/znframework/package-response/zipball/d8f9c0795853636db8d8d1a89c49d65041b07399",
+                "reference": "d8f9c0795853636db8d8d1a89c49d65041b07399",
+                "shasum": ""
+            },
+            "require": {
+                "php": ">=7.0.0",
+                "znframework/package-request": ">=6.0",
+                "znframework/package-zerocore": ">=6.0"
+            },
+            "time": "2025-01-05T14:03:09+00:00",
+            "type": "library",
+            "installation-source": "dist",
+            "autoload": {
+                "psr-4": {
+                    "ZN\\Response\\": ""
+                }
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "MIT"
+            ],
+            "authors": [
+                {
+                    "name": "Ozan Uykun",
+                    "email": "ozan@znframework.com"
+                }
+            ],
+            "description": "ZN Framework Response Package",
+            "homepage": "https://znframework.com",
+            "keywords": [
+                "redirection",
+                "response",
+                "znframework"
+            ],
+            "support": {
+                "issues": "https://github.com/znframework/package-response/issues",
+                "source": "https://github.com/znframework/package-response/tree/8.21.0"
+            },
+            "install-path": "../znframework/package-response"
+        },
+        {
+            "name": "znframework/package-security",
+            "version": "8.21.0",
+            "version_normalized": "8.21.0.0",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/znframework/package-security.git",
+                "reference": "569bd89baccacf2a3e18fd37f0a339246e003ba3"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/znframework/package-security/zipball/569bd89baccacf2a3e18fd37f0a339246e003ba3",
+                "reference": "569bd89baccacf2a3e18fd37f0a339246e003ba3",
+                "shasum": ""
+            },
+            "require": {
+                "php": ">=7.0.0",
+                "znframework/package-zerocore": ">=6.0"
+            },
+            "time": "2025-01-05T13:54:59+00:00",
+            "type": "library",
+            "installation-source": "dist",
+            "autoload": {
+                "psr-4": {
+                    "ZN\\Security\\": ""
+                }
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "MIT"
+            ],
+            "authors": [
+                {
+                    "name": "Ozan Uykun",
+                    "email": "ozan@znframework.com"
+                }
+            ],
+            "description": "ZN Framework Security Package",
+            "homepage": "https://znframework.com",
+            "keywords": [
+                "security",
+                "znframework"
+            ],
+            "support": {
+                "issues": "https://github.com/znframework/package-security/issues",
+                "source": "https://github.com/znframework/package-security/tree/8.21.0"
+            },
+            "install-path": "../znframework/package-security"
+        },
+        {
+            "name": "znframework/package-services",
+            "version": "8.21.0",
+            "version_normalized": "8.21.0.0",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/znframework/package-services.git",
+                "reference": "a4a05463af05f7996f4a26b239392e258b8d510b"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/znframework/package-services/zipball/a4a05463af05f7996f4a26b239392e258b8d510b",
+                "reference": "a4a05463af05f7996f4a26b239392e258b8d510b",
+                "shasum": ""
+            },
+            "require": {
+                "php": ">=7.0.0",
+                "znframework/package-protection": ">=6.0",
+                "znframework/package-request": ">=6.0",
+                "znframework/package-response": ">=6.0",
+                "znframework/package-xml": ">=6.0",
+                "znframework/package-zerocore": ">=6.0"
+            },
+            "time": "2025-01-05T14:02:26+00:00",
+            "type": "library",
+            "installation-source": "dist",
+            "autoload": {
+                "psr-4": {
+                    "ZN\\Services\\": ""
+                }
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "MIT"
+            ],
+            "authors": [
+                {
+                    "name": "Ozan Uykun",
+                    "email": "ozan@znframework.com"
+                }
+            ],
+            "description": "ZN Framework Services Package",
+            "homepage": "https://znframework.com",
+            "keywords": [
+                "cdn",
+                "curl",
+                "restful",
+                "services",
+                "znframework"
+            ],
+            "support": {
+                "issues": "https://github.com/znframework/package-services/issues",
+                "source": "https://github.com/znframework/package-services/tree/8.21.0"
+            },
+            "install-path": "../znframework/package-services"
+        },
+        {
+            "name": "znframework/package-shopping",
+            "version": "8.21.0",
+            "version_normalized": "8.21.0.0",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/znframework/package-shopping.git",
+                "reference": "c77c86aebfaa3b5f2d51ab6962c772f78e1e8908"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/znframework/package-shopping/zipball/c77c86aebfaa3b5f2d51ab6962c772f78e1e8908",
+                "reference": "c77c86aebfaa3b5f2d51ab6962c772f78e1e8908",
+                "shasum": ""
+            },
+            "require": {
+                "php": ">=7.0.0",
+                "znframework/package-helpers": ">=6.0",
+                "znframework/package-zerocore": ">=6.0"
+            },
+            "time": "2025-01-05T13:55:05+00:00",
+            "type": "library",
+            "installation-source": "dist",
+            "autoload": {
+                "psr-4": {
+                    "ZN\\Shopping\\": ""
+                }
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "MIT"
+            ],
+            "authors": [
+                {
+                    "name": "Ozan Uykun",
+                    "email": "ozan@znframework.com"
+                }
+            ],
+            "description": "ZN Framework Shopping Package",
+            "homepage": "https://znframework.com",
+            "keywords": [
+                "cart",
+                "commerce",
+                "shopping",
+                "znframework"
+            ],
+            "support": {
+                "issues": "https://github.com/znframework/package-shopping/issues",
+                "source": "https://github.com/znframework/package-shopping/tree/8.21.0"
+            },
+            "install-path": "../znframework/package-shopping"
+        },
+        {
+            "name": "znframework/package-storage",
+            "version": "8.21.0",
+            "version_normalized": "8.21.0.0",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/znframework/package-storage.git",
+                "reference": "c42012e89d63268fe8214a44b8ab8b978610ee8b"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/znframework/package-storage/zipball/c42012e89d63268fe8214a44b8ab8b978610ee8b",
+                "reference": "c42012e89d63268fe8214a44b8ab8b978610ee8b",
+                "shasum": ""
+            },
+            "require": {
+                "php": ">=7.0.0",
+                "znframework/package-cryptography": ">=6.0",
+                "znframework/package-protection": ">=6.0",
+                "znframework/package-zerocore": ">=6.0"
+            },
+            "time": "2025-01-05T14:02:23+00:00",
+            "type": "library",
+            "installation-source": "dist",
+            "autoload": {
+                "psr-4": {
+                    "ZN\\Storage\\": ""
+                }
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "MIT"
+            ],
+            "authors": [
+                {
+                    "name": "Ozan Uykun",
+                    "email": "ozan@znframework.com"
+                }
+            ],
+            "description": "ZN Framework Storage Package",
+            "homepage": "https://znframework.com",
+            "keywords": [
+                "storage",
+                "znframework"
+            ],
+            "support": {
+                "issues": "https://github.com/znframework/package-storage/issues",
+                "source": "https://github.com/znframework/package-storage/tree/8.21.0"
+            },
+            "install-path": "../znframework/package-storage"
+        },
+        {
+            "name": "znframework/package-validation",
+            "version": "8.21.0",
+            "version_normalized": "8.21.0.0",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/znframework/package-validation.git",
+                "reference": "16f02077c978e7fdd784645727693d91b91ed9d7"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/znframework/package-validation/zipball/16f02077c978e7fdd784645727693d91b91ed9d7",
+                "reference": "16f02077c978e7fdd784645727693d91b91ed9d7",
+                "shasum": ""
+            },
+            "require": {
+                "php": ">=7.0.0",
+                "znframework/package-captcha": ">=6.0",
+                "znframework/package-datetime": ">=6.0",
+                "znframework/package-security": ">=6.0",
+                "znframework/package-storage": ">=6.0",
+                "znframework/package-zerocore": ">=6.0"
+            },
+            "time": "2025-01-05T14:02:49+00:00",
+            "type": "library",
+            "installation-source": "dist",
+            "autoload": {
+                "psr-4": {
+                    "ZN\\Validation\\": ""
+                }
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "MIT"
+            ],
+            "authors": [
+                {
+                    "name": "Ozan Uykun",
+                    "email": "ozan@znframework.com"
+                }
+            ],
+            "description": "ZN Framework Validation Package",
+            "homepage": "https://znframework.com",
+            "keywords": [
+                "validation",
+                "znframework"
+            ],
+            "support": {
+                "issues": "https://github.com/znframework/package-validation/issues",
+                "source": "https://github.com/znframework/package-validation/tree/8.21.0"
+            },
+            "install-path": "../znframework/package-validation"
+        },
+        {
+            "name": "znframework/package-xml",
+            "version": "8.21.0",
+            "version_normalized": "8.21.0.0",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/znframework/package-xml.git",
+                "reference": "f2de99f43c475cd261713d173815c1c401c90eb9"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/znframework/package-xml/zipball/f2de99f43c475cd261713d173815c1c401c90eb9",
+                "reference": "f2de99f43c475cd261713d173815c1c401c90eb9",
+                "shasum": ""
+            },
+            "require": {
+                "php": ">=7.0.0",
+                "znframework/package-hypertext": ">=6.0",
+                "znframework/package-zerocore": ">=6.0"
+            },
+            "time": "2025-01-05T13:55:44+00:00",
+            "type": "library",
+            "installation-source": "dist",
+            "autoload": {
+                "psr-4": {
+                    "ZN\\XML\\": ""
+                }
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "MIT"
+            ],
+            "authors": [
+                {
+                    "name": "Ozan Uykun",
+                    "email": "ozan@znframework.com"
+                }
+            ],
+            "description": "ZN Framework XML Package",
+            "homepage": "https://znframework.com",
+            "keywords": [
+                "xml",
+                "znframework"
+            ],
+            "support": {
+                "issues": "https://github.com/znframework/package-xml/issues",
+                "source": "https://github.com/znframework/package-xml/tree/8.21.0"
+            },
+            "install-path": "../znframework/package-xml"
+        },
+        {
+            "name": "znframework/package-zerocore",
+            "version": "8.21.0",
+            "version_normalized": "8.21.0.0",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/znframework/package-zerocore.git",
+                "reference": "d8bf5c931458d828867905205dbb07c5c5f2452b"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/znframework/package-zerocore/zipball/d8bf5c931458d828867905205dbb07c5c5f2452b",
+                "reference": "d8bf5c931458d828867905205dbb07c5c5f2452b",
+                "shasum": ""
+            },
+            "require": {
+                "php": ">=7.0.0"
+            },
+            "time": "2025-01-05T14:01:53+00:00",
+            "type": "library",
+            "installation-source": "dist",
+            "autoload": {
+                "psr-4": {
+                    "ZN\\": ""
+                }
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "MIT"
+            ],
+            "authors": [
+                {
+                    "name": "Ozan Uykun",
+                    "email": "ozan@znframework.com"
+                }
+            ],
+            "description": "ZN Framework Core Package",
+            "homepage": "https://znframework.com",
+            "keywords": [
+                "zerocore",
+                "znframework"
+            ],
+            "support": {
+                "issues": "https://github.com/znframework/package-zerocore/issues",
+                "source": "https://github.com/znframework/package-zerocore/tree/8.21.0"
+            },
+            "install-path": "../znframework/package-zerocore"
+        }
+    ],
+    "dev": true,
+    "dev-package-names": []
+}
