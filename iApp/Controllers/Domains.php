@@ -13,8 +13,8 @@ class Domains extends Controller
     {
         $this->pageTitle = 'Domain Yönetimi';
         $this->domains   = $this->model->getAll();
-        $this->success   = Session::get('success');
-        $this->error     = Session::get('error');
+        $this->success   = Session::select('success');
+        $this->error     = Session::select('error');
         Session::delete('success');
         Session::delete('error');
     }
@@ -30,7 +30,7 @@ class Domains extends Controller
 
     public function store()
     {
-        if (!Http::isPost()) {
+        if (!Http::isRequestMethod('post')) {
             Redirect::to('domains/main');
         }
 
@@ -44,20 +44,20 @@ class Domains extends Controller
         ];
 
         if (empty($data['site_id']) || empty($data['name'])) {
-            Session::set('error', 'Site ve domain adı zorunludur.');
+            Session::insert('error', 'Site ve domain adı zorunludur.');
             Redirect::to('domains/create');
             return;
         }
 
         $this->model->create($data);
-        Session::set('success', 'Domain başarıyla eklendi.');
+        Session::insert('success', 'Domain başarıyla eklendi.');
         Redirect::to('domains/main');
     }
 
     public function delete($id)
     {
         $this->model->delete($id);
-        Session::set('success', 'Domain başarıyla silindi.');
+        Session::insert('success', 'Domain başarıyla silindi.');
         Redirect::to('domains/main');
     }
 }

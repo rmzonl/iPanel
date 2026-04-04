@@ -13,15 +13,15 @@ class Settings extends Controller
     {
         $this->pageTitle      = 'Ayarlar';
         $this->serverSettings = $this->model->getServerSettings();
-        $this->success        = Session::get('success');
-        $this->error          = Session::get('error');
+        $this->success        = Session::select('success');
+        $this->error          = Session::select('error');
         Session::delete('success');
         Session::delete('error');
     }
 
     public function save()
     {
-        if (!Http::isPost()) {
+        if (!Http::isRequestMethod('post')) {
             Redirect::to('settings/main');
         }
 
@@ -38,7 +38,7 @@ class Settings extends Controller
             }
         }
 
-        Session::set('success', 'Ayarlar başarıyla kaydedildi.');
+        Session::insert('success', 'Ayarlar başarıyla kaydedildi.');
         Redirect::to('settings/main');
     }
 }

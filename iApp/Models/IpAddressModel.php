@@ -6,7 +6,7 @@ class IpAddressModel extends Model
     {
         return DB::table('ip_addresses ip')
             ->select('ip.*, c.first_name, c.last_name, c.company_name')
-            ->leftJoin('clients c', 'ip.client_id = c.id')
+            ->join('clients c', 'ip.client_id = c.id', 'LEFT')
             ->orderBy('ip.id', 'desc')
             ->get();
     }

@@ -14,12 +14,12 @@ class ClientModel extends Model
 
     public function count()
     {
-        return DB::table('clients')->count();
+        return DB::table('clients')->get()->totalRows();
     }
 
     public function getRecent($limit = 5)
     {
-        return DB::table('clients')->orderBy('id', 'desc')->limit($limit)->get();
+        return DB::table('clients')->orderBy('id', 'desc')->limit(0, $limit)->get();
     }
 
     public function create($data)

@@ -18,7 +18,7 @@ class SslModel extends Model
 
     public function countActive()
     {
-        return DB::table('ssl_certificates')->where('status', 'active')->count();
+        return DB::table('ssl_certificates')->where('status', 'active')->get()->totalRows();
     }
 
     public function create($data)

@@ -13,8 +13,8 @@ class Ftp extends Controller
     {
         $this->pageTitle = 'FTP Hesapları';
         $this->ftpAccounts = $this->model->getAll();
-        $this->success   = Session::get('success');
-        $this->error     = Session::get('error');
+        $this->success   = Session::select('success');
+        $this->error     = Session::select('error');
         Session::delete('success');
         Session::delete('error');
     }
@@ -28,7 +28,7 @@ class Ftp extends Controller
 
     public function store()
     {
-        if (!Http::isPost()) {
+        if (!Http::isRequestMethod('post')) {
             Redirect::to('ftp/main');
         }
 
@@ -42,20 +42,20 @@ class Ftp extends Controller
         ];
 
         if (empty($data['site_id']) || empty($data['username'])) {
-            Session::set('error', 'Site ve kullanıcı adı zorunludur.');
+            Session::insert('error', 'Site ve kullanıcı adı zorunludur.');
             Redirect::to('ftp/create');
             return;
         }
 
         $this->model->create($data);
-        Session::set('success', 'FTP hesabı başarıyla oluşturuldu.');
+        Session::insert('success', 'FTP hesabı başarıyla oluşturuldu.');
         Redirect::to('ftp/main');
     }
 
     public function delete($id)
     {
         $this->model->delete($id);
-        Session::set('success', 'FTP hesabı başarıyla silindi.');
+        Session::insert('success', 'FTP hesabı başarıyla silindi.');
         Redirect::to('ftp/main');
     }
 }

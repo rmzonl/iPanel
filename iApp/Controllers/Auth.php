@@ -4,11 +4,11 @@ class Auth extends Controller
 {
     public function login()
     {
-        if (Session::get('admin_user')) {
+        if (Session::select('admin_user')) {
             Redirect::to('dashboard/main');
         }
 
-        if (Http::isPost()) {
+        if (Http::isRequestMethod('post')) {
             $username = Post::get('username');
             $password = Post::get('password');
 
@@ -19,7 +19,7 @@ class Auth extends Controller
 
             $user = DB::table('users')
                 ->where('username', $username)
-                ->orWhere('email', $username)
+                ->whereOr('email', $username)
                 ->get()
                 ->row();
 
@@ -29,7 +29,7 @@ class Auth extends Controller
                     return;
                 }
 
-                Session::set('admin_user', [
+                Session::insert('admin_user', [
                     'id'       => $user->id,
                     'username' => $user->username,
                     'email'    => $user->email,

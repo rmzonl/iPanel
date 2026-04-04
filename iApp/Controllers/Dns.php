@@ -13,8 +13,8 @@ class Dns extends Controller
     {
         $this->pageTitle = 'DNS Yönetimi';
         $this->zones     = $this->model->getAllZones();
-        $this->success   = Session::get('success');
-        $this->error     = Session::get('error');
+        $this->success   = Session::select('success');
+        $this->error     = Session::select('error');
         Session::delete('success');
         Session::delete('error');
     }
@@ -28,8 +28,8 @@ class Dns extends Controller
         $this->pageTitle = 'DNS Kayıtları: ' . $zone->domain_name;
         $this->zone      = $zone;
         $this->records   = $this->model->getRecordsByZoneId($zoneId);
-        $this->success   = Session::get('success');
-        $this->error     = Session::get('error');
+        $this->success   = Session::select('success');
+        $this->error     = Session::select('error');
         Session::delete('success');
         Session::delete('error');
     }
@@ -47,7 +47,7 @@ class Dns extends Controller
 
     public function storeRecord()
     {
-        if (!Http::isPost()) {
+        if (!Http::isRequestMethod('post')) {
             Redirect::to('dns/main');
         }
 
@@ -62,20 +62,20 @@ class Dns extends Controller
         ];
 
         if (empty($data['type']) || empty($data['name']) || empty($data['value'])) {
-            Session::set('error', 'Tür, isim ve değer zorunludur.');
+            Session::insert('error', 'Tür, isim ve değer zorunludur.');
             Redirect::to('dns/createRecord/' . $zoneId);
             return;
         }
 
         $this->model->createRecord($data);
-        Session::set('success', 'DNS kaydı başarıyla eklendi.');
+        Session::insert('success', 'DNS kaydı başarıyla eklendi.');
         Redirect::to('dns/records/' . $zoneId);
     }
 
     public function deleteZone($id)
     {
         $this->model->deleteZone($id);
-        Session::set('success', 'DNS zonu başarıyla silindi.');
+        Session::insert('success', 'DNS zonu başarıyla silindi.');
         Redirect::to('dns/main');
     }
 
@@ -84,7 +84,7 @@ class Dns extends Controller
         $record = $this->model->getRecordById($id);
         $zoneId = $record ? $record->zone_id : null;
         $this->model->deleteRecord($id);
-        Session::set('success', 'DNS kaydı başarıyla silindi.');
+        Session::insert('success', 'DNS kaydı başarıyla silindi.');
         if ($zoneId) {
             Redirect::to('dns/records/' . $zoneId);
         } else {

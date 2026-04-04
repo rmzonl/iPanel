@@ -13,8 +13,8 @@ class IpAddresses extends Controller
     {
         $this->pageTitle = 'IP Adresleri';
         $this->ips       = $this->model->getAll();
-        $this->success   = Session::get('success');
-        $this->error     = Session::get('error');
+        $this->success   = Session::select('success');
+        $this->error     = Session::select('error');
         Session::delete('success');
         Session::delete('error');
     }
@@ -28,7 +28,7 @@ class IpAddresses extends Controller
 
     public function store()
     {
-        if (!Http::isPost()) {
+        if (!Http::isRequestMethod('post')) {
             Redirect::to('ipaddresses/main');
         }
 
@@ -43,20 +43,20 @@ class IpAddresses extends Controller
         ];
 
         if (empty($data['ip'])) {
-            Session::set('error', 'IP adresi zorunludur.');
+            Session::insert('error', 'IP adresi zorunludur.');
             Redirect::to('ipaddresses/create');
             return;
         }
 
         $this->model->create($data);
-        Session::set('success', 'IP adresi başarıyla eklendi.');
+        Session::insert('success', 'IP adresi başarıyla eklendi.');
         Redirect::to('ipaddresses/main');
     }
 
     public function delete($id)
     {
         $this->model->delete($id);
-        Session::set('success', 'IP adresi başarıyla silindi.');
+        Session::insert('success', 'IP adresi başarıyla silindi.');
         Redirect::to('ipaddresses/main');
     }
 }

@@ -13,8 +13,8 @@ class Databases extends Controller
     {
         $this->pageTitle  = 'Veritabanları';
         $this->databases  = $this->model->getAll();
-        $this->success    = Session::get('success');
-        $this->error      = Session::get('error');
+        $this->success    = Session::select('success');
+        $this->error      = Session::select('error');
         Session::delete('success');
         Session::delete('error');
     }
@@ -28,7 +28,7 @@ class Databases extends Controller
 
     public function store()
     {
-        if (!Http::isPost()) {
+        if (!Http::isRequestMethod('post')) {
             Redirect::to('databases/main');
         }
 
@@ -42,20 +42,20 @@ class Databases extends Controller
         ];
 
         if (empty($data['site_id']) || empty($data['db_name']) || empty($data['db_user'])) {
-            Session::set('error', 'Site, veritabanı adı ve kullanıcı zorunludur.');
+            Session::insert('error', 'Site, veritabanı adı ve kullanıcı zorunludur.');
             Redirect::to('databases/create');
             return;
         }
 
         $this->model->create($data);
-        Session::set('success', 'Veritabanı başarıyla oluşturuldu.');
+        Session::insert('success', 'Veritabanı başarıyla oluşturuldu.');
         Redirect::to('databases/main');
     }
 
     public function delete($id)
     {
         $this->model->delete($id);
-        Session::set('success', 'Veritabanı başarıyla silindi.');
+        Session::insert('success', 'Veritabanı başarıyla silindi.');
         Redirect::to('databases/main');
     }
 }

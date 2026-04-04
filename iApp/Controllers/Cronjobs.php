@@ -13,8 +13,8 @@ class Cronjobs extends Controller
     {
         $this->pageTitle  = 'Cron İşleri';
         $this->cronjobs   = $this->model->getAll();
-        $this->success    = Session::get('success');
-        $this->error      = Session::get('error');
+        $this->success    = Session::select('success');
+        $this->error      = Session::select('error');
         Session::delete('success');
         Session::delete('error');
     }
@@ -28,7 +28,7 @@ class Cronjobs extends Controller
 
     public function store()
     {
-        if (!Http::isPost()) {
+        if (!Http::isRequestMethod('post')) {
             Redirect::to('cronjobs/main');
         }
 
@@ -41,20 +41,20 @@ class Cronjobs extends Controller
         ];
 
         if (empty($data['site_id']) || empty($data['title']) || empty($data['command']) || empty($data['schedule'])) {
-            Session::set('error', 'Tüm zorunlu alanları doldurunuz.');
+            Session::insert('error', 'Tüm zorunlu alanları doldurunuz.');
             Redirect::to('cronjobs/create');
             return;
         }
 
         $this->model->create($data);
-        Session::set('success', 'Cron işi başarıyla oluşturuldu.');
+        Session::insert('success', 'Cron işi başarıyla oluşturuldu.');
         Redirect::to('cronjobs/main');
     }
 
     public function delete($id)
     {
         $this->model->delete($id);
-        Session::set('success', 'Cron işi başarıyla silindi.');
+        Session::insert('success', 'Cron işi başarıyla silindi.');
         Redirect::to('cronjobs/main');
     }
 }

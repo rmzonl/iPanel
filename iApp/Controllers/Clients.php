@@ -13,8 +13,8 @@ class Clients extends Controller
     {
         $this->pageTitle = 'Müşteriler';
         $this->clients   = $this->model->getAll();
-        $this->success   = Session::get('success');
-        $this->error     = Session::get('error');
+        $this->success   = Session::select('success');
+        $this->error     = Session::select('error');
         Session::delete('success');
         Session::delete('error');
     }
@@ -26,7 +26,7 @@ class Clients extends Controller
 
     public function store()
     {
-        if (!Http::isPost()) {
+        if (!Http::isRequestMethod('post')) {
             Redirect::to('clients/main');
         }
 
@@ -44,13 +44,13 @@ class Clients extends Controller
         ];
 
         if (empty($data['first_name']) || empty($data['last_name']) || empty($data['email'])) {
-            Session::set('error', 'Ad, soyad ve e-posta alanları zorunludur.');
+            Session::insert('error', 'Ad, soyad ve e-posta alanları zorunludur.');
             Redirect::to('clients/create');
             return;
         }
 
         $this->model->create($data);
-        Session::set('success', 'Müşteri başarıyla eklendi.');
+        Session::insert('success', 'Müşteri başarıyla eklendi.');
         Redirect::to('clients/main');
     }
 
@@ -65,7 +65,7 @@ class Clients extends Controller
 
     public function update($id)
     {
-        if (!Http::isPost()) {
+        if (!Http::isRequestMethod('post')) {
             Redirect::to('clients/main');
         }
 
@@ -83,14 +83,14 @@ class Clients extends Controller
         ];
 
         $this->model->update($id, $data);
-        Session::set('success', 'Müşteri başarıyla güncellendi.');
+        Session::insert('success', 'Müşteri başarıyla güncellendi.');
         Redirect::to('clients/main');
     }
 
     public function delete($id)
     {
         $this->model->delete($id);
-        Session::set('success', 'Müşteri başarıyla silindi.');
+        Session::insert('success', 'Müşteri başarıyla silindi.');
         Redirect::to('clients/main');
     }
 }

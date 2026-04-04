@@ -13,8 +13,8 @@ class Ssl extends Controller
     {
         $this->pageTitle  = 'SSL Sertifikaları';
         $this->certs      = $this->model->getAll();
-        $this->success    = Session::get('success');
-        $this->error      = Session::get('error');
+        $this->success    = Session::select('success');
+        $this->error      = Session::select('error');
         Session::delete('success');
         Session::delete('error');
     }
@@ -28,7 +28,7 @@ class Ssl extends Controller
 
     public function store()
     {
-        if (!Http::isPost()) {
+        if (!Http::isRequestMethod('post')) {
             Redirect::to('ssl/main');
         }
 
@@ -45,20 +45,20 @@ class Ssl extends Controller
         ];
 
         if (empty($data['domain_id'])) {
-            Session::set('error', 'Domain seçimi zorunludur.');
+            Session::insert('error', 'Domain seçimi zorunludur.');
             Redirect::to('ssl/create');
             return;
         }
 
         $this->model->create($data);
-        Session::set('success', 'SSL sertifikası başarıyla eklendi.');
+        Session::insert('success', 'SSL sertifikası başarıyla eklendi.');
         Redirect::to('ssl/main');
     }
 
     public function delete($id)
     {
         $this->model->delete($id);
-        Session::set('success', 'SSL sertifikası başarıyla silindi.');
+        Session::insert('success', 'SSL sertifikası başarıyla silindi.');
         Redirect::to('ssl/main');
     }
 }

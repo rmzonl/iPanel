@@ -13,8 +13,8 @@ class Backups extends Controller
     {
         $this->pageTitle = 'Yedeklemeler';
         $this->backups   = $this->model->getAll();
-        $this->success   = Session::get('success');
-        $this->error     = Session::get('error');
+        $this->success   = Session::select('success');
+        $this->error     = Session::select('error');
         Session::delete('success');
         Session::delete('error');
 
@@ -26,7 +26,7 @@ class Backups extends Controller
 
     public function create()
     {
-        if (!Http::isPost()) {
+        if (!Http::isRequestMethod('post')) {
             Redirect::to('backups/main');
         }
 
@@ -41,14 +41,14 @@ class Backups extends Controller
         ];
 
         $this->model->create($data);
-        Session::set('success', 'Yedekleme işlemi başlatıldı.');
+        Session::insert('success', 'Yedekleme işlemi başlatıldı.');
         Redirect::to('backups/main');
     }
 
     public function delete($id)
     {
         $this->model->delete($id);
-        Session::set('success', 'Yedekleme kaydı silindi.');
+        Session::insert('success', 'Yedekleme kaydı silindi.');
         Redirect::to('backups/main');
     }
 }

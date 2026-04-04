@@ -7,7 +7,7 @@ class SiteModel extends Model
         return DB::table('sites s')
             ->select('s.*, c.first_name, c.last_name, c.company_name, i.ip')
             ->join('clients c', 's.client_id = c.id')
-            ->leftJoin('ip_addresses i', 's.ip_id = i.id')
+            ->join('ip_addresses i', 's.ip_id = i.id', 'LEFT')
             ->orderBy('s.id', 'desc')
             ->get();
     }
@@ -17,7 +17,7 @@ class SiteModel extends Model
         return DB::table('sites s')
             ->select('s.*, c.first_name, c.last_name, c.company_name, i.ip')
             ->join('clients c', 's.client_id = c.id')
-            ->leftJoin('ip_addresses i', 's.ip_id = i.id')
+            ->join('ip_addresses i', 's.ip_id = i.id', 'LEFT')
             ->where('s.id', $id)
             ->get()->row();
     }
@@ -32,7 +32,7 @@ class SiteModel extends Model
 
     public function count()
     {
-        return DB::table('sites')->count();
+        return DB::table('sites')->get()->totalRows();
     }
 
     public function create($data)

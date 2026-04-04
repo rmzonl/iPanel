@@ -16,7 +16,7 @@ class UserModel extends Model
     {
         return DB::table('users')
             ->where('username', $username)
-            ->orWhere('email', $username)
+            ->whereOr('email', $username)
             ->get()->row();
     }
 

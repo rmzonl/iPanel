@@ -13,8 +13,8 @@ class Email extends Controller
     {
         $this->pageTitle = 'E-posta Hesapları';
         $this->emails    = $this->model->getAll();
-        $this->success   = Session::get('success');
-        $this->error     = Session::get('error');
+        $this->success   = Session::select('success');
+        $this->error     = Session::select('error');
         Session::delete('success');
         Session::delete('error');
     }
@@ -28,7 +28,7 @@ class Email extends Controller
 
     public function store()
     {
-        if (!Http::isPost()) {
+        if (!Http::isRequestMethod('post')) {
             Redirect::to('email/main');
         }
 
@@ -38,7 +38,7 @@ class Email extends Controller
         $password = Post::get('password');
 
         if (empty($siteId) || empty($username) || empty($password)) {
-            Session::set('error', 'Site, kullanıcı adı ve şifre zorunludur.');
+            Session::insert('error', 'Site, kullanıcı adı ve şifre zorunludur.');
             Redirect::to('email/create');
             return;
         }
@@ -55,14 +55,14 @@ class Email extends Controller
         ];
 
         $this->model->create($data);
-        Session::set('success', 'E-posta hesabı başarıyla oluşturuldu.');
+        Session::insert('success', 'E-posta hesabı başarıyla oluşturuldu.');
         Redirect::to('email/main');
     }
 
     public function delete($id)
     {
         $this->model->delete($id);
-        Session::set('success', 'E-posta hesabı başarıyla silindi.');
+        Session::insert('success', 'E-posta hesabı başarıyla silindi.');
         Redirect::to('email/main');
     }
 }

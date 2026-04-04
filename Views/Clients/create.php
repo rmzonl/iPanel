@@ -1,4 +1,4 @@
-<?php include(VIEW_DIR . 'layouts/header.php'); ?>
+<?php include(VIEWS_DIR . 'layouts/header.php'); ?>
 
 <div class="page-header d-print-none">
     <div class="row align-items-center">
@@ -81,4 +81,4 @@
     </div>
 </div>
 
-<?php include(VIEW_DIR . 'layouts/footer.php'); ?>
+<?php include(VIEWS_DIR . 'layouts/footer.php'); ?>

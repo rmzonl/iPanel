@@ -13,8 +13,8 @@ class Sites extends Controller
     {
         $this->pageTitle = 'Siteler';
         $this->sites     = $this->model->getAll();
-        $this->success   = Session::get('success');
-        $this->error     = Session::get('error');
+        $this->success   = Session::select('success');
+        $this->error     = Session::select('error');
         Session::delete('success');
         Session::delete('error');
     }
@@ -30,7 +30,7 @@ class Sites extends Controller
 
     public function store()
     {
-        if (!Http::isPost()) {
+        if (!Http::isRequestMethod('post')) {
             Redirect::to('sites/main');
         }
 
@@ -46,13 +46,13 @@ class Sites extends Controller
         ];
 
         if (empty($data['client_id']) || empty($data['domain'])) {
-            Session::set('error', 'Müşteri ve domain alanları zorunludur.');
+            Session::insert('error', 'Müşteri ve domain alanları zorunludur.');
             Redirect::to('sites/create');
             return;
         }
 
         $this->model->create($data);
-        Session::set('success', 'Site başarıyla eklendi.');
+        Session::insert('success', 'Site başarıyla eklendi.');
         Redirect::to('sites/main');
     }
 
@@ -71,7 +71,7 @@ class Sites extends Controller
 
     public function update($id)
     {
-        if (!Http::isPost()) {
+        if (!Http::isRequestMethod('post')) {
             Redirect::to('sites/main');
         }
 
@@ -87,14 +87,14 @@ class Sites extends Controller
         ];
 
         $this->model->update($id, $data);
-        Session::set('success', 'Site başarıyla güncellendi.');
+        Session::insert('success', 'Site başarıyla güncellendi.');
         Redirect::to('sites/main');
     }
 
     public function delete($id)
     {
         $this->model->delete($id);
-        Session::set('success', 'Site başarıyla silindi.');
+        Session::insert('success', 'Site başarıyla silindi.');
         Redirect::to('sites/main');
     }
 }

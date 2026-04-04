@@ -6,8 +6,8 @@ class BackupModel extends Model
     {
         return DB::table('backups b')
             ->select('b.*, s.domain as site_domain, c.first_name, c.last_name')
-            ->leftJoin('sites s', 'b.site_id = s.id')
-            ->leftJoin('clients c', 'b.client_id = c.id')
+            ->join('sites s', 'b.site_id = s.id', 'LEFT')
+            ->join('clients c', 'b.client_id = c.id', 'LEFT')
             ->orderBy('b.id', 'desc')
             ->get();
     }

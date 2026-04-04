@@ -24,7 +24,7 @@ class DomainModel extends Model
 
     public function count()
     {
-        return DB::table('domains')->count();
+        return DB::table('domains')->get()->totalRows();
     }
 
     public function create($data)

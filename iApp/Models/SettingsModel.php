@@ -6,7 +6,7 @@ class SettingsModel extends Model
     {
         $query = DB::table('settings')->where('scope', $scope);
         if ($scopeId === null) {
-            $query = $query->where('scope_id', null);
+            $query = $query->whereNull('scope_id');
         } else {
             $query = $query->where('scope_id', $scopeId);
         }
@@ -24,7 +24,7 @@ class SettingsModel extends Model
             ->where('scope', $scope)
             ->where('setting_key', $key);
         if ($scopeId === null) {
-            $query = $query->where('scope_id', null);
+            $query = $query->whereNull('scope_id');
         } else {
             $query = $query->where('scope_id', $scopeId);
         }
@@ -46,7 +46,7 @@ class SettingsModel extends Model
                 ->where('scope', $scope)
                 ->where('setting_key', $key);
             if ($scopeId === null) {
-                $query = $query->where('scope_id', null);
+                $query = $query->whereNull('scope_id');
             } else {
                 $query = $query->where('scope_id', $scopeId);
             }

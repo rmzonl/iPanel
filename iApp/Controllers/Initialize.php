@@ -24,7 +24,7 @@ class Initialize extends Controller
             $isPublic = true;
         }
 
-        if (!$isPublic && !Session::get('admin_user')) {
+        if (!$isPublic && !Session::select('admin_user')) {
             Redirect::to('auth/login');
         }
     }

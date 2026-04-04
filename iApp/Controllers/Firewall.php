@@ -13,8 +13,8 @@ class Firewall extends Controller
     {
         $this->pageTitle = 'Güvenlik Duvarı';
         $this->rules     = $this->model->getAll();
-        $this->success   = Session::get('success');
-        $this->error     = Session::get('error');
+        $this->success   = Session::select('success');
+        $this->error     = Session::select('error');
         Session::delete('success');
         Session::delete('error');
     }
@@ -26,7 +26,7 @@ class Firewall extends Controller
 
     public function store()
     {
-        if (!Http::isPost()) {
+        if (!Http::isRequestMethod('post')) {
             Redirect::to('firewall/main');
         }
 
@@ -42,20 +42,20 @@ class Firewall extends Controller
         ];
 
         if (empty($data['name'])) {
-            Session::set('error', 'Kural adı zorunludur.');
+            Session::insert('error', 'Kural adı zorunludur.');
             Redirect::to('firewall/create');
             return;
         }
 
         $this->model->create($data);
-        Session::set('success', 'Güvenlik duvarı kuralı başarıyla eklendi.');
+        Session::insert('success', 'Güvenlik duvarı kuralı başarıyla eklendi.');
         Redirect::to('firewall/main');
     }
 
     public function delete($id)
     {
         $this->model->delete($id);
-        Session::set('success', 'Kural başarıyla silindi.');
+        Session::insert('success', 'Kural başarıyla silindi.');
         Redirect::to('firewall/main');
     }
 }
