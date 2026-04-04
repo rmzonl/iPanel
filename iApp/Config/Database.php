@@ -55,7 +55,7 @@
     [
         'driver'      => 'mysqli',
         'host'        => 'localhost',
-        'database'    => 'test',
+        'database'    => 'ipanel',
         'user'        => 'root',
         'password'    => '',
         'port'        => '',
