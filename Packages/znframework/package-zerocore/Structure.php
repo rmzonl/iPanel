@@ -42,11 +42,13 @@ class Structure
         unset($segments[0]);
 
         # The method information in the URL to be executed is captured.
+        $function = null;
+
         if( isset($segments[1]) )
         {
             $function = $segments[1];
 
-            unset($segments[1]);    
+            unset($segments[1]);
         }
 
         return

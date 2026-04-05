@@ -203,7 +203,7 @@ class Restoration
      */
     protected static function getCurrentURI($restorable)
     {
-        return strtolower($restorable === true ? CURRENT_CFUNCTION : rtrim(Request::getActiveURI(), '/'));
+        return strtolower($restorable === true ? (CURRENT_CFUNCTION ?? '') : rtrim(Request::getActiveURI(), '/'));
     }
 
     /**
