@@ -4,6 +4,7 @@ use ZN\Request\Http;
 use ZN\Request\Post;
 use ZN\Request\Get;
 use ZN\Inclusion\Project\Masterpage;
+use ZN\Inclusion\Project\View;
 use DB;
 use Session;
 use Redirect;
@@ -21,23 +22,23 @@ class Clients extends Controller
 
     public function main()
     {
-        $this->pageTitle = 'Müşteriler';
-        $this->clients   = $this->model->getAll();
-        $this->success   = Session::select('success');
-        $this->error     = Session::select('error');
+        View::pageTitle('Müşteriler');
+        View::clients($this->model->getAll());
+        View::success(Session::select('success'));
+        View::error(Session::select('error'));
         Session::delete('success');
         Session::delete('error');
     }
 
     public function create()
     {
-        $this->pageTitle = 'Yeni Müşteri Ekle';
+        View::pageTitle('Yeni Müşteri Ekle');
     }
 
     public function store()
     {
         if (!Http::isRequestMethod('post')) {
-            Redirect::to('clients/main');
+            Redirect::action('clients/main');
         }
 
         $data = [
@@ -55,28 +56,28 @@ class Clients extends Controller
 
         if (empty($data['first_name']) || empty($data['last_name']) || empty($data['email'])) {
             Session::insert('error', 'Ad, soyad ve e-posta alanları zorunludur.');
-            Redirect::to('clients/create');
+            Redirect::action('clients/create');
             return;
         }
 
         $this->model->create($data);
         Session::insert('success', 'Müşteri başarıyla eklendi.');
-        Redirect::to('clients/main');
+        Redirect::action('clients/main');
     }
 
     public function edit($id)
     {
-        $this->pageTitle = 'Müşteri Düzenle';
-        $this->client    = $this->model->getById($id);
-        if (!$this->client) {
-            Redirect::to('clients/main');
+        View::pageTitle('Müşteri Düzenle');
+        View::client($this->model->getById($id));
+        if (!View::client()) {
+            Redirect::action('clients/main');
         }
     }
 
     public function update($id)
     {
         if (!Http::isRequestMethod('post')) {
-            Redirect::to('clients/main');
+            Redirect::action('clients/main');
         }
 
         $data = [
@@ -94,13 +95,13 @@ class Clients extends Controller
 
         $this->model->update($id, $data);
         Session::insert('success', 'Müşteri başarıyla güncellendi.');
-        Redirect::to('clients/main');
+        Redirect::action('clients/main');
     }
 
     public function delete($id)
     {
         $this->model->delete($id);
         Session::insert('success', 'Müşteri başarıyla silindi.');
-        Redirect::to('clients/main');
+        Redirect::action('clients/main');
     }
 }

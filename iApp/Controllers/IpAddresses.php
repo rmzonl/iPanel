@@ -4,6 +4,7 @@ use ZN\Request\Http;
 use ZN\Request\Post;
 use ZN\Request\Get;
 use ZN\Inclusion\Project\Masterpage;
+use ZN\Inclusion\Project\View;
 use DB;
 use Session;
 use Redirect;
@@ -21,25 +22,25 @@ class IpAddresses extends Controller
 
     public function main()
     {
-        $this->pageTitle = 'IP Adresleri';
-        $this->ips       = $this->model->getAll();
-        $this->success   = Session::select('success');
-        $this->error     = Session::select('error');
+        View::pageTitle('IP Adresleri');
+        View::ips($this->model->getAll());
+        View::success(Session::select('success'));
+        View::error(Session::select('error'));
         Session::delete('success');
         Session::delete('error');
     }
 
     public function create()
     {
-        $this->pageTitle = 'Yeni IP Adresi';
+        View::pageTitle('Yeni IP Adresi');
         $clientModel     = new \Project\Models\ClientModel();
-        $this->clients   = $clientModel->getAll();
+        View::clients($clientModel->getAll());
     }
 
     public function store()
     {
         if (!Http::isRequestMethod('post')) {
-            Redirect::to('ipaddresses/main');
+            Redirect::action('ipaddresses/main');
         }
 
         $data = [
@@ -54,19 +55,19 @@ class IpAddresses extends Controller
 
         if (empty($data['ip'])) {
             Session::insert('error', 'IP adresi zorunludur.');
-            Redirect::to('ipaddresses/create');
+            Redirect::action('ipaddresses/create');
             return;
         }
 
         $this->model->create($data);
         Session::insert('success', 'IP adresi başarıyla eklendi.');
-        Redirect::to('ipaddresses/main');
+        Redirect::action('ipaddresses/main');
     }
 
     public function delete($id)
     {
         $this->model->delete($id);
         Session::insert('success', 'IP adresi başarıyla silindi.');
-        Redirect::to('ipaddresses/main');
+        Redirect::action('ipaddresses/main');
     }
 }

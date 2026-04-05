@@ -4,6 +4,7 @@ use ZN\Request\Http;
 use ZN\Request\Post;
 use ZN\Request\Get;
 use ZN\Inclusion\Project\Masterpage;
+use ZN\Inclusion\Project\View;
 use DB;
 use Session;
 use Redirect;
@@ -21,25 +22,25 @@ class Ftp extends Controller
 
     public function main()
     {
-        $this->pageTitle = 'FTP Hesapları';
-        $this->ftpAccounts = $this->model->getAll();
-        $this->success   = Session::select('success');
-        $this->error     = Session::select('error');
+        View::pageTitle('FTP Hesapları');
+        View::ftpAccounts($this->model->getAll());
+        View::success(Session::select('success'));
+        View::error(Session::select('error'));
         Session::delete('success');
         Session::delete('error');
     }
 
     public function create()
     {
-        $this->pageTitle = 'Yeni FTP Hesabı';
+        View::pageTitle('Yeni FTP Hesabı');
         $siteModel       = new \Project\Models\SiteModel();
-        $this->sites     = $siteModel->getAll();
+        View::sites($siteModel->getAll());
     }
 
     public function store()
     {
         if (!Http::isRequestMethod('post')) {
-            Redirect::to('ftp/main');
+            Redirect::action('ftp/main');
         }
 
         $data = [
@@ -53,19 +54,19 @@ class Ftp extends Controller
 
         if (empty($data['site_id']) || empty($data['username'])) {
             Session::insert('error', 'Site ve kullanıcı adı zorunludur.');
-            Redirect::to('ftp/create');
+            Redirect::action('ftp/create');
             return;
         }
 
         $this->model->create($data);
         Session::insert('success', 'FTP hesabı başarıyla oluşturuldu.');
-        Redirect::to('ftp/main');
+        Redirect::action('ftp/main');
     }
 
     public function delete($id)
     {
         $this->model->delete($id);
         Session::insert('success', 'FTP hesabı başarıyla silindi.');
-        Redirect::to('ftp/main');
+        Redirect::action('ftp/main');
     }
 }

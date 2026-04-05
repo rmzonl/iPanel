@@ -4,6 +4,7 @@ use ZN\Request\Http;
 use ZN\Request\Post;
 use ZN\Request\Get;
 use ZN\Inclusion\Project\Masterpage;
+use ZN\Inclusion\Project\View;
 use DB;
 use Session;
 use Redirect;
@@ -19,11 +20,11 @@ class Dashboard extends Controller
         $domainModel = new \Project\Models\DomainModel();
         $sslModel    = new \Project\Models\SslModel();
 
-        $this->pageTitle       = 'Dashboard';
-        $this->totalClients    = $clientModel->count();
-        $this->totalSites      = $siteModel->count();
-        $this->totalDomains    = $domainModel->count();
-        $this->activeSSL       = $sslModel->countActive();
-        $this->recentClients   = $clientModel->getRecent(5);
+        View::pageTitle('Dashboard');
+        View::totalClients($clientModel->count());
+        View::totalSites($siteModel->count());
+        View::totalDomains($domainModel->count());
+        View::activeSSL($sslModel->countActive());
+        View::recentClients($clientModel->getRecent(5));
     }
 }

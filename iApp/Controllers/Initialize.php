@@ -4,6 +4,7 @@ use ZN\Request\Http;
 use ZN\Request\Post;
 use ZN\Request\Get;
 use ZN\Inclusion\Project\Masterpage;
+use ZN\Inclusion\Project\View;
 use DB;
 use Session;
 use Redirect;
@@ -24,11 +25,10 @@ class Initialize extends Controller
         $user = Session::select('admin_user');
 
         if (empty($user)) {
-            Redirect::to('auth/login');
+            Redirect::action('auth/login');
             return;
         }
 
-        $this->authUser = $user;
-        Masterpage::title(($this->pageTitle ?? 'Panel') . ' — iPanel');
+        View::authUser($user);
     }
 }

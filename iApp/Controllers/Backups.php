@@ -4,6 +4,7 @@ use ZN\Request\Http;
 use ZN\Request\Post;
 use ZN\Request\Get;
 use ZN\Inclusion\Project\Masterpage;
+use ZN\Inclusion\Project\View;
 use DB;
 use Session;
 use Redirect;
@@ -21,23 +22,23 @@ class Backups extends Controller
 
     public function main()
     {
-        $this->pageTitle = 'Yedeklemeler';
-        $this->backups   = $this->model->getAll();
-        $this->success   = Session::select('success');
-        $this->error     = Session::select('error');
+        View::pageTitle('Yedeklemeler');
+        View::backups($this->model->getAll());
+        View::success(Session::select('success'));
+        View::error(Session::select('error'));
         Session::delete('success');
         Session::delete('error');
 
         $siteModel     = new \Project\Models\SiteModel();
         $clientModel   = new \Project\Models\ClientModel();
-        $this->sites   = $siteModel->getAll();
-        $this->clients = $clientModel->getAll();
+        View::sites($siteModel->getAll());
+        View::clients($clientModel->getAll());
     }
 
     public function create()
     {
         if (!Http::isRequestMethod('post')) {
-            Redirect::to('backups/main');
+            Redirect::action('backups/main');
         }
 
         $data = [
@@ -52,13 +53,13 @@ class Backups extends Controller
 
         $this->model->create($data);
         Session::insert('success', 'Yedekleme işlemi başlatıldı.');
-        Redirect::to('backups/main');
+        Redirect::action('backups/main');
     }
 
     public function delete($id)
     {
         $this->model->delete($id);
         Session::insert('success', 'Yedekleme kaydı silindi.');
-        Redirect::to('backups/main');
+        Redirect::action('backups/main');
     }
 }

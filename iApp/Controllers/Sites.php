@@ -4,6 +4,7 @@ use ZN\Request\Http;
 use ZN\Request\Post;
 use ZN\Request\Get;
 use ZN\Inclusion\Project\Masterpage;
+use ZN\Inclusion\Project\View;
 use DB;
 use Session;
 use Redirect;
@@ -21,27 +22,27 @@ class Sites extends Controller
 
     public function main()
     {
-        $this->pageTitle = 'Siteler';
-        $this->sites     = $this->model->getAll();
-        $this->success   = Session::select('success');
-        $this->error     = Session::select('error');
+        View::pageTitle('Siteler');
+        View::sites($this->model->getAll());
+        View::success(Session::select('success'));
+        View::error(Session::select('error'));
         Session::delete('success');
         Session::delete('error');
     }
 
     public function create()
     {
-        $this->pageTitle = 'Yeni Site Ekle';
+        View::pageTitle('Yeni Site Ekle');
         $clientModel     = new \Project\Models\ClientModel();
         $ipModel         = new \Project\Models\IpAddressModel();
-        $this->clients   = $clientModel->getAll();
-        $this->ips       = $ipModel->getAllActive();
+        View::clients($clientModel->getAll());
+        View::ips($ipModel->getAllActive());
     }
 
     public function store()
     {
         if (!Http::isRequestMethod('post')) {
-            Redirect::to('sites/main');
+            Redirect::action('sites/main');
         }
 
         $data = [
@@ -57,32 +58,32 @@ class Sites extends Controller
 
         if (empty($data['client_id']) || empty($data['domain'])) {
             Session::insert('error', 'Müşteri ve domain alanları zorunludur.');
-            Redirect::to('sites/create');
+            Redirect::action('sites/create');
             return;
         }
 
         $this->model->create($data);
         Session::insert('success', 'Site başarıyla eklendi.');
-        Redirect::to('sites/main');
+        Redirect::action('sites/main');
     }
 
     public function edit($id)
     {
-        $this->pageTitle = 'Site Düzenle';
-        $this->site      = $this->model->getById($id);
-        if (!$this->site) {
-            Redirect::to('sites/main');
+        View::pageTitle('Site Düzenle');
+        View::site($this->model->getById($id));
+        if (!View::site()) {
+            Redirect::action('sites/main');
         }
         $clientModel   = new \Project\Models\ClientModel();
         $ipModel       = new \Project\Models\IpAddressModel();
-        $this->clients = $clientModel->getAll();
-        $this->ips     = $ipModel->getAllActive();
+        View::clients($clientModel->getAll());
+        View::ips($ipModel->getAllActive());
     }
 
     public function update($id)
     {
         if (!Http::isRequestMethod('post')) {
-            Redirect::to('sites/main');
+            Redirect::action('sites/main');
         }
 
         $data = [
@@ -98,13 +99,13 @@ class Sites extends Controller
 
         $this->model->update($id, $data);
         Session::insert('success', 'Site başarıyla güncellendi.');
-        Redirect::to('sites/main');
+        Redirect::action('sites/main');
     }
 
     public function delete($id)
     {
         $this->model->delete($id);
         Session::insert('success', 'Site başarıyla silindi.');
-        Redirect::to('sites/main');
+        Redirect::action('sites/main');
     }
 }

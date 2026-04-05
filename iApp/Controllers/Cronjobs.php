@@ -4,6 +4,7 @@ use ZN\Request\Http;
 use ZN\Request\Post;
 use ZN\Request\Get;
 use ZN\Inclusion\Project\Masterpage;
+use ZN\Inclusion\Project\View;
 use DB;
 use Session;
 use Redirect;
@@ -21,25 +22,25 @@ class Cronjobs extends Controller
 
     public function main()
     {
-        $this->pageTitle  = 'Cron İşleri';
-        $this->cronjobs   = $this->model->getAll();
-        $this->success    = Session::select('success');
-        $this->error      = Session::select('error');
+        View::pageTitle('Cron İşleri');
+        View::cronjobs($this->model->getAll());
+        View::success(Session::select('success'));
+        View::error(Session::select('error'));
         Session::delete('success');
         Session::delete('error');
     }
 
     public function create()
     {
-        $this->pageTitle = 'Yeni Cron İşi';
+        View::pageTitle('Yeni Cron İşi');
         $siteModel       = new \Project\Models\SiteModel();
-        $this->sites     = $siteModel->getAll();
+        View::sites($siteModel->getAll());
     }
 
     public function store()
     {
         if (!Http::isRequestMethod('post')) {
-            Redirect::to('cronjobs/main');
+            Redirect::action('cronjobs/main');
         }
 
         $data = [
@@ -52,19 +53,19 @@ class Cronjobs extends Controller
 
         if (empty($data['site_id']) || empty($data['title']) || empty($data['command']) || empty($data['schedule'])) {
             Session::insert('error', 'Tüm zorunlu alanları doldurunuz.');
-            Redirect::to('cronjobs/create');
+            Redirect::action('cronjobs/create');
             return;
         }
 
         $this->model->create($data);
         Session::insert('success', 'Cron işi başarıyla oluşturuldu.');
-        Redirect::to('cronjobs/main');
+        Redirect::action('cronjobs/main');
     }
 
     public function delete($id)
     {
         $this->model->delete($id);
         Session::insert('success', 'Cron işi başarıyla silindi.');
-        Redirect::to('cronjobs/main');
+        Redirect::action('cronjobs/main');
     }
 }

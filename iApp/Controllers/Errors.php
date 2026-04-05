@@ -4,6 +4,7 @@ use ZN\Request\Http;
 use ZN\Request\Post;
 use ZN\Request\Get;
 use ZN\Inclusion\Project\Masterpage;
+use ZN\Inclusion\Project\View;
 use DB;
 use Session;
 use Redirect;
@@ -14,7 +15,7 @@ class Errors extends Controller
 {
     public function notFound()
     {
-        $this->pageTitle = '404 - Sayfa Bulunamadı';
+        View::pageTitle('404 - Sayfa Bulunamadı');
         http_response_code(404);
     }
 }

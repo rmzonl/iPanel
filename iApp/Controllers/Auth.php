@@ -4,6 +4,7 @@ use ZN\Request\Http;
 use ZN\Request\Post;
 use ZN\Request\Get;
 use ZN\Inclusion\Project\Masterpage;
+use ZN\Inclusion\Project\View;
 use DB;
 use Session;
 use Redirect;
@@ -15,7 +16,7 @@ class Auth extends Controller
     public function login()
     {
         if (Session::select('admin_user')) {
-            Redirect::to('dashboard/main');
+            Redirect::action('dashboard/main');
         }
 
         if (Http::isRequestMethod('post')) {
@@ -23,7 +24,7 @@ class Auth extends Controller
             $password = Post::get('password');
 
             if (empty($username) || empty($password)) {
-                $this->error = 'Kullanıcı adı ve şifre gereklidir.';
+                View::error('Kullanıcı adı ve şifre gereklidir.');
                 return;
             }
 
@@ -35,7 +36,7 @@ class Auth extends Controller
 
             if ($user && password_verify($password, $user->password)) {
                 if ($user->status == 0) {
-                    $this->error = 'Hesabınız devre dışı bırakılmıştır.';
+                    View::error('Hesabınız devre dışı bırakılmıştır.');
                     return;
                 }
 
@@ -50,9 +51,9 @@ class Auth extends Controller
                     'last_login' => date('Y-m-d H:i:s')
                 ]);
 
-                Redirect::to('dashboard/main');
+                Redirect::action('dashboard/main');
             } else {
-                $this->error = 'Geçersiz kullanıcı adı veya şifre.';
+                View::error('Geçersiz kullanıcı adı veya şifre.');
             }
         }
     }
@@ -60,6 +61,6 @@ class Auth extends Controller
     public function logout()
     {
         Session::delete('admin_user');
-        Redirect::to('auth/login');
+        Redirect::action('auth/login');
     }
 }

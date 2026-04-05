@@ -4,6 +4,7 @@ use ZN\Request\Http;
 use ZN\Request\Post;
 use ZN\Request\Get;
 use ZN\Inclusion\Project\Masterpage;
+use ZN\Inclusion\Project\View;
 use DB;
 use Session;
 use Redirect;
@@ -21,27 +22,27 @@ class Domains extends Controller
 
     public function main()
     {
-        $this->pageTitle = 'Domain Yönetimi';
-        $this->domains   = $this->model->getAll();
-        $this->success   = Session::select('success');
-        $this->error     = Session::select('error');
+        View::pageTitle('Domain Yönetimi');
+        View::domains($this->model->getAll());
+        View::success(Session::select('success'));
+        View::error(Session::select('error'));
         Session::delete('success');
         Session::delete('error');
     }
 
     public function create()
     {
-        $this->pageTitle = 'Yeni Domain Ekle';
+        View::pageTitle('Yeni Domain Ekle');
         $siteModel       = new \Project\Models\SiteModel();
         $clientModel     = new \Project\Models\ClientModel();
-        $this->sites     = $siteModel->getAll();
-        $this->clients   = $clientModel->getAll();
+        View::sites($siteModel->getAll());
+        View::clients($clientModel->getAll());
     }
 
     public function store()
     {
         if (!Http::isRequestMethod('post')) {
-            Redirect::to('domains/main');
+            Redirect::action('domains/main');
         }
 
         $data = [
@@ -55,19 +56,19 @@ class Domains extends Controller
 
         if (empty($data['site_id']) || empty($data['name'])) {
             Session::insert('error', 'Site ve domain adı zorunludur.');
-            Redirect::to('domains/create');
+            Redirect::action('domains/create');
             return;
         }
 
         $this->model->create($data);
         Session::insert('success', 'Domain başarıyla eklendi.');
-        Redirect::to('domains/main');
+        Redirect::action('domains/main');
     }
 
     public function delete($id)
     {
         $this->model->delete($id);
         Session::insert('success', 'Domain başarıyla silindi.');
-        Redirect::to('domains/main');
+        Redirect::action('domains/main');
     }
 }

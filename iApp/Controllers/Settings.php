@@ -4,6 +4,7 @@ use ZN\Request\Http;
 use ZN\Request\Post;
 use ZN\Request\Get;
 use ZN\Inclusion\Project\Masterpage;
+use ZN\Inclusion\Project\View;
 use DB;
 use Session;
 use Redirect;
@@ -21,10 +22,10 @@ class Settings extends Controller
 
     public function main()
     {
-        $this->pageTitle      = 'Ayarlar';
-        $this->serverSettings = $this->model->getServerSettings();
-        $this->success        = Session::select('success');
-        $this->error          = Session::select('error');
+        View::pageTitle('Ayarlar');
+        View::serverSettings($this->model->getServerSettings());
+        View::success(Session::select('success'));
+        View::error(Session::select('error'));
         Session::delete('success');
         Session::delete('error');
     }
@@ -32,7 +33,7 @@ class Settings extends Controller
     public function save()
     {
         if (!Http::isRequestMethod('post')) {
-            Redirect::to('settings/main');
+            Redirect::action('settings/main');
         }
 
         $keys = [
@@ -49,6 +50,6 @@ class Settings extends Controller
         }
 
         Session::insert('success', 'Ayarlar başarıyla kaydedildi.');
-        Redirect::to('settings/main');
+        Redirect::action('settings/main');
     }
 }

@@ -4,6 +4,7 @@ use ZN\Request\Http;
 use ZN\Request\Post;
 use ZN\Request\Get;
 use ZN\Inclusion\Project\Masterpage;
+use ZN\Inclusion\Project\View;
 use DB;
 use Session;
 use Redirect;
@@ -21,23 +22,23 @@ class Firewall extends Controller
 
     public function main()
     {
-        $this->pageTitle = 'Güvenlik Duvarı';
-        $this->rules     = $this->model->getAll();
-        $this->success   = Session::select('success');
-        $this->error     = Session::select('error');
+        View::pageTitle('Güvenlik Duvarı');
+        View::rules($this->model->getAll());
+        View::success(Session::select('success'));
+        View::error(Session::select('error'));
         Session::delete('success');
         Session::delete('error');
     }
 
     public function create()
     {
-        $this->pageTitle = 'Yeni Kural Ekle';
+        View::pageTitle('Yeni Kural Ekle');
     }
 
     public function store()
     {
         if (!Http::isRequestMethod('post')) {
-            Redirect::to('firewall/main');
+            Redirect::action('firewall/main');
         }
 
         $data = [
@@ -53,19 +54,19 @@ class Firewall extends Controller
 
         if (empty($data['name'])) {
             Session::insert('error', 'Kural adı zorunludur.');
-            Redirect::to('firewall/create');
+            Redirect::action('firewall/create');
             return;
         }
 
         $this->model->create($data);
         Session::insert('success', 'Güvenlik duvarı kuralı başarıyla eklendi.');
-        Redirect::to('firewall/main');
+        Redirect::action('firewall/main');
     }
 
     public function delete($id)
     {
         $this->model->delete($id);
         Session::insert('success', 'Kural başarıyla silindi.');
-        Redirect::to('firewall/main');
+        Redirect::action('firewall/main');
     }
 }

@@ -4,6 +4,7 @@ use ZN\Request\Http;
 use ZN\Request\Post;
 use ZN\Request\Get;
 use ZN\Inclusion\Project\Masterpage;
+use ZN\Inclusion\Project\View;
 use DB;
 use Session;
 use Redirect;
@@ -21,25 +22,25 @@ class Email extends Controller
 
     public function main()
     {
-        $this->pageTitle = 'E-posta Hesapları';
-        $this->emails    = $this->model->getAll();
-        $this->success   = Session::select('success');
-        $this->error     = Session::select('error');
+        View::pageTitle('E-posta Hesapları');
+        View::emails($this->model->getAll());
+        View::success(Session::select('success'));
+        View::error(Session::select('error'));
         Session::delete('success');
         Session::delete('error');
     }
 
     public function create()
     {
-        $this->pageTitle = 'Yeni E-posta Hesabı';
+        View::pageTitle('Yeni E-posta Hesabı');
         $siteModel       = new \Project\Models\SiteModel();
-        $this->sites     = $siteModel->getAll();
+        View::sites($siteModel->getAll());
     }
 
     public function store()
     {
         if (!Http::isRequestMethod('post')) {
-            Redirect::to('email/main');
+            Redirect::action('email/main');
         }
 
         $siteId   = Post::get('site_id');
@@ -49,7 +50,7 @@ class Email extends Controller
 
         if (empty($siteId) || empty($username) || empty($password)) {
             Session::insert('error', 'Site, kullanıcı adı ve şifre zorunludur.');
-            Redirect::to('email/create');
+            Redirect::action('email/create');
             return;
         }
 
@@ -66,13 +67,13 @@ class Email extends Controller
 
         $this->model->create($data);
         Session::insert('success', 'E-posta hesabı başarıyla oluşturuldu.');
-        Redirect::to('email/main');
+        Redirect::action('email/main');
     }
 
     public function delete($id)
     {
         $this->model->delete($id);
         Session::insert('success', 'E-posta hesabı başarıyla silindi.');
-        Redirect::to('email/main');
+        Redirect::action('email/main');
     }
 }

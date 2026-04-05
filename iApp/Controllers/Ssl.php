@@ -4,6 +4,7 @@ use ZN\Request\Http;
 use ZN\Request\Post;
 use ZN\Request\Get;
 use ZN\Inclusion\Project\Masterpage;
+use ZN\Inclusion\Project\View;
 use DB;
 use Session;
 use Redirect;
@@ -21,25 +22,25 @@ class Ssl extends Controller
 
     public function main()
     {
-        $this->pageTitle  = 'SSL Sertifikaları';
-        $this->certs      = $this->model->getAll();
-        $this->success    = Session::select('success');
-        $this->error      = Session::select('error');
+        View::pageTitle('SSL Sertifikaları');
+        View::certs($this->model->getAll());
+        View::success(Session::select('success'));
+        View::error(Session::select('error'));
         Session::delete('success');
         Session::delete('error');
     }
 
     public function create()
     {
-        $this->pageTitle  = 'SSL Sertifikası Ekle';
+        View::pageTitle('SSL Sertifikası Ekle');
         $domainModel      = new \Project\Models\DomainModel();
-        $this->domains    = $domainModel->getAll();
+        View::domains($domainModel->getAll());
     }
 
     public function store()
     {
         if (!Http::isRequestMethod('post')) {
-            Redirect::to('ssl/main');
+            Redirect::action('ssl/main');
         }
 
         $data = [
@@ -56,19 +57,19 @@ class Ssl extends Controller
 
         if (empty($data['domain_id'])) {
             Session::insert('error', 'Domain seçimi zorunludur.');
-            Redirect::to('ssl/create');
+            Redirect::action('ssl/create');
             return;
         }
 
         $this->model->create($data);
         Session::insert('success', 'SSL sertifikası başarıyla eklendi.');
-        Redirect::to('ssl/main');
+        Redirect::action('ssl/main');
     }
 
     public function delete($id)
     {
         $this->model->delete($id);
         Session::insert('success', 'SSL sertifikası başarıyla silindi.');
-        Redirect::to('ssl/main');
+        Redirect::action('ssl/main');
     }
 }

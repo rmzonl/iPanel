@@ -4,6 +4,7 @@ use ZN\Request\Http;
 use ZN\Request\Post;
 use ZN\Request\Get;
 use ZN\Inclusion\Project\Masterpage;
+use ZN\Inclusion\Project\View;
 use DB;
 use Session;
 use Redirect;
@@ -21,25 +22,25 @@ class Databases extends Controller
 
     public function main()
     {
-        $this->pageTitle  = 'Veritabanları';
-        $this->databases  = $this->model->getAll();
-        $this->success    = Session::select('success');
-        $this->error      = Session::select('error');
+        View::pageTitle('Veritabanları');
+        View::databases($this->model->getAll());
+        View::success(Session::select('success'));
+        View::error(Session::select('error'));
         Session::delete('success');
         Session::delete('error');
     }
 
     public function create()
     {
-        $this->pageTitle = 'Yeni Veritabanı';
+        View::pageTitle('Yeni Veritabanı');
         $siteModel       = new \Project\Models\SiteModel();
-        $this->sites     = $siteModel->getAll();
+        View::sites($siteModel->getAll());
     }
 
     public function store()
     {
         if (!Http::isRequestMethod('post')) {
-            Redirect::to('databases/main');
+            Redirect::action('databases/main');
         }
 
         $data = [
@@ -53,19 +54,19 @@ class Databases extends Controller
 
         if (empty($data['site_id']) || empty($data['db_name']) || empty($data['db_user'])) {
             Session::insert('error', 'Site, veritabanı adı ve kullanıcı zorunludur.');
-            Redirect::to('databases/create');
+            Redirect::action('databases/create');
             return;
         }
 
         $this->model->create($data);
         Session::insert('success', 'Veritabanı başarıyla oluşturuldu.');
-        Redirect::to('databases/main');
+        Redirect::action('databases/main');
     }
 
     public function delete($id)
     {
         $this->model->delete($id);
         Session::insert('success', 'Veritabanı başarıyla silindi.');
-        Redirect::to('databases/main');
+        Redirect::action('databases/main');
     }
 }
