@@ -121,7 +121,7 @@ class In
      */
     public static function defaultProjectKey(?string $fix = NULL) : string
     {
-        return md5(Request::getBaseURL(strtolower(CONTAINER_PROJECT)) . $fix);
+        return md5(Request::getBaseURL(strtolower(CONTAINER_PROJECT ?? '')) . $fix);
     }
 
     /**
