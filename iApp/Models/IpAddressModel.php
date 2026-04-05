@@ -1,4 +1,7 @@
 <?php namespace Project\Models;
+use ZN\Model;
+use DB;
+
 
 class IpAddressModel extends Model
 {
