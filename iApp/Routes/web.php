@@ -1,106 +1,92 @@
 <?php
 
-// Auth routes
-Route::url('auth/login',   'Auth::login');
-Route::url('auth/logout',  'Auth::logout');
+// Auth
+Route::change('{start}auth/login{\/}')->uri('Auth/login');
+Route::change('{start}auth/logout{\/}')->uri('Auth/logout');
 
 // Dashboard
-Route::url('dashboard',       'Dashboard::main');
-Route::url('dashboard/main',  'Dashboard::main');
+Route::change('{start}dashboard{\/}')->uri('Dashboard/main');
 
 // Clients
-Route::url('clients',                'Clients::main');
-Route::url('clients/main',           'Clients::main');
-Route::url('clients/create',         'Clients::create');
-Route::url('clients/store',          'Clients::store');
-Route::url('clients/edit/(:num)',     'Clients::edit/$1');
-Route::url('clients/update/(:num)',   'Clients::update/$1');
-Route::url('clients/delete/(:num)',   'Clients::delete/$1');
+Route::change('{start}clients{\/}')->uri('Clients/main');
+Route::change('{start}clients/create{\/}')->uri('Clients/create');
+Route::change('{start}clients/store{\/}')->uri('Clients/store');
+Route::change('{start}clients/edit/({number}){end}')->uri('Clients/edit/$1');
+Route::change('{start}clients/update/({number}){end}')->uri('Clients/update/$1');
+Route::change('{start}clients/delete/({number}){end}')->uri('Clients/delete/$1');
 
 // Sites
-Route::url('sites',                  'Sites::main');
-Route::url('sites/main',             'Sites::main');
-Route::url('sites/create',           'Sites::create');
-Route::url('sites/store',            'Sites::store');
-Route::url('sites/edit/(:num)',       'Sites::edit/$1');
-Route::url('sites/update/(:num)',     'Sites::update/$1');
-Route::url('sites/delete/(:num)',     'Sites::delete/$1');
+Route::change('{start}sites{\/}')->uri('Sites/main');
+Route::change('{start}sites/create{\/}')->uri('Sites/create');
+Route::change('{start}sites/store{\/}')->uri('Sites/store');
+Route::change('{start}sites/edit/({number}){end}')->uri('Sites/edit/$1');
+Route::change('{start}sites/update/({number}){end}')->uri('Sites/update/$1');
+Route::change('{start}sites/delete/({number}){end}')->uri('Sites/delete/$1');
 
 // Domains
-Route::url('domains',                'Domains::main');
-Route::url('domains/main',           'Domains::main');
-Route::url('domains/create',         'Domains::create');
-Route::url('domains/store',          'Domains::store');
-Route::url('domains/delete/(:num)',   'Domains::delete/$1');
+Route::change('{start}domains{\/}')->uri('Domains/main');
+Route::change('{start}domains/create{\/}')->uri('Domains/create');
+Route::change('{start}domains/store{\/}')->uri('Domains/store');
+Route::change('{start}domains/delete/({number}){end}')->uri('Domains/delete/$1');
 
 // SSL
-Route::url('ssl',                    'Ssl::main');
-Route::url('ssl/main',               'Ssl::main');
-Route::url('ssl/create',             'Ssl::create');
-Route::url('ssl/store',              'Ssl::store');
-Route::url('ssl/delete/(:num)',       'Ssl::delete/$1');
+Route::change('{start}ssl{\/}')->uri('Ssl/main');
+Route::change('{start}ssl/create{\/}')->uri('Ssl/create');
+Route::change('{start}ssl/store{\/}')->uri('Ssl/store');
+Route::change('{start}ssl/delete/({number}){end}')->uri('Ssl/delete/$1');
 
 // Email
-Route::url('email',                  'Email::main');
-Route::url('email/main',             'Email::main');
-Route::url('email/create',           'Email::create');
-Route::url('email/store',            'Email::store');
-Route::url('email/delete/(:num)',     'Email::delete/$1');
+Route::change('{start}email{\/}')->uri('Email/main');
+Route::change('{start}email/create{\/}')->uri('Email/create');
+Route::change('{start}email/store{\/}')->uri('Email/store');
+Route::change('{start}email/delete/({number}){end}')->uri('Email/delete/$1');
 
 // DNS
-Route::url('dns',                    'Dns::main');
-Route::url('dns/main',               'Dns::main');
-Route::url('dns/records/(:num)',      'Dns::records/$1');
-Route::url('dns/createRecord/(:num)', 'Dns::createRecord/$1');
-Route::url('dns/storeRecord',         'Dns::storeRecord');
-Route::url('dns/deleteZone/(:num)',   'Dns::deleteZone/$1');
-Route::url('dns/deleteRecord/(:num)', 'Dns::deleteRecord/$1');
+Route::change('{start}dns{\/}')->uri('Dns/main');
+Route::change('{start}dns/records/({number}){end}')->uri('Dns/records/$1');
+Route::change('{start}dns/createRecord/({number}){end}')->uri('Dns/createRecord/$1');
+Route::change('{start}dns/storeRecord{\/}')->uri('Dns/storeRecord');
+Route::change('{start}dns/deleteZone/({number}){end}')->uri('Dns/deleteZone/$1');
+Route::change('{start}dns/deleteRecord/({number}){end}')->uri('Dns/deleteRecord/$1');
 
 // FTP
-Route::url('ftp',                    'Ftp::main');
-Route::url('ftp/main',               'Ftp::main');
-Route::url('ftp/create',             'Ftp::create');
-Route::url('ftp/store',              'Ftp::store');
-Route::url('ftp/delete/(:num)',       'Ftp::delete/$1');
+Route::change('{start}ftp{\/}')->uri('Ftp/main');
+Route::change('{start}ftp/create{\/}')->uri('Ftp/create');
+Route::change('{start}ftp/store{\/}')->uri('Ftp/store');
+Route::change('{start}ftp/delete/({number}){end}')->uri('Ftp/delete/$1');
 
 // Databases
-Route::url('databases',              'Databases::main');
-Route::url('databases/main',         'Databases::main');
-Route::url('databases/create',       'Databases::create');
-Route::url('databases/store',        'Databases::store');
-Route::url('databases/delete/(:num)', 'Databases::delete/$1');
+Route::change('{start}databases{\/}')->uri('Databases/main');
+Route::change('{start}databases/create{\/}')->uri('Databases/create');
+Route::change('{start}databases/store{\/}')->uri('Databases/store');
+Route::change('{start}databases/delete/({number}){end}')->uri('Databases/delete/$1');
 
 // Backups
-Route::url('backups',                'Backups::main');
-Route::url('backups/main',           'Backups::main');
-Route::url('backups/create',         'Backups::create');
-Route::url('backups/delete/(:num)',   'Backups::delete/$1');
+Route::change('{start}backups{\/}')->uri('Backups/main');
+Route::change('{start}backups/create{\/}')->uri('Backups/create');
+Route::change('{start}backups/delete/({number}){end}')->uri('Backups/delete/$1');
 
 // Cron Jobs
-Route::url('cronjobs',               'Cronjobs::main');
-Route::url('cronjobs/main',          'Cronjobs::main');
-Route::url('cronjobs/create',        'Cronjobs::create');
-Route::url('cronjobs/store',         'Cronjobs::store');
-Route::url('cronjobs/delete/(:num)',  'Cronjobs::delete/$1');
+Route::change('{start}cronjobs{\/}')->uri('Cronjobs/main');
+Route::change('{start}cronjobs/create{\/}')->uri('Cronjobs/create');
+Route::change('{start}cronjobs/store{\/}')->uri('Cronjobs/store');
+Route::change('{start}cronjobs/delete/({number}){end}')->uri('Cronjobs/delete/$1');
 
 // IP Addresses
-Route::url('ipaddresses',                'IpAddresses::main');
-Route::url('ipaddresses/main',           'IpAddresses::main');
-Route::url('ipaddresses/create',         'IpAddresses::create');
-Route::url('ipaddresses/store',          'IpAddresses::store');
-Route::url('ipaddresses/delete/(:num)',   'IpAddresses::delete/$1');
+Route::change('{start}ipaddresses{\/}')->uri('IpAddresses/main');
+Route::change('{start}ipaddresses/create{\/}')->uri('IpAddresses/create');
+Route::change('{start}ipaddresses/store{\/}')->uri('IpAddresses/store');
+Route::change('{start}ipaddresses/delete/({number}){end}')->uri('IpAddresses/delete/$1');
 
 // Firewall
-Route::url('firewall',               'Firewall::main');
-Route::url('firewall/main',          'Firewall::main');
-Route::url('firewall/create',        'Firewall::create');
-Route::url('firewall/store',         'Firewall::store');
-Route::url('firewall/delete/(:num)', 'Firewall::delete/$1');
+Route::change('{start}firewall{\/}')->uri('Firewall/main');
+Route::change('{start}firewall/create{\/}')->uri('Firewall/create');
+Route::change('{start}firewall/store{\/}')->uri('Firewall/store');
+Route::change('{start}firewall/delete/({number}){end}')->uri('Firewall/delete/$1');
 
 // Settings
-Route::url('settings',               'Settings::main');
-Route::url('settings/main',          'Settings::main');
-Route::url('settings/save',          'Settings::save');
+Route::change('{start}settings{\/}')->uri('Settings/main');
+Route::change('{start}settings/save{\/}')->uri('Settings/save');
 
 // Errors
-Route::url('errors/notFound',        'Errors::notFound');
+Route::change('{start}errors/notFound{\/}')->uri('Errors/notFound');
