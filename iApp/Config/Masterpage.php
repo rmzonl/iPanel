@@ -10,19 +10,19 @@
     |
     */
 
-    'headPage' => '', # string or array
+    'headPage' => 'layouts/head', # string or array
 
     /*
     |--------------------------------------------------------------------------
     | Head Page
     |--------------------------------------------------------------------------
     |
-    | It is specified in which view the html codes in the [body] tags will be 
+    | It is specified in which view the html codes in the [body] tags will be
     | placed.
     |
     */
 
-    'bodyPage' => '',
+    'bodyPage' => 'layouts/body',
 
     /*
     |--------------------------------------------------------------------------
@@ -63,6 +63,8 @@
         'language' => 'tr',
         'charset'  => ['utf-8']
     ],
+
+    'title' => 'iPanel',
 
     /*
     |--------------------------------------------------------------------------
@@ -121,9 +123,9 @@
 
     'attributes' =>
     [
-        'html' => [],
+        'html' => ['lang' => 'tr'],
         'head' => [],
-        'body' => []
+        'body' => ['class' => 'antialiased']
     ],
 
     /*
