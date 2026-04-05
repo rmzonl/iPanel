@@ -13,7 +13,7 @@
   <div class="page-body">
     <div class="container-xl">
 
-      {-- Stats Row --}
+      <!-- Stats Row -->
       <div class="row row-deck row-cards mb-4">
 
         <div class="col-sm-6 col-lg-3">
@@ -100,7 +100,7 @@
 
       <div class="row row-deck row-cards">
 
-        {-- Recent Clients --}
+        <!-- Recent Clients -->
         <div class="col-lg-6">
           <div class="card">
             <div class="card-header">
@@ -142,7 +142,7 @@
           </div>
         </div>
 
-        {-- Recent Sites --}
+        <!-- Recent Sites -->
         <div class="col-lg-6">
           <div class="card">
             <div class="card-header">

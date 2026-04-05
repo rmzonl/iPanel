@@ -33,7 +33,7 @@
 
       <div class="tab-content">
 
-        {-- Server Settings Tab --}
+        <!-- Server Settings Tab -->
         <div class="tab-pane fade show active" id="serverTab">
           <form method="POST" action="{{ URL::base('settings/saveServer') }}">
             <div class="card">
@@ -70,7 +70,7 @@
           </form>
         </div>
 
-        {-- Client Settings Tab --}
+        <!-- Client Settings Tab -->
         <div class="tab-pane fade" id="clientTab">
           <div class="card">
             <div class="card-header">
@@ -92,7 +92,7 @@
           </div>
         </div>
 
-        {-- Site Settings Tab --}
+        <!-- Site Settings Tab -->
         <div class="tab-pane fade" id="siteTab">
           <div class="card">
             <div class="card-header">

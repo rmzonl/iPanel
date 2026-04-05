@@ -82,7 +82,7 @@
   </div>
 </div>
 
-{-- Create Backup Modal --}
+<!-- Create Backup Modal -->
 <div class="modal modal-blur fade" id="createBackupModal" tabindex="-1">
   <div class="modal-dialog modal-sm modal-dialog-centered">
     <div class="modal-content">
