@@ -487,6 +487,6 @@ class In
             }
         }
 
-        return $requestUri;
+        return $requestUri ?? '';
     }
 }
