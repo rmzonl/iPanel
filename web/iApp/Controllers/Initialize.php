@@ -15,10 +15,12 @@ class Initialize extends Controller
 {
     public function main()
     {
-        $controller = strtolower(CURRENT_CFUNCTION ?? '');
+        $controller = strtolower(CURRENT_CONTROLLER ?? '');
 
-        if ($controller === 'auth') {
-            Masterpage::bodyPage('layouts/auth-body');
+        if (in_array($controller, ['auth', 'errors'])) {
+            if ($controller === 'auth') {
+                Masterpage::bodyPage('layouts/auth-body');
+            }
             return;
         }
 
