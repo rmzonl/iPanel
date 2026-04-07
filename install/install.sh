@@ -81,7 +81,20 @@ install_deps() {
             ufw fail2ban \
             tar gzip rsync openssl
     else
+        # EPEL — pure-ftpd, certbot, redis vb. için
         $PKG_INSTALL epel-release
+        dnf -q makecache
+
+        # Remi repo — PHP 8.2 için (AlmaLinux/Rocky/RHEL 8-9)
+        local REMI_RPM="https://rpms.remirepo.net/enterprise/remi-release-${OS_VER}.rpm"
+        if ! rpm -q remi-release >/dev/null 2>&1; then
+            dnf install -y -q "$REMI_RPM" || fail "Remi repo kurulamadı: $REMI_RPM"
+        fi
+
+        # PHP 8.2 modülünü etkinleştir
+        dnf module reset php -y -q
+        dnf module enable php:remi-8.2 -y -q
+
         $PKG_INSTALL \
             curl wget git ca-certificates gnupg \
             nginx \
@@ -118,20 +131,28 @@ fetch_sources() {
 ###############################################################################
 # 4. Sistem kullanıcıları / grupları
 ###############################################################################
+
+# Web sunucusu kullanıcısını belirle (OS'a göre)
+# Ubuntu/Debian → www-data | AlmaLinux/RHEL → nginx
+detect_web_user() {
+    if [[ "$OS_ID" == "ubuntu" || "$OS_ID" == "debian" ]]; then
+        WEB_USER="www-data"
+    else
+        WEB_USER="nginx"
+    fi
+    export WEB_USER
+}
+
 create_users() {
+    detect_web_user
+
     if ! getent group ipanel >/dev/null; then
         groupadd ipanel
         ok "Grup oluşturuldu: ipanel"
     fi
 
-    # www-data (Ubuntu/Debian) veya nginx (RHEL)
-    for WEB_USER in www-data nginx; do
-        if id "$WEB_USER" >/dev/null 2>&1; then
-            usermod -aG ipanel "$WEB_USER"
-            ok "$WEB_USER → ipanel grubuna eklendi"
-            break
-        fi
-    done
+    usermod -aG ipanel "$WEB_USER" 2>/dev/null || true
+    ok "$WEB_USER → ipanel grubuna eklendi"
 }
 
 ###############################################################################
@@ -213,23 +234,34 @@ SQL
 create_php_fpm_pool() {
     log "PHP-FPM pool oluşturuluyor (panel için)..."
 
-    local PHP_VER=""
-    for v in 8.2 8.3 8.1 8.4 8.0; do
-        if [[ -d "/etc/php/$v/fpm/pool.d" ]]; then
-            PHP_VER="$v"
-            break
-        fi
-    done
-    [[ -z "$PHP_VER" ]] && fail "PHP-FPM kurulumu bulunamadı (/etc/php/*/fpm/pool.d)"
+    local POOL_FILE="" FPM_SVC=""
 
-    cat > "/etc/php/$PHP_VER/fpm/pool.d/ipanel.conf" <<EOF
+    if [[ "$OS_ID" == "ubuntu" || "$OS_ID" == "debian" ]]; then
+        # Ubuntu/Debian: /etc/php/X.Y/fpm/pool.d/  +  php X.Y-fpm servis adı
+        local PHP_VER=""
+        for v in 8.2 8.3 8.1 8.4 8.0; do
+            if [[ -d "/etc/php/$v/fpm/pool.d" ]]; then
+                PHP_VER="$v"; break
+            fi
+        done
+        [[ -z "$PHP_VER" ]] && fail "PHP-FPM kurulumu bulunamadı (/etc/php/*/fpm/pool.d)"
+        POOL_FILE="/etc/php/$PHP_VER/fpm/pool.d/ipanel.conf"
+        FPM_SVC="php${PHP_VER}-fpm"
+    else
+        # RHEL/AlmaLinux/Rocky: /etc/php-fpm.d/  +  php-fpm servis adı
+        [[ -d /etc/php-fpm.d ]] || fail "PHP-FPM kurulumu bulunamadı (/etc/php-fpm.d)"
+        POOL_FILE="/etc/php-fpm.d/ipanel.conf"
+        FPM_SVC="php-fpm"
+    fi
+
+    cat > "$POOL_FILE" <<EOF
 ; iPanel Web UI — otomatik oluşturuldu
 [ipanel]
-user = www-data
-group = www-data
+user = $WEB_USER
+group = $WEB_USER
 listen = /run/php/ipanel.sock
-listen.owner = www-data
-listen.group = www-data
+listen.owner = $WEB_USER
+listen.group = $WEB_USER
 listen.mode = 0660
 pm = ondemand
 pm.max_children = 5
@@ -241,9 +273,9 @@ php_admin_flag[log_errors] = on
 php_admin_value[open_basedir] = $IPANEL_ROOT/web:/tmp:/var/log/ipanel
 EOF
 
-    systemctl enable --now "php${PHP_VER}-fpm"
-    systemctl restart "php${PHP_VER}-fpm"
-    ok "PHP-FPM pool: php${PHP_VER}-fpm → /run/php/ipanel.sock"
+    systemctl enable --now "$FPM_SVC"
+    systemctl restart "$FPM_SVC"
+    ok "PHP-FPM pool: $FPM_SVC → /run/php/ipanel.sock"
 }
 
 ###############################################################################
@@ -308,42 +340,42 @@ finalize() {
 
     # iApp/Storage — ZN Framework cache/session/DB + sistem dosyaları
     mkdir -p "$IPANEL_ROOT/web/iApp/Storage"/{cache,logs,session,database,Files}
-    chown -R www-data:www-data "$IPANEL_ROOT/web/iApp/Storage"
+    chown -R ${WEB_USER}:${WEB_USER} "$IPANEL_ROOT/web/iApp/Storage"
     chmod -R 775 "$IPANEL_ROOT/web/iApp/Storage"
     ok "Storage dizinleri hazırlandı."
 
     # Çoklu dil desteği dizinleri
     mkdir -p "$IPANEL_ROOT/web/iApp/Languages"/{tr,en}
-    chown -R www-data:www-data "$IPANEL_ROOT/web/iApp/Languages"
+    chown -R ${WEB_USER}:${WEB_USER} "$IPANEL_ROOT/web/iApp/Languages"
     chmod -R 755 "$IPANEL_ROOT/web/iApp/Languages"
     ok "Languages dizinleri hazırlandı (tr, en)."
 
     # Template dizini
     mkdir -p "$IPANEL_ROOT/web/iApp/Templates"
-    chown www-data:www-data "$IPANEL_ROOT/web/iApp/Templates"
+    chown ${WEB_USER}:${WEB_USER} "$IPANEL_ROOT/web/iApp/Templates"
     chmod 755 "$IPANEL_ROOT/web/iApp/Templates"
     ok "Templates dizini hazırlandı."
 
     # Plugin dizini
     mkdir -p "$IPANEL_ROOT/web/iApp/Plugins"
-    chown www-data:www-data "$IPANEL_ROOT/web/iApp/Plugins"
+    chown ${WEB_USER}:${WEB_USER} "$IPANEL_ROOT/web/iApp/Plugins"
     chmod 755 "$IPANEL_ROOT/web/iApp/Plugins"
     ok "Plugins dizini hazırlandı."
 
     # Themes dizini
     mkdir -p "$IPANEL_ROOT/web/iApp/Themes"
-    chown www-data:www-data "$IPANEL_ROOT/web/iApp/Themes"
+    chown ${WEB_USER}:${WEB_USER} "$IPANEL_ROOT/web/iApp/Themes"
     chmod 755 "$IPANEL_ROOT/web/iApp/Themes"
     ok "Themes dizini hazırlandı."
 
     # uploads/ — web erişimli, kullanıcı dosyaları için
     mkdir -p "$IPANEL_ROOT/web/uploads"
-    chown www-data:www-data "$IPANEL_ROOT/web/uploads"
+    chown ${WEB_USER}:${WEB_USER} "$IPANEL_ROOT/web/uploads"
     chmod 775 "$IPANEL_ROOT/web/uploads"
     ok "uploads/ dizini hazırlandı (web-accessible)."
 
     # Web dizini sahipliği
-    chown -R www-data:www-data "$IPANEL_ROOT/web"
+    chown -R ${WEB_USER}:${WEB_USER} "$IPANEL_ROOT/web"
     chmod -R o-rwx "$IPANEL_ROOT/web/iApp/Config"
 
     # CLI aracı symlink
@@ -379,18 +411,15 @@ health_check() {
     check_service nginx        "Nginx"
     check_service ipanel-agent "iPanel Agent"
 
-    # PHP-FPM — hangi versiyon olduğunu bul
-    local PHP_VER=""
-    for v in 8.2 8.3 8.1 8.4 8.0; do
-        if systemctl is-active --quiet "php${v}-fpm" 2>/dev/null; then
-            PHP_VER="$v"; break
+    # PHP-FPM — Ubuntu'da versiyonlu isim, RHEL'de php-fpm
+    local FPM_OK=false
+    for svc in php-fpm php8.2-fpm php8.3-fpm php8.1-fpm; do
+        if systemctl is-active --quiet "$svc" 2>/dev/null; then
+            ok "PHP-FPM çalışıyor ($svc)"
+            FPM_OK=true; break
         fi
     done
-    if [[ -n "$PHP_VER" ]]; then
-        ok "PHP ${PHP_VER}-FPM çalışıyor"
-    else
-        warn "PHP-FPM servisi aktif değil"; ALL_OK=false
-    fi
+    $FPM_OK || { warn "PHP-FPM servisi aktif değil"; ALL_OK=false; }
 
     [[ -S /run/ipanel/agent.sock ]] \
         && ok "Agent socket mevcut" \
