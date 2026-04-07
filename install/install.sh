@@ -81,22 +81,24 @@ install_deps() {
             ufw fail2ban \
             tar gzip rsync openssl
     else
-        # EPEL — pure-ftpd, certbot, redis vb. için
-        $PKG_INSTALL epel-release
-        dnf -q makecache
+        # Adım 1: temel araçlar + EPEL
+        dnf install -y curl wget git ca-certificates gnupg tar gzip rsync openssl
+        dnf install -y epel-release
+        dnf makecache
 
-        # Remi repo — PHP 8.2 için (AlmaLinux/Rocky/RHEL 8-9)
+        # Adım 2: Remi repo (PHP 8.2 için)
         local REMI_RPM="https://rpms.remirepo.net/enterprise/remi-release-${OS_VER}.rpm"
         if ! rpm -q remi-release >/dev/null 2>&1; then
-            dnf install -y -q "$REMI_RPM" || fail "Remi repo kurulamadı: $REMI_RPM"
+            dnf install -y "$REMI_RPM" || fail "Remi repo kurulamadı: $REMI_RPM"
         fi
 
-        # PHP 8.2 modülünü etkinleştir
-        dnf module reset php -y -q
-        dnf module enable php:remi-8.2 -y -q
+        # Adım 3: PHP 8.2 modülünü etkinleştir + cache yenile
+        dnf module reset php -y
+        dnf module enable php:remi-8.2 -y
+        dnf makecache
 
-        $PKG_INSTALL \
-            curl wget git ca-certificates gnupg \
+        # Adım 4: kalan paketler
+        dnf install -y \
             nginx \
             php-cli php-fpm php-mysqlnd php-mbstring \
             php-xml php-curl php-zip php-gd php-bcmath php-intl \
@@ -106,8 +108,7 @@ install_deps() {
             pure-ftpd \
             redis \
             certbot \
-            firewalld fail2ban \
-            tar gzip rsync openssl
+            firewalld fail2ban
     fi
 
     ok "Paketler kuruldu."
