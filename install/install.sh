@@ -306,11 +306,41 @@ install_nginx_panel() {
 finalize() {
     log "Dosya izinleri ve son ayarlar yapılıyor..."
 
-    # Storage dizinleri oluştur ve izinleri ayarla
-    mkdir -p "$IPANEL_ROOT/web/iApp/Storage"/{cache,logs,session,database}
+    # iApp/Storage — ZN Framework cache/session/DB + sistem dosyaları
+    mkdir -p "$IPANEL_ROOT/web/iApp/Storage"/{cache,logs,session,database,Files}
     chown -R www-data:www-data "$IPANEL_ROOT/web/iApp/Storage"
     chmod -R 775 "$IPANEL_ROOT/web/iApp/Storage"
     ok "Storage dizinleri hazırlandı."
+
+    # Çoklu dil desteği dizinleri
+    mkdir -p "$IPANEL_ROOT/web/iApp/Languages"/{tr,en}
+    chown -R www-data:www-data "$IPANEL_ROOT/web/iApp/Languages"
+    chmod -R 755 "$IPANEL_ROOT/web/iApp/Languages"
+    ok "Languages dizinleri hazırlandı (tr, en)."
+
+    # Template dizini
+    mkdir -p "$IPANEL_ROOT/web/iApp/Templates"
+    chown www-data:www-data "$IPANEL_ROOT/web/iApp/Templates"
+    chmod 755 "$IPANEL_ROOT/web/iApp/Templates"
+    ok "Templates dizini hazırlandı."
+
+    # Plugin dizini
+    mkdir -p "$IPANEL_ROOT/web/iApp/Plugins"
+    chown www-data:www-data "$IPANEL_ROOT/web/iApp/Plugins"
+    chmod 755 "$IPANEL_ROOT/web/iApp/Plugins"
+    ok "Plugins dizini hazırlandı."
+
+    # Themes dizini
+    mkdir -p "$IPANEL_ROOT/web/iApp/Themes"
+    chown www-data:www-data "$IPANEL_ROOT/web/iApp/Themes"
+    chmod 755 "$IPANEL_ROOT/web/iApp/Themes"
+    ok "Themes dizini hazırlandı."
+
+    # uploads/ — web erişimli, kullanıcı dosyaları için
+    mkdir -p "$IPANEL_ROOT/web/uploads"
+    chown www-data:www-data "$IPANEL_ROOT/web/uploads"
+    chmod 775 "$IPANEL_ROOT/web/uploads"
+    ok "uploads/ dizini hazırlandı (web-accessible)."
 
     # Web dizini sahipliği
     chown -R www-data:www-data "$IPANEL_ROOT/web"

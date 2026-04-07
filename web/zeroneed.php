@@ -41,13 +41,13 @@ ZN\ZN::defines
     'DATABASES_DIR'   => '',
     'STORAGE_DIR'     => 'iApp/Storage/',
     'COMMANDS_DIR'    => 'iApp/Commands/',
-    'LANGUAGES_DIR'   => '', 
+    'LANGUAGES_DIR'   => 'iApp/Languages/',
     'LIBRARIES_DIR'   => 'iApp/Libraries/',
     'AUTOLOAD_DIR'    => '',
-    'FILES_DIR'       => '',
-    'TEMPLATES_DIR'   => '',
+    'FILES_DIR'       => 'iApp/Storage/Files/',
+    'TEMPLATES_DIR'   => 'iApp/Templates/',
     'THEMES_DIR'      => 'iApp/Themes/',
-    'PLUGINS_DIR'     => '',
-    'UPLOADS_DIR'     => ''
+    'PLUGINS_DIR'     => 'iApp/Plugins/',
+    'UPLOADS_DIR'     => 'uploads/'
 
 ])::run('CE');
