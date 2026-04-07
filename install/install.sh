@@ -20,6 +20,24 @@ fail() { echo -e "${C_RED}HATA:${C_RST} $*"; exit 1; }
 
 [[ $EUID -eq 0 ]] || fail "iPanel kurulumu root olarak çalışmalıdır."
 
+# cPanel/WHM tespiti — desteklenmiyor
+if [[ -d /usr/local/cpanel || -f /usr/local/cpanel/cpanel ]]; then
+    echo -e "${C_RED}"
+    echo "  ╔══════════════════════════════════════════════════════════╗"
+    echo "  ║  HATA: cPanel/WHM tespit edildi                         ║"
+    echo "  ╠══════════════════════════════════════════════════════════╣"
+    echo "  ║  iPanel, cPanel kurulu bir sunucuya kurulamaz.           ║"
+    echo "  ║                                                          ║"
+    echo "  ║  Lütfen temiz bir sunucu kullanın:                       ║"
+    echo "  ║    • AlmaLinux 9 (önerilen)                              ║"
+    echo "  ║    • Rocky Linux 9                                       ║"
+    echo "  ║    • Ubuntu 22.04 / 24.04                                ║"
+    echo "  ║    • Debian 12                                           ║"
+    echo "  ╚══════════════════════════════════════════════════════════╝"
+    echo -e "${C_RST}"
+    exit 1
+fi
+
 ###############################################################################
 # 1. OS tespiti
 ###############################################################################
