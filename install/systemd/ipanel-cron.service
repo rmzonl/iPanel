@@ -1,0 +1,8 @@
+[Unit]
+Description=iPanel periodic tasks (cleanup, certbot renew, monitoring)
+After=network.target
+
+[Service]
+Type=oneshot
+User=root
+ExecStart=/usr/local/ipanel/bin/ipanel agent-call ssl.renewAll

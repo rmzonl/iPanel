@@ -1,0 +1,25 @@
+[Unit]
+Description=iPanel Agent Daemon
+Documentation=https://github.com/rmzonl/ipanel
+After=network.target
+Wants=network.target
+
+[Service]
+Type=simple
+User=root
+Group=root
+ExecStart=/usr/bin/php /usr/local/ipanel/agent/agent.php
+ExecReload=/bin/kill -HUP $MAINPID
+Restart=always
+RestartSec=5
+StandardOutput=append:/var/log/ipanel/agent.out
+StandardError=append:/var/log/ipanel/agent.err
+
+# Hardening
+NoNewPrivileges=false
+PrivateTmp=true
+ProtectSystem=false
+ProtectHome=false
+
+[Install]
+WantedBy=multi-user.target

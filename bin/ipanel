@@ -1,0 +1,223 @@
+#!/usr/bin/env php
+<?php
+/**
+ * iPanel CLI — management command for administrators.
+ *
+ * Usage:
+ *   ipanel status              Show service and agent status
+ *   ipanel update              Pull latest panel code and migrate
+ *   ipanel backup              Back up the panel itself
+ *   ipanel passwd <user>       Reset an admin user's password
+ *   ipanel logs <target>       Tail a log (agent, nginx, panel)
+ *   ipanel repair              Rebuild vhosts / re-apply configs
+ *   ipanel version             Print version
+ *   ipanel agent-call <a> [k=v] Send a JSON-RPC call to the agent (debug)
+ */
+
+declare(strict_types=1);
+
+if (posix_geteuid() !== 0 && (($argv[1] ?? '') !== 'version')) {
+    fwrite(STDERR, "ipanel: must run as root\n");
+    exit(1);
+}
+
+define('IPANEL_ROOT', '/usr/local/ipanel');
+define('IPANEL_CONFIG', '/etc/ipanel/agent.conf.php');
+define('IPANEL_SOCKET', '/run/ipanel/agent.sock');
+define('IPANEL_VERSION', '0.1.0');
+
+$cmd = $argv[1] ?? 'help';
+array_shift($argv);
+array_shift($argv);
+
+switch ($cmd) {
+    case 'version':
+        echo "iPanel " . IPANEL_VERSION . "\n";
+        break;
+
+    case 'status':
+        cmdStatus();
+        break;
+
+    case 'update':
+        cmdUpdate();
+        break;
+
+    case 'backup':
+        cmdBackup();
+        break;
+
+    case 'passwd':
+        cmdPasswd($argv);
+        break;
+
+    case 'logs':
+        cmdLogs($argv);
+        break;
+
+    case 'repair':
+        cmdRepair();
+        break;
+
+    case 'agent-call':
+        cmdAgentCall($argv);
+        break;
+
+    case 'help':
+    default:
+        echo <<<HELP
+iPanel CLI — v0.1.0
+
+Usage: ipanel <command> [args]
+
+Commands:
+  status              Show service and agent status
+  update              Pull latest panel code and run migrations
+  backup              Back up the iPanel install (config + DB)
+  passwd <user>       Reset an admin user's password
+  logs <target>       Tail a log: agent | nginx | panel
+  repair              Rebuild vhosts and re-apply configs
+  agent-call <action> [k=v...]
+                      Send a debug JSON-RPC call to the agent
+  version             Print version
+  help                Show this help
+HELP;
+        echo "\n";
+        break;
+}
+
+function cmdStatus(): void
+{
+    $services = ['nginx', 'mysql', 'mariadb', 'postfix', 'dovecot', 'bind9', 'pure-ftpd', 'ipanel-agent'];
+    printf("%-20s  %s\n", 'Service', 'Status');
+    echo str_repeat('-', 40) . "\n";
+    foreach ($services as $s) {
+        exec("systemctl is-active $s 2>/dev/null", $out, $rc);
+        $status = trim($out[0] ?? 'n/a');
+        printf("%-20s  %s\n", $s, $status);
+        $out = [];
+    }
+
+    echo "\nAgent socket: " . (file_exists(IPANEL_SOCKET) ? "OK ({IPANEL_SOCKET})" : 'MISSING') . "\n";
+}
+
+function cmdUpdate(): void
+{
+    chdir(IPANEL_ROOT) || die("cannot cd " . IPANEL_ROOT . "\n");
+    passthru('git pull --ff-only', $rc);
+    if ($rc !== 0) {
+        exit($rc);
+    }
+    if (is_dir(IPANEL_ROOT . '/web/Packages/composer')) {
+        passthru('cd ' . escapeshellarg(IPANEL_ROOT . '/web') . ' && composer install --no-dev --no-interaction');
+    }
+    passthru('systemctl restart ipanel-agent');
+    echo "Update complete.\n";
+}
+
+function cmdBackup(): void
+{
+    $stamp  = date('Ymd_His');
+    $target = "/var/backups/ipanel/panel_{$stamp}.tar.gz";
+    @mkdir(dirname($target), 0750, true);
+
+    exec('mysqldump ipanel 2>/dev/null > /tmp/ipanel_db.sql', $out, $rc);
+    passthru("tar -czf " . escapeshellarg($target) . " /etc/ipanel " . IPANEL_ROOT . " /tmp/ipanel_db.sql");
+    @unlink('/tmp/ipanel_db.sql');
+    echo "Backup saved: {$target}\n";
+}
+
+function cmdPasswd(array $argv): void
+{
+    $user = $argv[0] ?? null;
+    if (!$user) {
+        fwrite(STDERR, "Usage: ipanel passwd <user>\n");
+        exit(1);
+    }
+    echo "New password: ";
+    system('stty -echo');
+    $p1 = trim(fgets(STDIN));
+    system('stty echo');
+    echo "\nConfirm: ";
+    system('stty -echo');
+    $p2 = trim(fgets(STDIN));
+    system('stty echo');
+    echo "\n";
+    if ($p1 !== $p2 || strlen($p1) < 8) {
+        fwrite(STDERR, "Passwords do not match or too short.\n");
+        exit(1);
+    }
+    $hash = password_hash($p1, PASSWORD_BCRYPT);
+    $sql = "UPDATE users SET password = " . mysqlQuote($hash) . " WHERE username = " . mysqlQuote($user) . ";";
+    exec('mysql ipanel -e ' . escapeshellarg($sql), $out, $rc);
+    if ($rc !== 0) {
+        fwrite(STDERR, "Failed to update password.\n");
+        exit(1);
+    }
+    echo "Password updated for {$user}.\n";
+}
+
+function cmdLogs(array $argv): void
+{
+    $target = $argv[0] ?? 'panel';
+    $map = [
+        'agent' => '/var/log/ipanel/agent.log',
+        'panel' => IPANEL_ROOT . '/web/iApp/Storage/logs/*.log',
+        'nginx' => '/var/log/nginx/error.log',
+    ];
+    if (!isset($map[$target])) {
+        fwrite(STDERR, "Unknown log: $target (agent|nginx|panel)\n");
+        exit(1);
+    }
+    passthru('tail -f ' . $map[$target]);
+}
+
+function cmdRepair(): void
+{
+    echo "Rebuilding vhost configurations from database...\n";
+    echo "TODO: iterate sites table and send nginx.createVhost per site.\n";
+}
+
+function cmdAgentCall(array $argv): void
+{
+    $action = array_shift($argv);
+    if (!$action) {
+        fwrite(STDERR, "Usage: ipanel agent-call <module.method> [k=v...]\n");
+        exit(1);
+    }
+    $params = [];
+    foreach ($argv as $pair) {
+        if (strpos($pair, '=') !== false) {
+            [$k, $v] = explode('=', $pair, 2);
+            $params[$k] = $v;
+        }
+    }
+    if (!file_exists(IPANEL_CONFIG)) {
+        fwrite(STDERR, "Missing " . IPANEL_CONFIG . "\n");
+        exit(1);
+    }
+    $cfg = require IPANEL_CONFIG;
+    $secret = $cfg['secret_key'] ?? '';
+
+    $ts  = time();
+    $sig = hash_hmac('sha256', $action . '|' . json_encode($params) . '|' . $ts, $secret);
+    $req = json_encode(compact('action', 'params', 'ts', 'sig')) . "\n";
+
+    $sock = stream_socket_client('unix://' . IPANEL_SOCKET, $errno, $errstr, 5);
+    if (!$sock) {
+        fwrite(STDERR, "Agent connection failed: $errstr\n");
+        exit(1);
+    }
+    fwrite($sock, $req);
+    $resp = '';
+    while (!feof($sock)) {
+        $resp .= fread($sock, 8192);
+    }
+    fclose($sock);
+    echo $resp;
+}
+
+function mysqlQuote(string $s): string
+{
+    return "'" . addslashes($s) . "'";
+}
