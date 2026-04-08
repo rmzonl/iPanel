@@ -36,6 +36,7 @@
         <!-- Server Settings Tab -->
         <div class="tab-pane fade show active" id="serverTab">
           <form method="POST" action="{{ URL::base('settings/saveServer') }}">
+        {[ echo $csrfField ?? ""; ]}
             <div class="card">
               <div class="card-header"><h3 class="card-title">Sunucu Genel Ayarları</h3></div>
               <div class="card-body">

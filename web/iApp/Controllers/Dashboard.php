@@ -1,30 +1,44 @@
 <?php namespace Project\Controllers;
-use ZN\Controller;
-use ZN\Request\Http;
-use ZN\Request\Post;
-use ZN\Request\Get;
-use ZN\Inclusion\Project\Masterpage;
-use ZN\Inclusion\Project\View;
-use DB;
-use Session;
-use Redirect;
-use URL;
 
+use ZN\Controller;
+use ZN\Inclusion\Project\View;
+use Session;
+use Project\Libraries\Acl;
 
 class Dashboard extends Controller
 {
-    public function main()
+    public function main(): void
     {
+        $user        = Acl::user();
         $clientModel = new \Project\Models\ClientModel();
         $siteModel   = new \Project\Models\SiteModel();
         $domainModel = new \Project\Models\DomainModel();
         $sslModel    = new \Project\Models\SslModel();
 
+        if ($user['role'] === 'admin') {
+            $totalClients = $clientModel->count();
+            $totalSites   = $siteModel->count();
+            $totalDomains = $domainModel->count();
+            $activeSSL    = $sslModel->countActive();
+            $recent       = $clientModel->getRecent(5);
+        } else {
+            // Reseller: yalnızca kendi müşterileri ve siteleri
+            $myClients    = $clientModel->getByReseller((int) $user['id']);
+            $mySites      = $siteModel->getByReseller((int) $user['id']);
+            $clientRows   = $myClients ? $myClients->result() : [];
+            $siteRows     = $mySites   ? $mySites->result()   : [];
+            $totalClients = count($clientRows);
+            $totalSites   = count($siteRows);
+            $totalDomains = 0;
+            $activeSSL    = 0;
+            $recent       = $myClients;
+        }
+
         View::pageTitle('Dashboard');
-        View::totalClients($clientModel->count());
-        View::totalSites($siteModel->count());
-        View::totalDomains($domainModel->count());
-        View::activeSSL($sslModel->countActive());
-        View::recentClients($clientModel->getRecent(5));
+        View::totalClients($totalClients);
+        View::totalSites($totalSites);
+        View::totalDomains($totalDomains);
+        View::activeSSL($activeSSL);
+        View::recentClients($recent);
     }
 }

@@ -24,9 +24,21 @@ class DatabaseModel extends Model
         return DB::table('site_databases')->where('site_id', $siteId)->get();
     }
 
-    public function create($data)
+    public function getByReseller(int $resellerId)
     {
-        return DB::table('site_databases')->insert($data);
+        return DB::table('site_databases sd')
+            ->select('sd.*, s.domain as site_domain')
+            ->join('sites s',   'sd.site_id = s.id')
+            ->join('clients c', 's.client_id = c.id')
+            ->where('c.reseller_id', $resellerId)
+            ->orderBy('sd.id', 'desc')
+            ->get();
+    }
+
+    public function create($data): int
+    {
+        DB::table('site_databases')->insert($data);
+        return (int) DB::pdo()->lastInsertId();
     }
 
     public function update($id, $data)

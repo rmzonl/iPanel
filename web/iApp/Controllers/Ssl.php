@@ -1,15 +1,16 @@
 <?php namespace Project\Controllers;
+
 use ZN\Controller;
 use ZN\Request\Http;
 use ZN\Request\Post;
-use ZN\Request\Get;
-use ZN\Inclusion\Project\Masterpage;
 use ZN\Inclusion\Project\View;
 use DB;
 use Session;
 use Redirect;
-use URL;
-
+use Project\Libraries\Acl;
+use Project\Libraries\CsrfGuard;
+use Project\Libraries\AuditLogger;
+use Project\Libraries\InputValidator;
 
 class Ssl extends Controller
 {
@@ -20,55 +21,73 @@ class Ssl extends Controller
         $this->model = new \Project\Models\SslModel();
     }
 
-    public function main()
+    public function main(): void
     {
+        $user  = Acl::user();
+        $certs = ($user['role'] === 'admin')
+            ? $this->model->getAll()
+            : $this->model->getByReseller($user['id']);
+
         View::pageTitle('SSL Sertifikaları');
-        View::certs($this->model->getAll());
+        View::certs($certs);
         View::success(Session::select('success'));
         View::error(Session::select('error'));
         Session::delete('success');
         Session::delete('error');
     }
 
-    public function create()
+    public function create(): void
     {
+        $user        = Acl::user();
+        $domainModel = new \Project\Models\DomainModel();
+        $domains     = ($user['role'] === 'admin') ? $domainModel->getAll() : $domainModel->getByReseller($user['id']);
+
         View::pageTitle('SSL Sertifikası Ekle');
-        $domainModel      = new \Project\Models\DomainModel();
-        View::domains($domainModel->getAll());
+        View::domains($domains);
     }
 
-    public function store()
+    public function store(): void
     {
-        if (!Http::isRequestMethod('post')) {
-            Redirect::action('ssl/main');
-        }
+        if (!Http::isRequestMethod('post')) { Redirect::action('ssl/main'); return; }
+        if (!CsrfGuard::verify()) { Session::insert('error', 'Geçersiz form isteği.'); Redirect::action('ssl/main'); return; }
 
-        $data = [
-            'domain_id'   => Post::get('domain_id'),
-            'type'        => Post::get('type') ?: 'letsencrypt',
-            'cert_file'   => Post::get('cert_file'),
-            'key_file'    => Post::get('key_file'),
-            'chain_file'  => Post::get('chain_file'),
-            'issued_at'   => Post::get('issued_at') ?: null,
-            'expires_at'  => Post::get('expires_at') ?: null,
-            'auto_renew'  => Post::get('auto_renew') ? 1 : 0,
-            'status'      => Post::get('status') ?: 'pending',
-        ];
+        $domainId = (int) Post::get('domain_id');
+        Acl::requireOwnership(Acl::ownsDomain($domainId));
 
-        if (empty($data['domain_id'])) {
-            Session::insert('error', 'Domain seçimi zorunludur.');
+        $raw = InputValidator::sanitize([
+            'domain_id'  => $domainId,
+            'type'       => Post::get('type') ?: 'letsencrypt',
+            'cert_file'  => Post::get('cert_file'),
+            'key_file'   => Post::get('key_file'),
+            'chain_file' => Post::get('chain_file'),
+            'issued_at'  => Post::get('issued_at') ?: null,
+            'expires_at' => Post::get('expires_at') ?: null,
+            'auto_renew' => Post::get('auto_renew') ? 1 : 0,
+            'status'     => Post::get('status') ?: 'pending',
+        ]);
+
+        $v = InputValidator::from($raw)
+            ->required('domain_id', 'Domain')
+            ->in('type', ['letsencrypt', 'paid', 'self_signed'], 'Tür')
+            ->in('status', ['active', 'expired', 'pending', 'failed'], 'Durum');
+
+        if (!$v->passes()) {
+            Session::insert('error', $v->firstError());
             Redirect::action('ssl/create');
             return;
         }
 
-        $this->model->create($data);
+        $id = $this->model->create($raw);
+        AuditLogger::log('ssl.create', 'ssl_certificate', $id, "SSL sertifikası eklendi: domain #$domainId");
         Session::insert('success', 'SSL sertifikası başarıyla eklendi.');
         Redirect::action('ssl/main');
     }
 
-    public function delete($id)
+    public function delete(int $id): void
     {
+        Acl::requireOwnership(Acl::ownsSslCert($id));
         $this->model->delete($id);
+        AuditLogger::log('ssl.delete', 'ssl_certificate', $id, 'SSL sertifikası silindi.');
         Session::insert('success', 'SSL sertifikası başarıyla silindi.');
         Redirect::action('ssl/main');
     }

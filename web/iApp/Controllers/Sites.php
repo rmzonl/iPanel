@@ -1,15 +1,16 @@
 <?php namespace Project\Controllers;
+
 use ZN\Controller;
 use ZN\Request\Http;
 use ZN\Request\Post;
-use ZN\Request\Get;
-use ZN\Inclusion\Project\Masterpage;
 use ZN\Inclusion\Project\View;
 use DB;
 use Session;
 use Redirect;
-use URL;
-
+use Project\Libraries\Acl;
+use Project\Libraries\CsrfGuard;
+use Project\Libraries\AuditLogger;
+use Project\Libraries\InputValidator;
 
 class Sites extends Controller
 {
@@ -20,33 +21,46 @@ class Sites extends Controller
         $this->model = new \Project\Models\SiteModel();
     }
 
-    public function main()
+    public function main(): void
     {
+        $user  = Acl::user();
+        $sites = ($user['role'] === 'admin')
+            ? $this->model->getAll()
+            : $this->model->getByReseller($user['id']);
+
         View::pageTitle('Siteler');
-        View::sites($this->model->getAll());
+        View::sites($sites);
         View::success(Session::select('success'));
         View::error(Session::select('error'));
         Session::delete('success');
         Session::delete('error');
     }
 
-    public function create()
+    public function create(): void
     {
+        $user        = Acl::user();
+        $clientModel = new \Project\Models\ClientModel();
+        $ipModel     = new \Project\Models\IpAddressModel();
+
+        $clients = ($user['role'] === 'admin')
+            ? $clientModel->getAll()
+            : $clientModel->getByReseller($user['id']);
+
         View::pageTitle('Yeni Site Ekle');
-        $clientModel     = new \Project\Models\ClientModel();
-        $ipModel         = new \Project\Models\IpAddressModel();
-        View::clients($clientModel->getAll());
+        View::clients($clients);
         View::ips($ipModel->getAllActive());
     }
 
-    public function store()
+    public function store(): void
     {
-        if (!Http::isRequestMethod('post')) {
-            Redirect::action('sites/main');
-        }
+        if (!Http::isRequestMethod('post')) { Redirect::action('sites/main'); return; }
+        if (!CsrfGuard::verify()) { Session::insert('error', 'Geçersiz form isteği.'); Redirect::action('sites/main'); return; }
 
-        $data = [
-            'client_id'       => Post::get('client_id'),
+        $clientId = (int) Post::get('client_id');
+        Acl::requireOwnership(Acl::ownsClient($clientId));
+
+        $raw = InputValidator::sanitize([
+            'client_id'       => $clientId,
             'domain'          => Post::get('domain'),
             'ip_id'           => Post::get('ip_id') ?: null,
             'document_root'   => Post::get('document_root'),
@@ -54,40 +68,54 @@ class Sites extends Controller
             'status'          => Post::get('status') ?: 'active',
             'disk_quota'      => Post::get('disk_quota') ?: 0,
             'bandwidth_quota' => Post::get('bandwidth_quota') ?: 0,
-        ];
+        ]);
 
-        if (empty($data['client_id']) || empty($data['domain'])) {
-            Session::insert('error', 'Müşteri ve domain alanları zorunludur.');
+        $v = InputValidator::from($raw)
+            ->required('client_id', 'Müşteri')
+            ->required('domain', 'Domain')
+            ->maxLength('domain', 255, 'Domain')
+            ->in('status', ['active', 'suspended', 'deleted'], 'Durum');
+
+        if (!$v->passes()) {
+            Session::insert('error', $v->firstError());
             Redirect::action('sites/create');
             return;
         }
 
-        $this->model->create($data);
+        $id = $this->model->create($raw);
+        AuditLogger::log('sites.create', 'site', $id, "Site oluşturuldu: {$raw['domain']}");
         Session::insert('success', 'Site başarıyla eklendi.');
         Redirect::action('sites/main');
     }
 
-    public function edit($id)
+    public function edit(int $id): void
     {
+        Acl::requireOwnership(Acl::ownsSite($id));
+        $site = $this->model->getById($id);
+        if (!$site) { Redirect::action('sites/main'); return; }
+
+        $user        = Acl::user();
+        $clientModel = new \Project\Models\ClientModel();
+        $ipModel     = new \Project\Models\IpAddressModel();
+
+        $clients = ($user['role'] === 'admin')
+            ? $clientModel->getAll()
+            : $clientModel->getByReseller($user['id']);
+
         View::pageTitle('Site Düzenle');
-        View::site($this->model->getById($id));
-        if (!View::site()) {
-            Redirect::action('sites/main');
-        }
-        $clientModel   = new \Project\Models\ClientModel();
-        $ipModel       = new \Project\Models\IpAddressModel();
-        View::clients($clientModel->getAll());
+        View::site($site);
+        View::clients($clients);
         View::ips($ipModel->getAllActive());
     }
 
-    public function update($id)
+    public function update(int $id): void
     {
-        if (!Http::isRequestMethod('post')) {
-            Redirect::action('sites/main');
-        }
+        if (!Http::isRequestMethod('post')) { Redirect::action('sites/main'); return; }
+        if (!CsrfGuard::verify()) { Session::insert('error', 'Geçersiz form isteği.'); Redirect::action('sites/main'); return; }
+        Acl::requireOwnership(Acl::ownsSite($id));
 
-        $data = [
-            'client_id'       => Post::get('client_id'),
+        $raw = InputValidator::sanitize([
+            'client_id'       => (int) Post::get('client_id'),
             'domain'          => Post::get('domain'),
             'ip_id'           => Post::get('ip_id') ?: null,
             'document_root'   => Post::get('document_root'),
@@ -95,16 +123,20 @@ class Sites extends Controller
             'status'          => Post::get('status') ?: 'active',
             'disk_quota'      => Post::get('disk_quota') ?: 0,
             'bandwidth_quota' => Post::get('bandwidth_quota') ?: 0,
-        ];
+        ]);
 
-        $this->model->update($id, $data);
+        $this->model->update($id, $raw);
+        AuditLogger::log('sites.update', 'site', $id, "Site güncellendi: {$raw['domain']}");
         Session::insert('success', 'Site başarıyla güncellendi.');
         Redirect::action('sites/main');
     }
 
-    public function delete($id)
+    public function delete(int $id): void
     {
+        Acl::requireOwnership(Acl::ownsSite($id));
+        $site = $this->model->getById($id);
         $this->model->delete($id);
+        AuditLogger::log('sites.delete', 'site', $id, "Site silindi: " . ($site->domain ?? $id));
         Session::insert('success', 'Site başarıyla silindi.');
         Redirect::action('sites/main');
     }

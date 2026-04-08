@@ -24,9 +24,21 @@ class SslModel extends Model
         return DB::table('ssl_certificates')->where('status', 'active')->get()->totalRows();
     }
 
-    public function create($data)
+    public function getByReseller(int $resellerId)
     {
-        return DB::table('ssl_certificates')->insert($data);
+        return DB::table('ssl_certificates sc')
+            ->select('sc.*, d.name as domain_name')
+            ->join('domains d',  'sc.domain_id = d.id')
+            ->join('clients c',  'd.client_id  = c.id')
+            ->where('c.reseller_id', $resellerId)
+            ->orderBy('sc.id', 'desc')
+            ->get();
+    }
+
+    public function create($data): int
+    {
+        DB::table('ssl_certificates')->insert($data);
+        return (int) DB::pdo()->lastInsertId();
     }
 
     public function update($id, $data)

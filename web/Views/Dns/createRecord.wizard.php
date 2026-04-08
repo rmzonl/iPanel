@@ -25,6 +25,7 @@
           @endif
 
           <form method="POST" action="{{ URL::base('dns/storeRecord') }}">
+        {[ echo $csrfField ?? ""; ]}
             <input type="hidden" name="zone_id" value="{{ $zone->id }}"/>
             <div class="card">
               <div class="card-body">

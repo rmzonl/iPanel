@@ -217,3 +217,44 @@ INSERT INTO settings (scope, scope_id, setting_key, setting_value) VALUES
 ('server', NULL, 'ssl_email', 'admin@ipanel.local'),
 ('server', NULL, 'backup_path', '/var/backups/ipanel'),
 ('server', NULL, 'webroot_base', '/var/www');
+
+-- ============================================================
+-- Güvenlik tabloları — v0.2.0
+-- ============================================================
+
+-- Reseller izolasyonu: müşterinin hangi reseller'a ait olduğu
+ALTER TABLE clients ADD COLUMN IF NOT EXISTS reseller_id INT NULL AFTER id;
+ALTER TABLE clients ADD CONSTRAINT fk_clients_reseller
+    FOREIGN KEY IF NOT EXISTS (reseller_id) REFERENCES users(id) ON DELETE SET NULL;
+
+-- Login brute-force koruması
+CREATE TABLE IF NOT EXISTS login_attempts (
+    id           INT AUTO_INCREMENT PRIMARY KEY,
+    ip           VARCHAR(45)  NOT NULL,
+    username     VARCHAR(100) NULL,
+    attempted_at DATETIME     DEFAULT CURRENT_TIMESTAMP,
+    INDEX idx_ip_time       (ip, attempted_at),
+    INDEX idx_username_time (username, attempted_at)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_general_ci;
+
+-- Denetim logu
+CREATE TABLE IF NOT EXISTS audit_logs (
+    id            INT AUTO_INCREMENT PRIMARY KEY,
+    user_id       INT          NULL,
+    username      VARCHAR(100) NULL,
+    action        VARCHAR(100) NOT NULL,
+    resource_type VARCHAR(100) NULL,
+    resource_id   INT          NULL,
+    description   TEXT         NULL,
+    ip            VARCHAR(45)  NULL,
+    user_agent    TEXT         NULL,
+    created_at    DATETIME     DEFAULT CURRENT_TIMESTAMP,
+    INDEX idx_user     (user_id),
+    INDEX idx_action   (action),
+    INDEX idx_resource (resource_type, resource_id),
+    INDEX idx_created  (created_at)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_general_ci;
+
+-- Admin: varsayılan şifreyi güvenli ile değiştir
+-- Kurulum betiği tarafından oluşturulacak, burada placeholder
+-- (install.sh bu INSERT'i yapar)

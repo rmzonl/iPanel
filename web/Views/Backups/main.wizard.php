@@ -87,6 +87,7 @@
   <div class="modal-dialog modal-sm modal-dialog-centered">
     <div class="modal-content">
       <form method="POST" action="{{ URL::base('backups/store') }}">
+        {[ echo $csrfField ?? ""; ]}
         <div class="modal-header">
           <h5 class="modal-title">Yeni Yedek Oluştur</h5>
           <button type="button" class="btn-close" data-bs-dismiss="modal"></button>

@@ -24,9 +24,21 @@ class EmailModel extends Model
         return DB::table('email_accounts')->where('site_id', $siteId)->get();
     }
 
-    public function create($data)
+    public function getByReseller(int $resellerId)
     {
-        return DB::table('email_accounts')->insert($data);
+        return DB::table('email_accounts ea')
+            ->select('ea.*, s.domain as site_domain')
+            ->join('sites s',   'ea.site_id = s.id')
+            ->join('clients c', 's.client_id = c.id')
+            ->where('c.reseller_id', $resellerId)
+            ->orderBy('ea.id', 'desc')
+            ->get();
+    }
+
+    public function create($data): int
+    {
+        DB::table('email_accounts')->insert($data);
+        return (int) DB::pdo()->lastInsertId();
     }
 
     public function update($id, $data)

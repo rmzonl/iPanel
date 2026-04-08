@@ -21,6 +21,7 @@
       @endif
 
       <form method="POST" action="{{ URL::base('auth/login') }}" autocomplete="off" novalidate>
+        {[ echo $csrfField ?? ''; ]}
         <div class="mb-3">
           <label class="form-label">Kullanıcı Adı veya E-posta</label>
           <input type="text" name="username" class="form-control" placeholder="admin" autocomplete="username" required/>

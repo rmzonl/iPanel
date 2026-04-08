@@ -1,15 +1,16 @@
 <?php namespace Project\Controllers;
+
 use ZN\Controller;
 use ZN\Request\Http;
 use ZN\Request\Post;
-use ZN\Request\Get;
-use ZN\Inclusion\Project\Masterpage;
 use ZN\Inclusion\Project\View;
 use DB;
 use Session;
 use Redirect;
-use URL;
-
+use Project\Libraries\Acl;
+use Project\Libraries\CsrfGuard;
+use Project\Libraries\AuditLogger;
+use Project\Libraries\InputValidator;
 
 class Email extends Controller
 {
@@ -20,59 +21,82 @@ class Email extends Controller
         $this->model = new \Project\Models\EmailModel();
     }
 
-    public function main()
+    public function main(): void
     {
+        $user   = Acl::user();
+        $emails = ($user['role'] === 'admin')
+            ? $this->model->getAll()
+            : $this->model->getByReseller($user['id']);
+
         View::pageTitle('E-posta Hesapları');
-        View::emails($this->model->getAll());
+        View::emails($emails);
         View::success(Session::select('success'));
         View::error(Session::select('error'));
         Session::delete('success');
         Session::delete('error');
     }
 
-    public function create()
+    public function create(): void
     {
+        $user      = Acl::user();
+        $siteModel = new \Project\Models\SiteModel();
+        $sites     = ($user['role'] === 'admin') ? $siteModel->getAll() : $siteModel->getByReseller($user['id']);
+
         View::pageTitle('Yeni E-posta Hesabı');
-        $siteModel       = new \Project\Models\SiteModel();
-        View::sites($siteModel->getAll());
+        View::sites($sites);
     }
 
-    public function store()
+    public function store(): void
     {
-        if (!Http::isRequestMethod('post')) {
-            Redirect::action('email/main');
-        }
+        if (!Http::isRequestMethod('post')) { Redirect::action('email/main'); return; }
+        if (!CsrfGuard::verify()) { Session::insert('error', 'Geçersiz form isteği.'); Redirect::action('email/main'); return; }
 
-        $siteId   = Post::get('site_id');
-        $username = Post::get('username');
-        $domain   = Post::get('domain');
-        $password = Post::get('password');
+        $siteId = (int) Post::get('site_id');
+        Acl::requireOwnership(Acl::ownsSite($siteId));
 
-        if (empty($siteId) || empty($username) || empty($password)) {
-            Session::insert('error', 'Site, kullanıcı adı ve şifre zorunludur.');
+        $username    = trim((string) Post::get('username'));
+        $domain      = trim((string) Post::get('domain'));
+        $rawPassword = (string) Post::get('password');
+
+        $v = InputValidator::from(['username' => $username, 'domain' => $domain, 'site_id' => $siteId])
+            ->required('site_id', 'Site')
+            ->required('username', 'Kullanıcı adı')
+            ->required('domain', 'Domain');
+
+        if (empty($rawPassword)) {
+            Session::insert('error', 'Şifre zorunludur.');
             Redirect::action('email/create');
             return;
         }
 
-        $email = $username . '@' . $domain;
+        if (!$v->passes()) {
+            Session::insert('error', $v->firstError());
+            Redirect::action('email/create');
+            return;
+        }
 
-        $data = [
+        $emailAddress = $username . '@' . $domain;
+
+        $id = $this->model->create([
             'site_id'  => $siteId,
-            'username' => $username,
-            'email'    => $email,
-            'password' => password_hash($password, PASSWORD_BCRYPT),
-            'quota'    => Post::get('quota') ?: 1024,
-            'status'   => Post::get('status') ?: 'active',
-        ];
+            'username' => htmlspecialchars($username, ENT_QUOTES, 'UTF-8'),
+            'email'    => $emailAddress,
+            'password' => password_hash($rawPassword, PASSWORD_BCRYPT),
+            'quota'    => (int) (Post::get('quota') ?: 1024),
+            'status'   => Post::get('status') === 'suspended' ? 'suspended' : 'active',
+        ]);
 
-        $this->model->create($data);
+        AuditLogger::log('email.create', 'email_account', $id, "E-posta hesabı oluşturuldu: $emailAddress");
         Session::insert('success', 'E-posta hesabı başarıyla oluşturuldu.');
         Redirect::action('email/main');
     }
 
-    public function delete($id)
+    public function delete(int $id): void
     {
+        Acl::requireOwnership(Acl::ownsSiteResource('email_accounts', $id));
+        $account = $this->model->getById($id);
         $this->model->delete($id);
+        AuditLogger::log('email.delete', 'email_account', $id, 'E-posta hesabı silindi: ' . ($account->email ?? $id));
         Session::insert('success', 'E-posta hesabı başarıyla silindi.');
         Redirect::action('email/main');
     }

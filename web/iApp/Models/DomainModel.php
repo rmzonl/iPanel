@@ -30,9 +30,21 @@ class DomainModel extends Model
         return DB::table('domains')->get()->totalRows();
     }
 
-    public function create($data)
+    public function getByReseller(int $resellerId)
     {
-        return DB::table('domains')->insert($data);
+        return DB::table('domains d')
+            ->select('d.*, s.domain as site_domain, c.first_name, c.last_name')
+            ->join('sites s',   'd.site_id = s.id')
+            ->join('clients c', 'd.client_id = c.id')
+            ->where('c.reseller_id', $resellerId)
+            ->orderBy('d.id', 'desc')
+            ->get();
+    }
+
+    public function create($data): int
+    {
+        DB::table('domains')->insert($data);
+        return (int) DB::pdo()->lastInsertId();
     }
 
     public function delete($id)

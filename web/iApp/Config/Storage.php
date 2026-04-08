@@ -1,90 +1,33 @@
 <?php return
 [
-    /*
-    |--------------------------------------------------------------------------
-    | Cookie
-    |--------------------------------------------------------------------------
-    |
-    | Contains settings related to cookies. 
-    | Configures the parameters of the setcookie function.
-    | 
-    | encode: The cookie keys are set to which algorithm to encrypt.
-    |
-    */
-
     'cookie' =>
     [
         'encode'     => 'super',
         'regenerate' => true,
-        'time'       => 604800,
+        'time'       => 7200,       // 2 saat (güvenlik için kısaltıldı)
         'path'       => '/',
         'domain'     => '',
-        'secure'     => false,
-        'httpOnly'   => true
+        'secure'     => false,      // HTTPS olmayan ortam için false; prod'da true
+        'httpOnly'   => true,       // JS erişimine kapat
+        'sameSite'   => 'Strict',   // CSRF önlemi
     ],
-
-    /*
-    |--------------------------------------------------------------------------
-    | Session
-    |--------------------------------------------------------------------------
-    |
-    | Contains settings related to session. 
-    | 
-    | encode: The cookie keys are set to which algorithm to encrypt.
-    |
-    */
 
     'session' =>
     [
         'encode'     => 'super',
-        'regenerate' => true,
+        'regenerate' => true,       // Her istekte session ID yenile
     ],
 
-    /*
-    |--------------------------------------------------------------------------
-    | Shopping
-    |--------------------------------------------------------------------------
-    |
-    | Contains settings related to shopping. 
-    | 
-    | driver: It is specified in which structure the cart information will be 
-    | stored.
-    |
-    */
-    
     'shopping' =>
     [
         'driver' => 'session'
     ],
-
-    /*
-    |--------------------------------------------------------------------------
-    | Compression
-    |--------------------------------------------------------------------------
-    |
-    | Contains settings related to compression. 
-    | 
-    | driver: It is specified which drive to compress.
-    |
-    */
 
     'compression' =>
     [
         'driver' => 'gz'
     ],
 
-    /*
-    |--------------------------------------------------------------------------
-    | Cache
-    |--------------------------------------------------------------------------
-    |
-    | Includes configurations for the Cache library.
-    |
-    | drivers       : apc, memcache, wincache, file, redis
-    | driverSettings: Configurations by driver
-    |
-    */
-   
     'cache' =>
     [
         'driver'         => 'file',

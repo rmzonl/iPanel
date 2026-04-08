@@ -1,15 +1,16 @@
 <?php namespace Project\Controllers;
+
 use ZN\Controller;
 use ZN\Request\Http;
 use ZN\Request\Post;
-use ZN\Request\Get;
-use ZN\Inclusion\Project\Masterpage;
 use ZN\Inclusion\Project\View;
 use DB;
 use Session;
 use Redirect;
-use URL;
-
+use Project\Libraries\Acl;
+use Project\Libraries\CsrfGuard;
+use Project\Libraries\AuditLogger;
+use Project\Libraries\InputValidator;
 
 class Databases extends Controller
 {
@@ -20,52 +21,83 @@ class Databases extends Controller
         $this->model = new \Project\Models\DatabaseModel();
     }
 
-    public function main()
+    public function main(): void
     {
+        $user = Acl::user();
+        $dbs  = ($user['role'] === 'admin')
+            ? $this->model->getAll()
+            : $this->model->getByReseller($user['id']);
+
         View::pageTitle('Veritabanları');
-        View::databases($this->model->getAll());
+        View::databases($dbs);
         View::success(Session::select('success'));
         View::error(Session::select('error'));
         Session::delete('success');
         Session::delete('error');
     }
 
-    public function create()
+    public function create(): void
     {
+        $user      = Acl::user();
+        $siteModel = new \Project\Models\SiteModel();
+        $sites     = ($user['role'] === 'admin') ? $siteModel->getAll() : $siteModel->getByReseller($user['id']);
+
         View::pageTitle('Yeni Veritabanı');
-        $siteModel       = new \Project\Models\SiteModel();
-        View::sites($siteModel->getAll());
+        View::sites($sites);
     }
 
-    public function store()
+    public function store(): void
     {
-        if (!Http::isRequestMethod('post')) {
-            Redirect::action('databases/main');
-        }
+        if (!Http::isRequestMethod('post')) { Redirect::action('databases/main'); return; }
+        if (!CsrfGuard::verify()) { Session::insert('error', 'Geçersiz form isteği.'); Redirect::action('databases/main'); return; }
 
-        $data = [
-            'site_id'     => Post::get('site_id'),
-            'db_name'     => Post::get('db_name'),
-            'db_user'     => Post::get('db_user'),
-            'db_password' => password_hash(Post::get('db_password'), PASSWORD_BCRYPT),
-            'charset'     => Post::get('charset') ?: 'utf8mb4',
-            'status'      => Post::get('status') ?: 'active',
-        ];
+        $siteId = (int) Post::get('site_id');
+        Acl::requireOwnership(Acl::ownsSite($siteId));
 
-        if (empty($data['site_id']) || empty($data['db_name']) || empty($data['db_user'])) {
-            Session::insert('error', 'Site, veritabanı adı ve kullanıcı zorunludur.');
+        $rawPassword = (string) Post::get('db_password');
+
+        $raw = InputValidator::sanitize([
+            'site_id'  => $siteId,
+            'db_name'  => Post::get('db_name'),
+            'db_user'  => Post::get('db_user'),
+            'charset'  => Post::get('charset') ?: 'utf8mb4',
+            'status'   => Post::get('status') ?: 'active',
+        ]);
+
+        $v = InputValidator::from($raw)
+            ->required('site_id', 'Site')
+            ->required('db_name', 'Veritabanı adı')
+            ->required('db_user', 'Kullanıcı adı')
+            ->maxLength('db_name', 64, 'Veritabanı adı')
+            ->maxLength('db_user', 64, 'Kullanıcı adı')
+            ->in('status', ['active', 'suspended'], 'Durum');
+
+        if (empty($rawPassword)) {
+            Session::insert('error', 'Şifre zorunludur.');
             Redirect::action('databases/create');
             return;
         }
 
-        $this->model->create($data);
+        if (!$v->passes()) {
+            Session::insert('error', $v->firstError());
+            Redirect::action('databases/create');
+            return;
+        }
+
+        $raw['db_password'] = password_hash($rawPassword, PASSWORD_BCRYPT);
+
+        $id = $this->model->create($raw);
+        AuditLogger::log('databases.create', 'database', $id, "Veritabanı oluşturuldu: {$raw['db_name']}");
         Session::insert('success', 'Veritabanı başarıyla oluşturuldu.');
         Redirect::action('databases/main');
     }
 
-    public function delete($id)
+    public function delete(int $id): void
     {
+        Acl::requireOwnership(Acl::ownsSiteResource('site_databases', $id));
+        $db = $this->model->getById($id);
         $this->model->delete($id);
+        AuditLogger::log('databases.delete', 'database', $id, 'Veritabanı silindi: ' . ($db->db_name ?? $id));
         Session::insert('success', 'Veritabanı başarıyla silindi.');
         Redirect::action('databases/main');
     }

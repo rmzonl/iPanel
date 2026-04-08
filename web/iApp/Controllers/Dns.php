@@ -1,15 +1,16 @@
 <?php namespace Project\Controllers;
+
 use ZN\Controller;
 use ZN\Request\Http;
 use ZN\Request\Post;
-use ZN\Request\Get;
-use ZN\Inclusion\Project\Masterpage;
 use ZN\Inclusion\Project\View;
 use DB;
 use Session;
 use Redirect;
-use URL;
-
+use Project\Libraries\Acl;
+use Project\Libraries\CsrfGuard;
+use Project\Libraries\AuditLogger;
+use Project\Libraries\InputValidator;
 
 class Dns extends Controller
 {
@@ -20,23 +21,29 @@ class Dns extends Controller
         $this->model = new \Project\Models\DnsModel();
     }
 
-    public function main()
+    public function main(): void
     {
+        $user  = Acl::user();
+        $zones = ($user['role'] === 'admin')
+            ? $this->model->getAllZones()
+            : $this->model->getZonesByReseller($user['id']);
+
         View::pageTitle('DNS Yönetimi');
-        View::zones($this->model->getAllZones());
+        View::zones($zones);
         View::success(Session::select('success'));
         View::error(Session::select('error'));
         Session::delete('success');
         Session::delete('error');
     }
 
-    public function records($zoneId)
+    public function records(int $zoneId): void
     {
+        Acl::requireOwnership(Acl::ownsDnsZone($zoneId));
+
         $zone = $this->model->getZoneById($zoneId);
-        if (!$zone) {
-            Redirect::action('dns/main');
-        }
-        View::pageTitle('DNS Kayıtları: ' . $zone->domain_name);
+        if (!$zone) { Redirect::action('dns/main'); return; }
+
+        View::pageTitle('DNS Kayıtları: ' . ($zone->domain_name ?? ''));
         View::zone($zone);
         View::records($this->model->getRecordsByZoneId($zoneId));
         View::success(Session::select('success'));
@@ -45,61 +52,70 @@ class Dns extends Controller
         Session::delete('error');
     }
 
-    public function createRecord($zoneId)
+    public function createRecord(int $zoneId): void
     {
+        Acl::requireOwnership(Acl::ownsDnsZone($zoneId));
+
         $zone = $this->model->getZoneById($zoneId);
-        if (!$zone) {
-            Redirect::action('dns/main');
-        }
+        if (!$zone) { Redirect::action('dns/main'); return; }
+
         View::pageTitle('DNS Kaydı Ekle');
         View::zone($zone);
         View::zoneId($zoneId);
     }
 
-    public function storeRecord()
+    public function storeRecord(): void
     {
-        if (!Http::isRequestMethod('post')) {
-            Redirect::action('dns/main');
-        }
+        if (!Http::isRequestMethod('post')) { Redirect::action('dns/main'); return; }
+        if (!CsrfGuard::verify()) { Session::insert('error', 'Geçersiz form isteği.'); Redirect::action('dns/main'); return; }
 
-        $zoneId = Post::get('zone_id');
-        $data = [
+        $zoneId = (int) Post::get('zone_id');
+        Acl::requireOwnership(Acl::ownsDnsZone($zoneId));
+
+        $raw = InputValidator::sanitize([
             'zone_id'  => $zoneId,
             'type'     => Post::get('type'),
             'name'     => Post::get('name'),
             'value'    => Post::get('value'),
-            'priority' => Post::get('priority') ?: 0,
-            'ttl'      => Post::get('ttl') ?: 3600,
-        ];
+            'priority' => (int) (Post::get('priority') ?: 0),
+            'ttl'      => (int) (Post::get('ttl') ?: 3600),
+        ]);
 
-        if (empty($data['type']) || empty($data['name']) || empty($data['value'])) {
-            Session::insert('error', 'Tür, isim ve değer zorunludur.');
+        $v = InputValidator::from($raw)
+            ->required('type', 'Tür')
+            ->required('name', 'İsim')
+            ->required('value', 'Değer')
+            ->in('type', ['A', 'AAAA', 'CNAME', 'MX', 'TXT', 'NS', 'SRV', 'CAA', 'PTR'], 'DNS kayıt türü');
+
+        if (!$v->passes()) {
+            Session::insert('error', $v->firstError());
             Redirect::action('dns/createRecord/' . $zoneId);
             return;
         }
 
-        $this->model->createRecord($data);
+        $id = $this->model->createRecord($raw);
+        AuditLogger::log('dns.createRecord', 'dns_record', $id, "DNS kaydı eklendi: {$raw['type']} {$raw['name']}");
         Session::insert('success', 'DNS kaydı başarıyla eklendi.');
         Redirect::action('dns/records/' . $zoneId);
     }
 
-    public function deleteZone($id)
+    public function deleteZone(int $id): void
     {
+        Acl::requireOwnership(Acl::ownsDnsZone($id));
         $this->model->deleteZone($id);
+        AuditLogger::log('dns.deleteZone', 'dns_zone', $id, 'DNS zonu silindi.');
         Session::insert('success', 'DNS zonu başarıyla silindi.');
         Redirect::action('dns/main');
     }
 
-    public function deleteRecord($id)
+    public function deleteRecord(int $id): void
     {
+        Acl::requireOwnership(Acl::ownsDnsRecord($id));
         $record = $this->model->getRecordById($id);
-        $zoneId = $record ? $record->zone_id : null;
+        $zoneId = $record ? (int) $record->zone_id : null;
         $this->model->deleteRecord($id);
+        AuditLogger::log('dns.deleteRecord', 'dns_record', $id, 'DNS kaydı silindi.');
         Session::insert('success', 'DNS kaydı başarıyla silindi.');
-        if ($zoneId) {
-            Redirect::action('dns/records/' . $zoneId);
-        } else {
-            Redirect::action('dns/main');
-        }
+        $zoneId ? Redirect::action('dns/records/' . $zoneId) : Redirect::action('dns/main');
     }
 }

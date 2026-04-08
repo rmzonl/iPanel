@@ -25,6 +25,7 @@
           @endif
 
           <form method="POST" action="{{ URL::base('domains/store') }}">
+        {[ echo $csrfField ?? ""; ]}
             <div class="card">
               <div class="card-body">
                 <div class="row g-3">

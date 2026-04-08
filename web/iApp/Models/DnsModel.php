@@ -28,9 +28,21 @@ class DnsModel extends Model
         return DB::table('dns_zones')->where('domain_id', $domainId)->get()->row();
     }
 
-    public function createZone($data)
+    public function getZonesByReseller(int $resellerId)
     {
-        return DB::table('dns_zones')->insert($data);
+        return DB::table('dns_zones dz')
+            ->select('dz.*, d.name as domain_name')
+            ->join('domains d',  'dz.domain_id = d.id')
+            ->join('clients c',  'd.client_id  = c.id')
+            ->where('c.reseller_id', $resellerId)
+            ->orderBy('dz.id', 'desc')
+            ->get();
+    }
+
+    public function createZone($data): int
+    {
+        DB::table('dns_zones')->insert($data);
+        return (int) DB::pdo()->lastInsertId();
     }
 
     public function deleteZone($id)

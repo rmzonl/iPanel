@@ -25,9 +25,18 @@ class ClientModel extends Model
         return DB::table('clients')->orderBy('id', 'desc')->limit(0, $limit)->get();
     }
 
-    public function create($data)
+    public function getByReseller(int $resellerId)
     {
-        return DB::table('clients')->insert($data);
+        return DB::table('clients')
+            ->where('reseller_id', $resellerId)
+            ->orderBy('id', 'desc')
+            ->get();
+    }
+
+    public function create($data): int
+    {
+        DB::table('clients')->insert($data);
+        return (int) DB::pdo()->lastInsertId();
     }
 
     public function update($id, $data)

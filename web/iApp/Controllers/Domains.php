@@ -1,15 +1,16 @@
 <?php namespace Project\Controllers;
+
 use ZN\Controller;
 use ZN\Request\Http;
 use ZN\Request\Post;
-use ZN\Request\Get;
-use ZN\Inclusion\Project\Masterpage;
 use ZN\Inclusion\Project\View;
 use DB;
 use Session;
 use Redirect;
-use URL;
-
+use Project\Libraries\Acl;
+use Project\Libraries\CsrfGuard;
+use Project\Libraries\AuditLogger;
+use Project\Libraries\InputValidator;
 
 class Domains extends Controller
 {
@@ -20,54 +21,77 @@ class Domains extends Controller
         $this->model = new \Project\Models\DomainModel();
     }
 
-    public function main()
+    public function main(): void
     {
+        $user    = Acl::user();
+        $domains = ($user['role'] === 'admin')
+            ? $this->model->getAll()
+            : $this->model->getByReseller($user['id']);
+
         View::pageTitle('Domain Yönetimi');
-        View::domains($this->model->getAll());
+        View::domains($domains);
         View::success(Session::select('success'));
         View::error(Session::select('error'));
         Session::delete('success');
         Session::delete('error');
     }
 
-    public function create()
+    public function create(): void
     {
+        $user        = Acl::user();
+        $siteModel   = new \Project\Models\SiteModel();
+        $clientModel = new \Project\Models\ClientModel();
+
+        $sites   = ($user['role'] === 'admin') ? $siteModel->getAll()   : $siteModel->getByReseller($user['id']);
+        $clients = ($user['role'] === 'admin') ? $clientModel->getAll() : $clientModel->getByReseller($user['id']);
+
         View::pageTitle('Yeni Domain Ekle');
-        $siteModel       = new \Project\Models\SiteModel();
-        $clientModel     = new \Project\Models\ClientModel();
-        View::sites($siteModel->getAll());
-        View::clients($clientModel->getAll());
+        View::sites($sites);
+        View::clients($clients);
     }
 
-    public function store()
+    public function store(): void
     {
-        if (!Http::isRequestMethod('post')) {
-            Redirect::action('domains/main');
-        }
+        if (!Http::isRequestMethod('post')) { Redirect::action('domains/main'); return; }
+        if (!CsrfGuard::verify()) { Session::insert('error', 'Geçersiz form isteği.'); Redirect::action('domains/main'); return; }
 
-        $data = [
-            'site_id'     => Post::get('site_id'),
-            'client_id'   => Post::get('client_id'),
+        $siteId = (int) Post::get('site_id');
+        Acl::requireOwnership(Acl::ownsSite($siteId));
+
+        $raw = InputValidator::sanitize([
+            'site_id'     => $siteId,
+            'client_id'   => (int) Post::get('client_id'),
             'name'        => Post::get('name'),
             'type'        => Post::get('type') ?: 'addon',
             'redirect_to' => Post::get('redirect_to'),
             'status'      => Post::get('status') ?: 'active',
-        ];
+        ]);
 
-        if (empty($data['site_id']) || empty($data['name'])) {
-            Session::insert('error', 'Site ve domain adı zorunludur.');
+        $v = InputValidator::from($raw)
+            ->required('site_id', 'Site')
+            ->required('name', 'Domain adı')
+            ->maxLength('name', 255, 'Domain')
+            ->in('type', ['main', 'addon', 'subdomain', 'alias'], 'Tür')
+            ->in('status', ['active', 'inactive'], 'Durum');
+
+        if (!$v->passes()) {
+            Session::insert('error', $v->firstError());
             Redirect::action('domains/create');
             return;
         }
 
-        $this->model->create($data);
+        $id = $this->model->create($raw);
+        AuditLogger::log('domains.create', 'domain', $id, "Domain oluşturuldu: {$raw['name']}");
         Session::insert('success', 'Domain başarıyla eklendi.');
         Redirect::action('domains/main');
     }
 
-    public function delete($id)
+    public function delete(int $id): void
     {
+        Acl::requireOwnership(Acl::ownsDomain($id));
+        $domain = $this->model->getById($id);
         $this->model->delete($id);
+        AuditLogger::log('domains.delete', 'domain', $id, 'Domain silindi: ' . ($domain->name ?? $id));
         Session::insert('success', 'Domain başarıyla silindi.');
         Redirect::action('domains/main');
     }

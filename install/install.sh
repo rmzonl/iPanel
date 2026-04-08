@@ -241,6 +241,14 @@ SQL
             -e "s/'user'\s*=>\s*'[^']*'/'user' => 'ipanel'/" \
             -e "s/'password'\s*=>\s*'[^']*'/'password' => '$DBPASS'/" \
             "$IPANEL_ROOT/web/iApp/Config/Database.php" || warn "Database.php sed başarısız"
+
+        # Varsayılan admin şifresini rastgele güvenli bir şifre ile değiştir
+        ADMIN_PASS=$(head -c 16 /dev/urandom | base64 | tr -d '/+=' | head -c 16)
+        ADMIN_HASH=$(php -r "echo password_hash('$ADMIN_PASS', PASSWORD_BCRYPT);")
+        mysql ipanel -e "UPDATE users SET password='$ADMIN_HASH' WHERE username='admin';" 2>/dev/null || true
+        echo "ADMIN_PASS=$ADMIN_PASS" >> /etc/ipanel/db.env
+        chmod 600 /etc/ipanel/db.env
+        ok "Admin şifresi rastgele oluşturuldu → /etc/ipanel/db.env"
     else
         warn "Veritabanı 'ipanel' zaten mevcut, şema yüklemesi atlandı."
         DBPASS=$(grep DB_PASS /etc/ipanel/db.env 2>/dev/null | cut -d= -f2 || echo "")
@@ -494,7 +502,7 @@ ${C_GRN}╔═══════════════════════
 
   Panel URL   :  https://${SERVER_IP}:8443
   Kullanıcı   :  admin
-  Şifre       :  password   ← hemen değiştir!
+  Şifre       :  $(grep ADMIN_PASS /etc/ipanel/db.env 2>/dev/null | cut -d= -f2 || echo 'bak: /etc/ipanel/db.env')
 
   Şifre değiştir:
     ipanel passwd admin

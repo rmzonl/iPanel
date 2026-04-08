@@ -32,22 +32,32 @@
         <ul class="navbar-nav pt-lg-3">
 
           {[
+            // Tüm roller için gösterilen menü öğeleri
             $navItems = [
-              ['url'=>'dashboard/main',   'icon'=>'ti-dashboard',    'label'=>'Dashboard'],
-              ['url'=>'clients/main',     'icon'=>'ti-users',        'label'=>'Müşteriler'],
-              ['url'=>'sites/main',       'icon'=>'ti-world',        'label'=>'Siteler'],
-              ['url'=>'domains/main',     'icon'=>'ti-link',         'label'=>'Domainler'],
-              ['url'=>'ssl/main',         'icon'=>'ti-lock',         'label'=>'SSL Sertifikaları'],
-              ['url'=>'email/main',       'icon'=>'ti-mail',         'label'=>'E-posta'],
-              ['url'=>'dns/main',         'icon'=>'ti-server',       'label'=>'DNS Yönetimi'],
-              ['url'=>'ftp/main',         'icon'=>'ti-folder',       'label'=>'FTP Hesapları'],
-              ['url'=>'databases/main',   'icon'=>'ti-database',     'label'=>'Veritabanları'],
-              ['url'=>'backups/main',     'icon'=>'ti-archive',      'label'=>'Yedeklemeler'],
-              ['url'=>'cronjobs/main',    'icon'=>'ti-clock',        'label'=>'Cron İşleri'],
-              ['url'=>'ipaddresses/main', 'icon'=>'ti-network',      'label'=>'IP Adresleri'],
-              ['url'=>'firewall/main',    'icon'=>'ti-shield',       'label'=>'Güvenlik Duvarı'],
-              ['url'=>'settings/main',    'icon'=>'ti-settings',     'label'=>'Ayarlar'],
+              ['url'=>'dashboard/main', 'icon'=>'ti-dashboard', 'label'=>'Dashboard'],
+              ['url'=>'clients/main',   'icon'=>'ti-users',     'label'=>'Müşteriler'],
+              ['url'=>'sites/main',     'icon'=>'ti-world',     'label'=>'Siteler'],
+              ['url'=>'domains/main',   'icon'=>'ti-link',      'label'=>'Domainler'],
+              ['url'=>'ssl/main',       'icon'=>'ti-lock',      'label'=>'SSL Sertifikaları'],
+              ['url'=>'email/main',     'icon'=>'ti-mail',      'label'=>'E-posta'],
+              ['url'=>'dns/main',       'icon'=>'ti-server',    'label'=>'DNS Yönetimi'],
+              ['url'=>'ftp/main',       'icon'=>'ti-folder',    'label'=>'FTP Hesapları'],
+              ['url'=>'databases/main', 'icon'=>'ti-database',  'label'=>'Veritabanları'],
+              ['url'=>'backups/main',   'icon'=>'ti-archive',   'label'=>'Yedeklemeler'],
+              ['url'=>'cronjobs/main',  'icon'=>'ti-clock',     'label'=>'Cron İşleri'],
             ];
+
+            // Admin-only menü öğeleri
+            $adminItems = [
+              ['url'=>'ipaddresses/main', 'icon'=>'ti-network', 'label'=>'IP Adresleri'],
+              ['url'=>'firewall/main',    'icon'=>'ti-shield',  'label'=>'Güvenlik Duvarı'],
+              ['url'=>'settings/main',    'icon'=>'ti-settings','label'=>'Ayarlar'],
+            ];
+
+            $isAdmin = ($navRole === 'admin');
+            if ($isAdmin) {
+                $navItems = array_merge($navItems, $adminItems);
+            }
           ]}
 
           @foreach($navItems as $item)
