@@ -49,15 +49,25 @@
 
             // Admin-only menü öğeleri
             $adminItems = [
-              ['url'=>'ipaddresses/main', 'icon'=>'ti-network', 'label'=>'IP Adresleri'],
-              ['url'=>'firewall/main',    'icon'=>'ti-shield',  'label'=>'Güvenlik Duvarı'],
-              ['url'=>'settings/main',    'icon'=>'ti-settings','label'=>'Ayarlar'],
+              ['url'=>'ipaddresses/main', 'icon'=>'ti-network',       'label'=>'IP Adresleri'],
+              ['url'=>'firewall/main',    'icon'=>'ti-shield',         'label'=>'Güvenlik Duvarı'],
+              ['url'=>'phpmyadmin/main',  'icon'=>'ti-database-import','label'=>'PHPMyAdmin'],
+              ['url'=>'phpmanager/main',  'icon'=>'ti-brand-php',      'label'=>'PHP Yönetimi'],
+              ['url'=>'nodemanager/main', 'icon'=>'ti-brand-nodejs',   'label'=>'Node.js'],
+              ['url'=>'settings/main',    'icon'=>'ti-settings',       'label'=>'Ayarlar'],
+            ];
+
+            // Tüm kullanıcılar için ek öğeler
+            $commonExtraItems = [
+              ['url'=>'apitokens/main',      'icon'=>'ti-api',         'label'=>'API Token\'lar'],
+              ['url'=>'settings/twoFactor',  'icon'=>'ti-shield-lock', 'label'=>'2FA Güvenlik'],
             ];
 
             $isAdmin = ($navRole === 'admin');
             if ($isAdmin) {
                 $navItems = array_merge($navItems, $adminItems);
             }
+            $navItems = array_merge($navItems, $commonExtraItems);
           ]}
 
           @foreach($navItems as $item)

@@ -20,10 +20,13 @@ use Project\Libraries\CsrfGuard;
 class Initialize extends Controller
 {
     /** Kimlik doğrulama gerektirmeyen controller'lar */
-    private const PUBLIC_CONTROLLERS = ['auth', 'errors'];
+    private const PUBLIC_CONTROLLERS = ['auth', 'errors', 'api'];
+
+    /** Settings içinde admin zorunluluğu olmayan metodlar (reseller de erişebilir) */
+    private const SETTINGS_RESELLER_ALLOWED = ['twoFactor', 'setup2fa', 'enable2fa', 'disable2fa', 'backupCodes'];
 
     /** Admin-only controller'lar (reseller erişemez) */
-    private const ADMIN_ONLY = ['settings', 'ipaddresses', 'firewall'];
+    private const ADMIN_ONLY = ['ipaddresses', 'firewall', 'phpmyadmin', 'phpmanager', 'nodemanager'];
 
     public function main(): void
     {
@@ -48,7 +51,11 @@ class Initialize extends Controller
         }
 
         // Admin-only erişim kontrolü
-        if (in_array($controller, self::ADMIN_ONLY, true) && ($user['role'] ?? '') !== 'admin') {
+        // Settings için reseller bazı metodlara erişebilir (2FA, API token)
+        $isAdminOnlyAccess = in_array($controller, self::ADMIN_ONLY, true)
+            || ($controller === 'settings' && !in_array($method, self::SETTINGS_RESELLER_ALLOWED, true));
+
+        if ($isAdminOnlyAccess && ($user['role'] ?? '') !== 'admin') {
             Session::insert('error', 'Bu bölüme erişim yetkiniz yok.');
             Redirect::action('dashboard/main');
             return;

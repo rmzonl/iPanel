@@ -11,6 +11,7 @@ use Project\Libraries\Acl;
 use Project\Libraries\CsrfGuard;
 use Project\Libraries\AuditLogger;
 use Project\Libraries\InputValidator;
+use Project\Libraries\Totp;
 
 // Admin-only — Initialize middleware bu controller'ı zaten kısıtlıyor
 class Settings extends Controller
@@ -48,7 +49,6 @@ class Settings extends Controller
             $value = Post::get($key);
             if ($value === null) continue;
 
-            // Tip bazlı doğrulama
             if ($key === 'server_ip') {
                 if (!filter_var($value, FILTER_VALIDATE_IP)) {
                     Session::insert('error', 'Sunucu IP adresi geçersiz.');
@@ -72,5 +72,142 @@ class Settings extends Controller
         AuditLogger::log('settings.save', 'settings', null, 'Ayarlar güncellendi: ' . implode(', ', $changes));
         Session::insert('success', 'Ayarlar başarıyla kaydedildi.');
         Redirect::action('settings/main');
+    }
+
+    // ---------------------------------------------------------------
+    // 2FA Yönetimi
+    // ---------------------------------------------------------------
+
+    /** 2FA kurulum sayfası */
+    public function twoFactor(): void
+    {
+        $user   = Acl::user();
+        $dbUser = DB::table('users')->where('id', $user['id'])->get()->row();
+
+        View::pageTitle('İki Faktörlü Doğrulama');
+        View::totpEnabled(!empty($dbUser->totp_enabled));
+        View::backupRemaining($this->countBackupCodes($dbUser->totp_backup ?? null));
+        View::success(Session::select('success'));
+        View::error(Session::select('error'));
+        Session::delete('success');
+        Session::delete('error');
+    }
+
+    /** 2FA etkinleştirme başlat: secret üret, QR göster */
+    public function setup2fa(): void
+    {
+        if (!Http::isRequestMethod('post')) { Redirect::action('settings/twoFactor'); return; }
+        if (!CsrfGuard::verify()) { Session::insert('error', 'Geçersiz form isteği.'); Redirect::action('settings/twoFactor'); return; }
+
+        $user   = Acl::user();
+        $dbUser = DB::table('users')->where('id', $user['id'])->get()->row();
+
+        if (!empty($dbUser->totp_enabled)) {
+            Session::insert('error', '2FA zaten etkin.');
+            Redirect::action('settings/twoFactor');
+            return;
+        }
+
+        // Yeni secret üret ve geçici olarak session'a kaydet
+        $secret = Totp::generateSecret();
+        Session::insert('totp_setup_secret', $secret);
+
+        $otpUri = Totp::otpUri($secret, $user['email'] ?? $user['username'], 'iPanel');
+
+        View::pageTitle('2FA Kurulumu');
+        View::totpSecret($secret);
+        View::otpUri($otpUri);
+        View::csrfField(CsrfGuard::field());
+    }
+
+    /** 2FA etkinleştir: kullanıcının kodu doğru girdiğini teyit et */
+    public function enable2fa(): void
+    {
+        if (!Http::isRequestMethod('post')) { Redirect::action('settings/twoFactor'); return; }
+        if (!CsrfGuard::verify()) { Session::insert('error', 'Geçersiz form isteği.'); Redirect::action('settings/twoFactor'); return; }
+
+        $user   = Acl::user();
+        $secret = Session::select('totp_setup_secret');
+
+        if (empty($secret)) {
+            Session::insert('error', '2FA kurulum oturumu sona erdi. Lütfen tekrar deneyin.');
+            Redirect::action('settings/twoFactor');
+            return;
+        }
+
+        $code = trim((string) Post::get('code'));
+        if (!Totp::verify($secret, $code)) {
+            Session::insert('error', 'Doğrulama kodu geçersiz. Lütfen uygulamanızdan güncel kodu girin.');
+            Redirect::action('settings/setup2fa');
+            return;
+        }
+
+        // Yedek kodlar üret
+        $backupCodes = Totp::generateBackupCodes(8);
+        $backupHash  = Totp::hashBackupCodes($backupCodes);
+
+        DB::table('users')->where('id', $user['id'])->update([
+            'totp_secret'  => $secret,
+            'totp_enabled' => 1,
+            'totp_backup'  => $backupHash,
+        ]);
+
+        Session::delete('totp_setup_secret');
+
+        AuditLogger::log('auth.2fa_enabled', 'user', $user['id'], "2FA etkinleştirildi: {$user['username']}");
+
+        // Yedek kodları göster
+        Session::insert('totp_backup_codes', $backupCodes);
+        Redirect::action('settings/backupCodes');
+    }
+
+    /** Yedek kodları göster */
+    public function backupCodes(): void
+    {
+        $codes = Session::select('totp_backup_codes');
+        if (empty($codes)) {
+            Redirect::action('settings/twoFactor');
+            return;
+        }
+        Session::delete('totp_backup_codes');
+
+        View::pageTitle('Yedek Kodlar');
+        View::backupCodes($codes);
+    }
+
+    /** 2FA devre dışı bırak */
+    public function disable2fa(): void
+    {
+        if (!Http::isRequestMethod('post')) { Redirect::action('settings/twoFactor'); return; }
+        if (!CsrfGuard::verify()) { Session::insert('error', 'Geçersiz form isteği.'); Redirect::action('settings/twoFactor'); return; }
+
+        $user = Acl::user();
+
+        // Şifreyi doğrula (ek güvence)
+        $password = (string) Post::get('password');
+        $dbUser   = DB::table('users')->where('id', $user['id'])->get()->row();
+
+        if (!$dbUser || !password_verify($password, $dbUser->password)) {
+            Session::insert('error', 'Şifreniz yanlış. 2FA devre dışı bırakılamadı.');
+            Redirect::action('settings/twoFactor');
+            return;
+        }
+
+        DB::table('users')->where('id', $user['id'])->update([
+            'totp_secret'  => null,
+            'totp_enabled' => 0,
+            'totp_backup'  => null,
+        ]);
+
+        AuditLogger::log('auth.2fa_disabled', 'user', $user['id'], "2FA devre dışı: {$user['username']}");
+        Session::insert('success', '2FA başarıyla devre dışı bırakıldı.');
+        Redirect::action('settings/twoFactor');
+    }
+
+    private function countBackupCodes(?string $json): int
+    {
+        if (empty($json)) return 0;
+        $codes = json_decode($json, true);
+        return is_array($codes) ? count($codes) : 0;
     }
 }

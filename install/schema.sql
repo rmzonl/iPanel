@@ -255,6 +255,31 @@ CREATE TABLE IF NOT EXISTS audit_logs (
     INDEX idx_created  (created_at)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_general_ci;
 
+-- ============================================================
+-- 2FA ve API Token tabloları — v0.3.0
+-- ============================================================
+
+-- Kullanıcıya TOTP 2FA desteği ekle
+ALTER TABLE users ADD COLUMN IF NOT EXISTS totp_secret  VARCHAR(64)  NULL AFTER role;
+ALTER TABLE users ADD COLUMN IF NOT EXISTS totp_enabled TINYINT(1)   DEFAULT 0 AFTER totp_secret;
+ALTER TABLE users ADD COLUMN IF NOT EXISTS totp_backup  TEXT         NULL AFTER totp_enabled;
+
+-- API erişim token'ları
+CREATE TABLE IF NOT EXISTS api_tokens (
+    id          INT AUTO_INCREMENT PRIMARY KEY,
+    user_id     INT          NOT NULL,
+    name        VARCHAR(100) NOT NULL,
+    token_hash  VARCHAR(64)  NOT NULL UNIQUE,
+    permissions TEXT         NULL COMMENT 'JSON dizi: ["clients.view","sites.view"]',
+    last_used   DATETIME     NULL,
+    expires_at  DATETIME     NULL,
+    status      ENUM('active','revoked') DEFAULT 'active',
+    created_at  DATETIME DEFAULT CURRENT_TIMESTAMP,
+    INDEX idx_token_hash (token_hash),
+    INDEX idx_user_id    (user_id),
+    FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_general_ci;
+
 -- Admin: varsayılan şifreyi güvenli ile değiştir
 -- Kurulum betiği tarafından oluşturulacak, burada placeholder
 -- (install.sh bu INSERT'i yapar)

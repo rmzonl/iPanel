@@ -90,8 +90,38 @@ class Acl
             'delete' => 'firewall.delete',
         ],
         'settings' => [
-            'main' => 'settings.view',
-            'save' => 'settings.edit',
+            'main'        => 'settings.view',
+            'save'        => 'settings.edit',
+            'twoFactor'   => 'profile.2fa',
+            'setup2fa'    => 'profile.2fa',
+            'enable2fa'   => 'profile.2fa',
+            'disable2fa'  => 'profile.2fa',
+            'backupCodes' => 'profile.2fa',
+        ],
+        'apitokens' => [
+            'main'   => 'apitokens.view',
+            'create' => 'apitokens.manage',
+            'revoke' => 'apitokens.manage',
+        ],
+        'phpmyadmin' => [
+            'main'            => 'phpmyadmin.view',
+            'install'         => 'phpmyadmin.manage',
+            'remove'          => 'phpmyadmin.manage',
+            'generateAccess'  => 'phpmyadmin.manage',
+        ],
+        'phpmanager' => [
+            'main'            => 'phpmanager.view',
+            'installVersion'  => 'phpmanager.manage',
+            'toggleExtension' => 'phpmanager.manage',
+            'restartFpm'      => 'phpmanager.manage',
+        ],
+        'nodemanager' => [
+            'main'           => 'nodemanager.view',
+            'installNvm'     => 'nodemanager.manage',
+            'installVersion' => 'nodemanager.manage',
+            'setDefault'     => 'nodemanager.manage',
+            'remove'         => 'nodemanager.manage',
+            'pm2'            => 'nodemanager.manage',
         ],
     ];
 
@@ -110,7 +140,10 @@ class Acl
             'dns.view',       'dns.create',      'dns.delete',
             'cronjobs.view',  'cronjobs.create', 'cronjobs.delete',
             'backups.view',   'backups.create',
-            // ipaddresses, firewall, settings → reseller erişemez
+            // Tüm roller için: 2FA + API token
+            'profile.2fa',
+            'apitokens.view', 'apitokens.manage',
+            // ipaddresses, firewall, settings, phpmyadmin, phpmanager, nodemanager → reseller erişemez
         ],
     ];
 
