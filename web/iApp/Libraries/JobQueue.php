@@ -38,7 +38,7 @@ class JobQueue
         DB::table('jobs')->insert([
             'uuid'        => $uuid,
             'type'        => $type,
-            'payload'     => json_encode($payload, JSON_UNESCAPED_UNICODE),
+            'payload'     => \Json::encode($payload),
             'status'      => self::STATUS_PENDING,
             'priority'    => max(1, min(9, $priority)),
             'user_id'     => $userId ?: null,

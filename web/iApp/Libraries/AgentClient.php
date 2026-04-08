@@ -64,7 +64,7 @@ class AgentClient
         }
         fclose($sock);
 
-        $decoded = json_decode(trim($resp), true);
+        $decoded = \Json::decode(trim($resp), true);
         if (!is_array($decoded)) {
             throw new \RuntimeException('agent returned invalid JSON');
         }

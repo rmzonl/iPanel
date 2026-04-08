@@ -43,38 +43,7 @@
               </tr>
             </thead>
             <tbody id="jobs-tbody">
-              @forelse($jobs as $job)
-                {[ $statusColors = ['pending'=>'secondary','running'=>'azure','completed'=>'success','failed'=>'danger','cancelled'=>'muted'];
-                   $statusLabels = ['pending'=>'Bekliyor','running'=>'Çalışıyor','completed'=>'Tamamlandı','failed'=>'Başarısız','cancelled'=>'İptal'];
-                   $sc = $statusColors[$job->status] ?? 'secondary';
-                   $sl = $statusLabels[$job->status] ?? $job->status;
-                ]}
-                <tr data-status="{{ $job->status }}">
-                  <td><code class="small">{{ substr($job->uuid, 0, 8) }}…</code></td>
-                  <td><span class="badge bg-blue-lt">{{ $job->type }}</span></td>
-                  <td><span class="badge bg-{{ $sc }}-lt text-{{ $sc }}">{{ $sl }}</span></td>
-                  <td class="text-muted">{{ $job->username ?? '—' }}</td>
-                  <td class="text-muted small">{{ $job->created_at }}</td>
-                  <td class="text-muted small">{{ $job->started_at ?? '—' }}</td>
-                  <td class="text-muted small">{{ $job->completed_at ?? '—' }}</td>
-                  <td>
-                    @if(in_array($job->status, ['pending']))
-                      <button class="btn btn-sm btn-ghost-danger"
-                              onclick="cancelJob('{{ $job->uuid }}')">
-                        <i class="ti ti-x"></i>
-                      </button>
-                    @endif
-                    @if($job->result)
-                      <button class="btn btn-sm btn-ghost-secondary"
-                              onclick="showResult('{{ addslashes($job->result) }}')">
-                        <i class="ti ti-eye"></i>
-                      </button>
-                    @endif
-                  </td>
-                </tr>
-              @empty
-                <tr><td colspan="8" class="text-center text-muted py-5">Görev bulunamadı</td></tr>
-              @endforelse
+              @view('Jobs/rows')
             </tbody>
           </table>
         </div>
@@ -127,10 +96,37 @@ function showResult(raw) {
   bootstrap.Modal.getOrCreateInstance(document.getElementById('result-modal')).show();
 }
 
-// Otomatik yenileme (çalışan iş varsa her 5 sn)
+// Otomatik yenileme — Import::usable/refreshRows endpoint ile (location.reload yerine)
 (function autoRefresh() {
-  const hasActive = [...document.querySelectorAll('#jobs-tbody tr[data-status="running"], #jobs-tbody tr[data-status="pending"]')].length > 0;
-  if (hasActive) setTimeout(() => location.reload(), 5000);
-  document.getElementById('jobs-last-refresh').textContent = 'Son: ' + new Date().toLocaleTimeString('tr-TR');
+  function updateTimestamp() {
+    document.getElementById('jobs-last-refresh').textContent = 'Son: ' + new Date().toLocaleTimeString('tr-TR');
+  }
+
+  function hasActiveJobs() {
+    return document.querySelectorAll('#jobs-tbody tr[data-status="running"], #jobs-tbody tr[data-status="pending"]').length > 0;
+  }
+
+  async function refresh() {
+    const filter = document.getElementById('status-filter').value;
+    const url    = '/jobs/refreshrows' + (filter ? '?status=' + encodeURIComponent(filter) : '');
+    try {
+      const res  = await fetch(url, { headers: {'X-Requested-With':'XMLHttpRequest'} });
+      const json = await res.json();
+      if (json.success && json.html !== undefined) {
+        document.getElementById('jobs-tbody').innerHTML = json.html;
+        filterJobs(filter);
+        // Sayfa içinde script varsa eval edilir
+        const scripts = document.getElementById('jobs-tbody').querySelectorAll('script');
+        scripts.forEach(s => eval(s.textContent));
+      }
+    } catch(e) { /* sessiz hata */ }
+    updateTimestamp();
+
+    // Aktif iş varsa 5 sn sonra tekrar yenile
+    if (hasActiveJobs()) setTimeout(refresh, 5000);
+  }
+
+  updateTimestamp();
+  if (hasActiveJobs()) setTimeout(refresh, 5000);
 })();
 </script>

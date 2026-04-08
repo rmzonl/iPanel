@@ -1,7 +1,10 @@
 <?php namespace Project\Libraries;
 
+use ZN\Request\Http;
+
 /**
  * AJAX / API için standart JSON yanıt yardımcısı.
+ * ZN Framework'ün Json facade'ını kullanır (ZN\Protection\Json).
  *
  * Kullanım:
  *   JsonResponse::success('Site oluşturuldu.', ['site_id' => 5]);
@@ -25,7 +28,7 @@ class JsonResponse
     /** Hata yanıtı gönder ve çık */
     public static function error(string $message, array $errors = [], int $httpCode = 422): never
     {
-        http_response_code($httpCode);
+        Http::response($httpCode);
         self::send(['success' => false, 'message' => $message, 'errors' => $errors]);
     }
 
@@ -41,13 +44,20 @@ class JsonResponse
         self::send(['success' => true, 'items' => $items, 'total' => $total, 'meta' => $meta]);
     }
 
+    /** İçerik HTML döndüren AJAX yanıtı (Import::usable ile hazırlanmış) */
+    public static function html(string $html, string $message = ''): never
+    {
+        self::send(['success' => true, 'message' => $message, 'html' => $html]);
+    }
+
     private static function send(array $payload): never
     {
         if (!headers_sent()) {
             header('Content-Type: application/json; charset=utf-8');
             header('X-Content-Type-Options: nosniff');
         }
-        echo json_encode($payload, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES);
+        // ZN Framework Json facade kullan (varsayılan: JSON_UNESCAPED_UNICODE)
+        echo \Json::encode($payload);
         exit;
     }
 }

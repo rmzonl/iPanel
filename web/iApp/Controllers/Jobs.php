@@ -5,6 +5,7 @@ use ZN\Request\Http;
 use ZN\Request\Post;
 use ZN\Request\Get;
 use ZN\Inclusion\Project\View;
+use Import;
 use Session;
 use Project\Libraries\JobQueue;
 use Project\Libraries\JsonResponse;
@@ -54,7 +55,7 @@ class Jobs extends Controller
             'uuid'         => $job->uuid,
             'type'         => $job->type,
             'status'       => $job->status,
-            'result'       => $job->result ? json_decode($job->result, true) : null,
+            'result'       => $job->result ? \Json::decodeArray($job->result) : null,
             'created_at'   => $job->created_at,
             'started_at'   => $job->started_at,
             'completed_at' => $job->completed_at,
@@ -82,6 +83,27 @@ class Jobs extends Controller
             'active_count' => JobQueue::activeCount(),
             'jobs'         => $simplified,
         ]);
+    }
+
+    /**
+     * AJAX GET: tablo satırlarını Import::usable ile wizard.php'den al.
+     * JS tarafında innerHTML ile inject edilir.
+     */
+    public function refreshRows(): void
+    {
+        $user    = Session::select('admin_user');
+        $isAdmin = ($user['role'] ?? '') === 'admin';
+        $filter  = Get::get('status') ?? '';
+
+        $jobs = $isAdmin
+            ? JobQueue::listAll($filter, 200)
+            : JobQueue::listForUser((int)$user['id'], 100);
+
+        View::jobs($jobs);
+
+        // Import::usable → wizard.php dosyasını yükle, HTML olarak döndür
+        $html = Import::usable(true)->page('Jobs/rows');
+        JsonResponse::html($html);
     }
 
     /** AJAX POST: iptal */

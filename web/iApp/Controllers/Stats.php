@@ -59,7 +59,7 @@ class Stats extends Controller
         $cycle     = 0;
 
         // İlk heartbeat
-        echo "event: connected\ndata: {\"ts\":" . time() . "}\n\n";
+        echo 'event: connected' . "\n" . 'data: ' . \Json::encode(['ts' => time()]) . "\n\n";
         flush();
 
         while (!connection_aborted() && $cycle < $maxCycles) {
@@ -68,10 +68,10 @@ class Stats extends Controller
 
             try {
                 $data = $this->callAgent('Stats', 'snapshot', []);
-                $json = json_encode(['cycle' => $cycle] + $data, JSON_UNESCAPED_UNICODE);
+                $json = \Json::encode(['cycle' => $cycle] + $data);
                 echo "event: stats\ndata: {$json}\n\n";
             } catch (\Throwable $e) {
-                $err = json_encode(['error' => $e->getMessage()]);
+                $err = \Json::encode(['error' => $e->getMessage()]);
                 echo "event: error\ndata: {$err}\n\n";
             }
 

@@ -51,9 +51,9 @@ class Initialize extends Controller
         if (empty($user)) {
             // JSON endpoint'lerde redirect yerine 401 döndür
             if (in_array($controller, self::JSON_CONTROLLERS, true)) {
-                http_response_code(401);
+                Http::response(401);
                 header('Content-Type: application/json');
-                echo json_encode(['success' => false, 'message' => 'Oturum açılmamış.']);
+                echo \Json::encode(['success' => false, 'message' => 'Oturum açılmamış.']);
                 exit;
             }
             Redirect::action('auth/login');
