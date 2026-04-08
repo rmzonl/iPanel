@@ -86,7 +86,7 @@ install_deps() {
 
         $PKG_INSTALL \
             curl wget git ca-certificates gnupg lsb-release \
-            nginx \
+            nginx libnginx-mod-http-headers-more-headers \
             php8.2-cli php8.2-fpm php8.2-mysql php8.2-mbstring \
             php8.2-xml php8.2-curl php8.2-zip php8.2-gd php8.2-bcmath \
             php8.2-redis php8.2-intl \
@@ -117,7 +117,7 @@ install_deps() {
 
         # Adım 4: kalan paketler
         dnf install -y \
-            nginx \
+            nginx nginx-mod-http-headers-more \
             php-cli php-fpm php-mysqlnd php-mbstring \
             php-xml php-curl php-zip php-gd php-bcmath php-intl \
             mariadb-server mariadb \
@@ -369,6 +369,13 @@ install_nginx_panel() {
     local NGINX_CONF="/etc/nginx/conf.d/ipanel.conf"
     [[ -f /etc/nginx/sites-available/ipanel.conf ]] && NGINX_CONF="/etc/nginx/sites-available/ipanel.conf"
     sed -i "s|unix:/run/php/ipanel\.sock|unix:${PHP_SOCK}|g" "$NGINX_CONF" 2>/dev/null || true
+
+    # headers-more modülü kurulu değilse more_clear_headers direktifini kaldır
+    # (server_tokens off zaten nginx sürümünü gizler; sadece "Server: nginx" kalır)
+    if ! nginx -V 2>&1 | grep -q "headers.more\|headers_more"; then
+        sed -i '/more_clear_headers/d' "$NGINX_CONF"
+        warn "nginx-mod-http-headers-more bulunamadı; more_clear_headers devre dışı (Server header gizlenmeyecek)"
+    fi
 
     systemctl enable --now nginx
     nginx -t || fail "Nginx config hatası var"
