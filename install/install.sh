@@ -270,9 +270,8 @@ SQL
 ALTER USER 'ipanel'@'localhost' IDENTIFIED BY '$DBPASS';
 FLUSH PRIVILEGES;
 SQL
-            sed -i \
-                -e "s/'password'\s*=>\s*'[^']*'/'password' => '$DBPASS'/" \
-                "$IPANEL_ROOT/web/iApp/Config/Database.php" || true
+            # Database.php — geçici düzeltme; fonksiyon sonunda tekrar tam güncelleme yapılır
+            true
             ADMIN_PASS=$(head -c 16 /dev/urandom | base64 | tr -d '/+=' | head -c 16)
             ADMIN_HASH=$(php -r "echo password_hash('$ADMIN_PASS', PASSWORD_BCRYPT);")
             mysql ipanel -e "UPDATE users SET password='$ADMIN_HASH' WHERE username='admin';" 2>/dev/null || true
@@ -282,6 +281,17 @@ SQL
         else
             DBPASS=$(grep DB_PASS /etc/ipanel/db.env | cut -d= -f2 || echo "")
         fi
+    fi
+
+    # git reset --hard sonrası Database.php her zaman sıfırlanır.
+    # Hangi dal çalışmış olursa olsun, her zaman doğru bilgileri yaz.
+    if [[ -n "$DBPASS" ]]; then
+        sed -i \
+            -e "s/'user'\s*=>\s*'[^']*'/'user' => 'ipanel'/" \
+            -e "s/'password'\s*=>\s*'[^']*'/'password' => '$DBPASS'/" \
+            "$IPANEL_ROOT/web/iApp/Config/Database.php" \
+            || warn "Database.php kimlik bilgileri güncellenemedi"
+        ok "Database.php: bağlantı bilgileri güncellendi (ipanel kullanıcısı)."
     fi
 }
 
