@@ -1,0 +1,53 @@
+<?php namespace Project\Libraries;
+
+/**
+ * AJAX / API için standart JSON yanıt yardımcısı.
+ *
+ * Kullanım:
+ *   JsonResponse::success('Site oluşturuldu.', ['site_id' => 5]);
+ *   JsonResponse::error('Alan adı zaten var.');
+ *   JsonResponse::job($uuid, 'Site oluşturma kuyruğa eklendi.');
+ */
+class JsonResponse
+{
+    /**
+     * Başarılı yanıt gönder ve çık.
+     *
+     * @param string $message  Kullanıcıya gösterilecek mesaj
+     * @param array  $data     Ek veri
+     * @param string $redirect Yönlendirme URL'i (opsiyonel)
+     */
+    public static function success(string $message, array $data = [], string $redirect = ''): never
+    {
+        self::send(['success' => true, 'message' => $message, 'data' => $data, 'redirect' => $redirect]);
+    }
+
+    /** Hata yanıtı gönder ve çık */
+    public static function error(string $message, array $errors = [], int $httpCode = 422): never
+    {
+        http_response_code($httpCode);
+        self::send(['success' => false, 'message' => $message, 'errors' => $errors]);
+    }
+
+    /** Kuyruğa eklenen iş için yanıt */
+    public static function job(string $uuid, string $message = 'İş kuyruğa eklendi.'): never
+    {
+        self::send(['success' => true, 'message' => $message, 'job_uuid' => $uuid, 'queued' => true]);
+    }
+
+    /** Sayfalanmış liste yanıtı */
+    public static function list(array $items, int $total = 0, array $meta = []): never
+    {
+        self::send(['success' => true, 'items' => $items, 'total' => $total, 'meta' => $meta]);
+    }
+
+    private static function send(array $payload): never
+    {
+        if (!headers_sent()) {
+            header('Content-Type: application/json; charset=utf-8');
+            header('X-Content-Type-Options: nosniff');
+        }
+        echo json_encode($payload, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES);
+        exit;
+    }
+}

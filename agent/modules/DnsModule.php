@@ -41,13 +41,13 @@ class DnsModule extends BaseModule
         $content .= "@\tIN\tNS\t{$p['ns2']}.\n\n";
 
         foreach ($records as $r) {
-            $content .= sprintf(
-                "%s\tIN\t%s\t%s%s\n",
-                $r['name'],
-                $r['type'],
-                isset($r['priority']) && $r['type'] === 'MX' ? $r['priority'] . "\t" : '',
-                $r['value']
-            );
+            $name     = $this->sanitizeRRName($r['name']  ?? '@');
+            $type     = $this->sanitizeRRType($r['type']  ?? 'A');
+            $value    = $this->sanitizeRRValue($type, $r['value'] ?? '');
+            $priority = ($type === 'MX' && isset($r['priority']))
+                ? ((int)$r['priority']) . "\t"
+                : '';
+            $content .= sprintf("%s\tIN\t%s\t%s%s\n", $name, $type, $priority, $value);
         }
 
         $zoneFile = "{$this->zonesDir}/{$domain}.zone";
@@ -96,6 +96,39 @@ class DnsModule extends BaseModule
     public function check(array $p): array
     {
         return $this->run(['named-checkconf']);
+    }
+
+    private function sanitizeRRName(string $n): string
+    {
+        $n = trim($n);
+        if ($n === '@' || $n === '*') return $n;
+        if (!preg_match('/^[a-zA-Z0-9\*_\-\.]{1,63}$/', $n)) {
+            throw new \InvalidArgumentException("invalid RR name: $n");
+        }
+        return $n;
+    }
+
+    private function sanitizeRRType(string $t): string
+    {
+        $allowed = ['A', 'AAAA', 'CNAME', 'MX', 'NS', 'TXT', 'SRV', 'PTR', 'CAA', 'DKIM', 'SPF'];
+        $t = strtoupper(trim($t));
+        if (!in_array($t, $allowed, true)) {
+            throw new \InvalidArgumentException("invalid RR type: $t");
+        }
+        return $t;
+    }
+
+    private function sanitizeRRValue(string $type, string $v): string
+    {
+        $v = trim($v);
+        if ($v === '') throw new \InvalidArgumentException("empty RR value");
+        // Satır sonu ve BIND direktif karakterlerini temizle
+        $v = preg_replace('/[\r\n\x00]/', '', $v);
+        if (in_array($type, ['TXT', 'SPF', 'DKIM'], true)) {
+            // TXT kayıtları tırnak içine al, iç tırnakları escape et
+            $v = '"' . str_replace('"', '\\"', $v) . '"';
+        }
+        return $v;
     }
 
     private function sanitizeDomain(string $d): string

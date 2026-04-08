@@ -313,10 +313,19 @@ install_systemd() {
     cp "$IPANEL_ROOT/install/systemd/ipanel-agent.service" /etc/systemd/system/
     cp "$IPANEL_ROOT/install/systemd/ipanel-cron.service"  /etc/systemd/system/
     cp "$IPANEL_ROOT/install/systemd/ipanel-cron.timer"    /etc/systemd/system/
+    cp "$IPANEL_ROOT/install/systemd/ipanel-jobs.service"  /etc/systemd/system/
+
+    # Servis dosyasındaki yolları güncelle
+    sed -i "s|/usr/local/ipanel|$IPANEL_ROOT|g" \
+        /etc/systemd/system/ipanel-agent.service \
+        /etc/systemd/system/ipanel-jobs.service  \
+        2>/dev/null || true
+
     systemctl daemon-reload
     systemctl enable --now ipanel-agent.service
     systemctl enable --now ipanel-cron.timer
-    ok "ipanel-agent.service başlatıldı."
+    systemctl enable --now ipanel-jobs.service
+    ok "Servisler başlatıldı: ipanel-agent, ipanel-cron, ipanel-jobs."
 }
 
 ###############################################################################
@@ -356,7 +365,7 @@ install_nginx_panel() {
     systemctl enable --now nginx
     nginx -t || fail "Nginx config hatası var"
     systemctl reload nginx
-    ok "Panel vhost etkinleştirildi (https://IP:8443)"
+    ok "Panel vhost etkinleştirildi (https://IP:3333)"
 }
 
 ###############################################################################
@@ -412,12 +421,20 @@ finalize() {
 
     # Temel güvenlik duvarı kuralları
     if command -v ufw >/dev/null 2>&1; then
-        ufw allow 22/tcp  >/dev/null
-        ufw allow 80/tcp  >/dev/null
-        ufw allow 443/tcp >/dev/null
-        ufw allow 8443/tcp >/dev/null
+        ufw allow 22/tcp   >/dev/null
+        ufw allow 80/tcp   >/dev/null
+        ufw allow 443/tcp  >/dev/null
+        ufw allow 3333/tcp >/dev/null
         echo "y" | ufw enable >/dev/null 2>&1 || true
-        ok "UFW etkinleştirildi."
+        ok "UFW etkinleştirildi (22/80/443/3333)."
+    elif command -v firewall-cmd >/dev/null 2>&1; then
+        systemctl enable --now firewalld >/dev/null 2>&1 || true
+        firewall-cmd --quiet --permanent --add-service=ssh
+        firewall-cmd --quiet --permanent --add-service=http
+        firewall-cmd --quiet --permanent --add-service=https
+        firewall-cmd --quiet --permanent --add-port=3333/tcp
+        firewall-cmd --quiet --reload
+        ok "firewalld: 22/80/443/3333 açıldı."
     fi
 }
 
@@ -500,7 +517,7 @@ ${C_GRN}╔═══════════════════════
 ║          iPanel kurulumu tamamlandı!                     ║
 ╚══════════════════════════════════════════════════════════╝${C_RST}
 
-  Panel URL   :  https://${SERVER_IP}:8443
+  Panel URL   :  https://${SERVER_IP}:3333
   Kullanıcı   :  admin
   Şifre       :  $(grep ADMIN_PASS /etc/ipanel/db.env 2>/dev/null | cut -d= -f2 || echo 'bak: /etc/ipanel/db.env')
 

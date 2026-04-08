@@ -201,9 +201,10 @@ CREATE TABLE firewall_rules (
     created_at DATETIME DEFAULT CURRENT_TIMESTAMP
 );
 
--- Default admin user (password: admin123)
+-- Admin kullanıcısı — şifre kurulum betiği tarafından randomize edilir.
+-- Schema yüklendiğinde geçici placeholder; install.sh bu satırı UPDATE ile değiştirir.
 INSERT INTO users (username, email, password, role) VALUES
-('admin', 'admin@ipanel.local', '$2y$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2.uheWG/igi', 'admin');
+('admin', 'admin@ipanel.local', '$2y$12$PLACEHOLDER_REPLACED_BY_INSTALLER_DO_NOT_USE', 'admin');
 
 -- Default server settings
 INSERT INTO settings (scope, scope_id, setting_key, setting_value) VALUES
@@ -253,6 +254,57 @@ CREATE TABLE IF NOT EXISTS audit_logs (
     INDEX idx_action   (action),
     INDEX idx_resource (resource_type, resource_id),
     INDEX idx_created  (created_at)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_general_ci;
+
+
+-- ============================================================
+-- 2FA ve API Token tabloları — v0.3.0
+-- ============================================================
+
+-- Kullanıcıya TOTP 2FA desteği ekle
+ALTER TABLE users ADD COLUMN IF NOT EXISTS totp_secret  VARCHAR(64)  NULL AFTER role;
+ALTER TABLE users ADD COLUMN IF NOT EXISTS totp_enabled TINYINT(1)   DEFAULT 0 AFTER totp_secret;
+ALTER TABLE users ADD COLUMN IF NOT EXISTS totp_backup  TEXT         NULL AFTER totp_enabled;
+
+-- API erişim token'ları
+CREATE TABLE IF NOT EXISTS api_tokens (
+    id          INT AUTO_INCREMENT PRIMARY KEY,
+    user_id     INT          NOT NULL,
+    name        VARCHAR(100) NOT NULL,
+    token_hash  VARCHAR(64)  NOT NULL UNIQUE,
+    permissions TEXT         NULL COMMENT 'JSON dizi: ["clients.view","sites.view"]',
+    last_used   DATETIME     NULL,
+    expires_at  DATETIME     NULL,
+    status      ENUM('active','revoked') DEFAULT 'active',
+    created_at  DATETIME DEFAULT CURRENT_TIMESTAMP,
+    INDEX idx_token_hash (token_hash),
+    INDEX idx_user_id    (user_id),
+    FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_general_ci;
+
+-- ============================================================
+-- Arka plan iş kuyruğu — v0.4.0
+-- ============================================================
+
+CREATE TABLE IF NOT EXISTS jobs (
+    id           INT AUTO_INCREMENT PRIMARY KEY,
+    uuid         CHAR(36)      NOT NULL UNIQUE,
+    type         VARCHAR(100)  NOT NULL COMMENT 'Örn: sites.create, ssl.issue',
+    payload      JSON          NOT NULL COMMENT 'İş parametreleri',
+    status       ENUM('pending','running','completed','failed','cancelled')
+                               DEFAULT 'pending',
+    result       JSON          NULL     COMMENT 'Çıktı / hata detayı',
+    user_id      INT           NULL,
+    username     VARCHAR(100)  NULL,
+    priority     TINYINT       DEFAULT 5 COMMENT '1=yüksek 5=normal 9=düşük',
+    attempts     TINYINT       DEFAULT 0,
+    max_attempts TINYINT       DEFAULT 3,
+    created_at   DATETIME      DEFAULT CURRENT_TIMESTAMP,
+    started_at   DATETIME      NULL,
+    completed_at DATETIME      NULL,
+    INDEX idx_status_priority (status, priority, created_at),
+    INDEX idx_user            (user_id),
+    INDEX idx_type            (type)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_general_ci;
 
 -- Admin: varsayılan şifreyi güvenli ile değiştir

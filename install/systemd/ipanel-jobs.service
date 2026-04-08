@@ -1,0 +1,26 @@
+[Unit]
+Description=iPanel Job Runner
+Documentation=https://github.com/rmzonl/ipanel
+After=network.target mariadb.service ipanel-agent.service
+Requires=ipanel-agent.service
+
+[Service]
+Type=simple
+User=root
+Group=root
+ExecStart=/usr/bin/php /usr/local/ipanel/bin/job-runner.php
+Restart=always
+RestartSec=5
+StandardOutput=journal
+StandardError=journal
+SyslogIdentifier=ipanel-jobs
+
+# Güvenlik kısıtlamaları
+NoNewPrivileges=false
+PrivateTmp=true
+ProtectKernelModules=true
+ProtectKernelTunables=true
+RestrictRealtime=true
+
+[Install]
+WantedBy=multi-user.target

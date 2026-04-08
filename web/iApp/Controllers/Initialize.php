@@ -20,10 +20,16 @@ use Project\Libraries\CsrfGuard;
 class Initialize extends Controller
 {
     /** Kimlik doğrulama gerektirmeyen controller'lar */
-    private const PUBLIC_CONTROLLERS = ['auth', 'errors'];
+    private const PUBLIC_CONTROLLERS = ['auth', 'errors', 'api'];
+
+    /** JSON yanıt döndüren controller'lar (redirect yerine 401 JSON) */
+    private const JSON_CONTROLLERS = ['stats', 'jobs'];
+
+    /** Settings içinde admin zorunluluğu olmayan metodlar (reseller da erişebilir) */
+    private const SETTINGS_RESELLER_ALLOWED = ['twoFactor', 'setup2fa', 'enable2fa', 'disable2fa', 'backupCodes'];
 
     /** Admin-only controller'lar (reseller erişemez) */
-    private const ADMIN_ONLY = ['settings', 'ipaddresses', 'firewall'];
+    private const ADMIN_ONLY = ['ipaddresses', 'firewall', 'phpmyadmin', 'phpmanager', 'nodemanager'];
 
     public function main(): void
     {
@@ -32,7 +38,7 @@ class Initialize extends Controller
         $controller = strtolower(CURRENT_CONTROLLER ?? '');
         $method     = strtolower(CURRENT_CFUNCTION  ?? 'main');
 
-        // Genel sayfalara (auth, errors) kimlik doğrulaması gerekmez
+        // Genel sayfalara (auth, errors, api) kimlik doğrulaması gerekmez
         if (in_array($controller, self::PUBLIC_CONTROLLERS, true)) {
             if ($controller === 'auth') {
                 Masterpage::bodyPage('layouts/auth-body');
@@ -43,12 +49,22 @@ class Initialize extends Controller
         // Oturum kontrolü
         $user = Session::select('admin_user');
         if (empty($user)) {
+            // JSON endpoint'lerde redirect yerine 401 döndür
+            if (in_array($controller, self::JSON_CONTROLLERS, true)) {
+                http_response_code(401);
+                header('Content-Type: application/json');
+                echo json_encode(['success' => false, 'message' => 'Oturum açılmamış.']);
+                exit;
+            }
             Redirect::action('auth/login');
             return;
         }
 
         // Admin-only erişim kontrolü
-        if (in_array($controller, self::ADMIN_ONLY, true) && ($user['role'] ?? '') !== 'admin') {
+        $isAdminOnlyAccess = in_array($controller, self::ADMIN_ONLY, true)
+            || ($controller === 'settings' && !in_array($method, self::SETTINGS_RESELLER_ALLOWED, true));
+
+        if ($isAdminOnlyAccess && ($user['role'] ?? '') !== 'admin') {
             Session::insert('error', 'Bu bölüme erişim yetkiniz yok.');
             Redirect::action('dashboard/main');
             return;
