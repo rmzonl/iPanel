@@ -86,7 +86,7 @@ install_deps() {
 
         $PKG_INSTALL \
             curl wget git ca-certificates gnupg lsb-release \
-            nginx libnginx-mod-http-headers-more-headers \
+            nginx \
             php8.2-cli php8.2-fpm php8.2-mysql php8.2-mbstring \
             php8.2-xml php8.2-curl php8.2-zip php8.2-gd php8.2-bcmath \
             php8.2-redis php8.2-intl \
@@ -98,6 +98,10 @@ install_deps() {
             certbot python3-certbot-nginx \
             ufw fail2ban \
             tar gzip rsync openssl
+
+        # headers-more modülü — isteğe bağlı
+        $PKG_INSTALL libnginx-mod-http-headers-more-headers 2>/dev/null \
+            || warn "nginx headers-more modülü bulunamadı — Server header gizlenemeyecek (kurulum devam ediyor)"
     else
         # Adım 1: temel araçlar + EPEL
         dnf install -y curl wget git ca-certificates gnupg tar gzip rsync openssl
@@ -117,7 +121,7 @@ install_deps() {
 
         # Adım 4: kalan paketler
         dnf install -y \
-            nginx nginx-mod-http-headers-more \
+            nginx \
             php-cli php-fpm php-mysqlnd php-mbstring \
             php-xml php-curl php-zip php-gd php-bcmath php-intl \
             mariadb-server mariadb \
@@ -127,6 +131,12 @@ install_deps() {
             redis \
             certbot \
             firewalld fail2ban
+
+        # headers-more modülü — isteğe bağlı, EPEL'de farklı isimlerle olabilir
+        # Bulunamazsa install_nginx_panel() direktifi conf'tan siler
+        dnf install -y nginx-mod-headers-more 2>/dev/null \
+            || dnf install -y nginx-mod-http-headers-more 2>/dev/null \
+            || warn "nginx headers-more modülü bulunamadı — Server header gizlenemeyecek (kurulum devam ediyor)"
     fi
 
     ok "Paketler kuruldu."
