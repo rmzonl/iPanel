@@ -89,7 +89,7 @@ install_deps() {
             nginx \
             php8.2-cli php8.2-fpm php8.2-mysql php8.2-mbstring \
             php8.2-xml php8.2-curl php8.2-zip php8.2-gd php8.2-bcmath \
-            php8.2-redis php8.2-intl \
+            php8.2-redis php8.2-intl php8.2-posix \
             mariadb-server mariadb-client \
             postfix dovecot-core dovecot-imapd dovecot-pop3d dovecot-lmtpd \
             bind9 bind9utils dnsutils \
@@ -124,6 +124,7 @@ install_deps() {
             nginx \
             php-cli php-fpm php-mysqlnd php-mbstring \
             php-xml php-curl php-zip php-gd php-bcmath php-intl \
+            php-process \
             mariadb-server mariadb \
             postfix dovecot \
             bind bind-utils \
@@ -261,7 +262,26 @@ SQL
         ok "Admin şifresi rastgele oluşturuldu → /etc/ipanel/db.env"
     else
         warn "Veritabanı 'ipanel' zaten mevcut, şema yüklemesi atlandı."
-        DBPASS=$(grep DB_PASS /etc/ipanel/db.env 2>/dev/null | cut -d= -f2 || echo "")
+        if [[ ! -f /etc/ipanel/db.env ]]; then
+            # db.env eksik (önceki kurulum yarıda kalmış olabilir) — yeni şifre oluştur
+            warn "db.env bulunamadı — MariaDB şifresi sıfırlanıyor..."
+            DBPASS=$(head -c 24 /dev/urandom | base64 | tr -d '/+=' | head -c 24)
+            mysql <<SQL
+ALTER USER 'ipanel'@'localhost' IDENTIFIED BY '$DBPASS';
+FLUSH PRIVILEGES;
+SQL
+            sed -i \
+                -e "s/'password'\s*=>\s*'[^']*'/'password' => '$DBPASS'/" \
+                "$IPANEL_ROOT/web/iApp/Config/Database.php" || true
+            ADMIN_PASS=$(head -c 16 /dev/urandom | base64 | tr -d '/+=' | head -c 16)
+            ADMIN_HASH=$(php -r "echo password_hash('$ADMIN_PASS', PASSWORD_BCRYPT);")
+            mysql ipanel -e "UPDATE users SET password='$ADMIN_HASH' WHERE username='admin';" 2>/dev/null || true
+            { echo "DB_PASS=$DBPASS"; echo "ADMIN_PASS=$ADMIN_PASS"; } > /etc/ipanel/db.env
+            chmod 600 /etc/ipanel/db.env
+            ok "db.env yeniden oluşturuldu → /etc/ipanel/db.env"
+        else
+            DBPASS=$(grep DB_PASS /etc/ipanel/db.env | cut -d= -f2 || echo "")
+        fi
     fi
 }
 
@@ -382,9 +402,17 @@ install_nginx_panel() {
 
     # headers-more modülü kurulu değilse more_clear_headers direktifini kaldır
     # (server_tokens off zaten nginx sürümünü gizler; sadece "Server: nginx" kalır)
-    if ! nginx -V 2>&1 | grep -q "headers.more\|headers_more"; then
+    # Dinamik modüller nginx -V çıktısında görünmez; .so varlığına bak
+    local HEADERS_MORE_LOADED=false
+    for f in \
+        /usr/lib64/nginx/modules/ngx_http_headers_more_filter_module.so \
+        /usr/lib/nginx/modules/ngx_http_headers_more_filter_module.so \
+        /usr/share/nginx/modules/mod-http-headers-more.conf; do
+        [[ -e "$f" ]] && { HEADERS_MORE_LOADED=true; break; }
+    done
+    if ! $HEADERS_MORE_LOADED; then
         sed -i '/more_clear_headers/d' "$NGINX_CONF"
-        warn "nginx-mod-http-headers-more bulunamadı; more_clear_headers devre dışı (Server header gizlenmeyecek)"
+        warn "nginx headers-more modülü bulunamadı; more_clear_headers devre dışı (Server header gizlenmeyecek)"
     fi
 
     systemctl enable --now nginx
