@@ -474,12 +474,20 @@ finalize() {
 
     # Temel güvenlik duvarı kuralları
     if command -v ufw >/dev/null 2>&1; then
-        ufw allow 22/tcp  >/dev/null
-        ufw allow 80/tcp  >/dev/null
-        ufw allow 443/tcp >/dev/null
+        ufw allow 22/tcp   >/dev/null
+        ufw allow 80/tcp   >/dev/null
+        ufw allow 443/tcp  >/dev/null
         ufw allow 8443/tcp >/dev/null
         echo "y" | ufw enable >/dev/null 2>&1 || true
-        ok "UFW etkinleştirildi."
+        ok "UFW etkinleştirildi (22/80/443/8443)."
+    elif command -v firewall-cmd >/dev/null 2>&1; then
+        systemctl enable --now firewalld >/dev/null 2>&1 || true
+        firewall-cmd --quiet --permanent --add-service=ssh
+        firewall-cmd --quiet --permanent --add-service=http
+        firewall-cmd --quiet --permanent --add-service=https
+        firewall-cmd --quiet --permanent --add-port=8443/tcp
+        firewall-cmd --quiet --reload
+        ok "firewalld: 22/80/443/8443 açıldı."
     fi
 }
 
