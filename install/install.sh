@@ -7,7 +7,7 @@
 #
 set -euo pipefail
 
-IPANEL_VERSION="0.1.0"
+IPANEL_VERSION="0.6.1"
 IPANEL_ROOT="/usr/local/ipanel"
 IPANEL_REPO="${IPANEL_REPO:-https://github.com/rmzonl/iPanel.git}"
 IPANEL_BRANCH="${IPANEL_BRANCH:-develop}"
@@ -425,24 +425,34 @@ install_nginx_panel() {
     [[ -f /etc/nginx/sites-available/ipanel.conf ]] && NGINX_CONF="/etc/nginx/sites-available/ipanel.conf"
     sed -i "s|unix:/run/php/ipanel\.sock|unix:${PHP_SOCK}|g" "$NGINX_CONF" 2>/dev/null || true
 
-    # headers-more modülü kurulu değilse more_clear_headers direktifini kaldır
-    # (server_tokens off zaten nginx sürümünü gizler; sadece "Server: nginx" kalır)
-    # Dinamik modüller nginx -V çıktısında görünmez; .so varlığına bak
+    # headers-more modülü yüklü mü? — .so varlığı yeterli değil, load_module gerekli.
+    # nginx -V statik derleme, grep ise load_module satırını kontrol eder.
     local HEADERS_MORE_LOADED=false
-    for f in \
-        /usr/lib64/nginx/modules/ngx_http_headers_more_filter_module.so \
-        /usr/lib/nginx/modules/ngx_http_headers_more_filter_module.so \
-        /usr/share/nginx/modules/mod-http-headers-more.conf; do
-        [[ -e "$f" ]] && { HEADERS_MORE_LOADED=true; break; }
-    done
+    if nginx -V 2>&1 | grep -qi 'headers.more\|headers_more'; then
+        HEADERS_MORE_LOADED=true
+    elif grep -r 'ngx_http_headers_more\|mod-http-headers-more' \
+            /etc/nginx/modules/ /etc/nginx/conf.d/ /etc/nginx/nginx.conf \
+            2>/dev/null | grep -q 'load_module'; then
+        HEADERS_MORE_LOADED=true
+    fi
     if ! $HEADERS_MORE_LOADED; then
         sed -i '/more_clear_headers/d' "$NGINX_CONF"
-        warn "nginx headers-more modülü bulunamadı; more_clear_headers devre dışı (Server header gizlenmeyecek)"
+        warn "nginx headers-more modülü yüklü değil; more_clear_headers devre dışı (server_tokens off hâlâ aktif)"
     fi
 
-    systemctl enable --now nginx
-    nginx -t || fail "Nginx config hatası var"
-    systemctl reload nginx
+    # reload yerine restart — ilk kurulumda reload sessizce eski config'de kalabilir
+    systemctl enable nginx
+    nginx -t || fail "Nginx config hatası var (nginx -t)"
+    systemctl restart nginx
+    sleep 1
+
+    # Port 3333'ün gerçekten açıldığını doğrula
+    if ! ss -tlnp 2>/dev/null | grep -q ':3333 '; then
+        warn "Nginx 3333'te dinlemiyor. Nginx error log:"
+        tail -20 /var/log/nginx/error.log 2>/dev/null || true
+        fail "Nginx 3333 portunda başlamadı. Kontrol: nginx -t && journalctl -u nginx -n 30"
+    fi
+
     ok "Panel vhost etkinleştirildi (https://IP:3333)"
 }
 

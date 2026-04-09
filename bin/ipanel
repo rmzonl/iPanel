@@ -24,7 +24,7 @@ if (posix_geteuid() !== 0 && (($argv[1] ?? '') !== 'version')) {
 define('IPANEL_ROOT', '/usr/local/ipanel');
 define('IPANEL_CONFIG', '/etc/ipanel/agent.conf.php');
 define('IPANEL_SOCKET', '/run/ipanel/agent.sock');
-define('IPANEL_VERSION', '0.1.0');
+define('IPANEL_VERSION', '0.6.1');
 
 $cmd = $argv[1] ?? 'help';
 array_shift($argv);
@@ -66,7 +66,7 @@ switch ($cmd) {
     case 'help':
     default:
         echo <<<HELP
-iPanel CLI — v0.1.0
+iPanel CLI — v0.6.1
 
 Usage: ipanel <command> [args]
 
@@ -98,7 +98,7 @@ function cmdStatus(): void
         $out = [];
     }
 
-    echo "\nAgent socket: " . (file_exists(IPANEL_SOCKET) ? "OK ({IPANEL_SOCKET})" : 'MISSING') . "\n";
+    echo "\nAgent socket: " . (file_exists(IPANEL_SOCKET) ? 'OK (' . IPANEL_SOCKET . ')' : 'MISSING') . "\n";
 }
 
 function cmdUpdate(): void
