@@ -2,6 +2,7 @@
 
 use DB;
 use Session;
+use Project\Libraries\RateLimiter;
 
 /**
  * Denetim logu — kim, ne zaman, ne yaptı

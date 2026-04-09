@@ -49,11 +49,13 @@
 
             // Admin-only menü öğeleri
             $adminItems = [
-              ['url'=>'ipaddresses/main', 'icon'=>'ti-network',       'label'=>'IP Adresleri'],
+              ['url'=>'filemanager/main', 'icon'=>'ti-files',          'label'=>'Dosya Yöneticisi'],
+              ['url'=>'ipaddresses/main', 'icon'=>'ti-network',        'label'=>'IP Adresleri'],
               ['url'=>'firewall/main',    'icon'=>'ti-shield',         'label'=>'Güvenlik Duvarı'],
               ['url'=>'phpmyadmin/main',  'icon'=>'ti-database-import','label'=>'PHPMyAdmin'],
               ['url'=>'phpmanager/main',  'icon'=>'ti-brand-php',      'label'=>'PHP Yönetimi'],
               ['url'=>'nodemanager/main', 'icon'=>'ti-brand-nodejs',   'label'=>'Node.js'],
+              ['url'=>'jobs/main',        'icon'=>'ti-list-check',     'label'=>'İş Kuyruğu'],
               ['url'=>'settings/main',    'icon'=>'ti-settings',       'label'=>'Ayarlar'],
             ];
 
@@ -161,12 +163,4 @@
 </div>
 
 <script src="https://cdn.jsdelivr.net/npm/@tabler/core@1.0.0-beta17/dist/js/tabler.min.js"></script>
-<script>
-  // Auto-dismiss flash messages
-  setTimeout(function() {
-    document.querySelectorAll('.alert-flash').forEach(function(el) {
-      var bsAlert = bootstrap.Alert.getOrCreateInstance(el);
-      bsAlert.close();
-    });
-  }, 4000);
-</script>
+<script src="{{ URL::base('assets/js/ipanel.js') }}"></script>

@@ -4,7 +4,11 @@
       <div class="row g-2 align-items-center">
         <div class="col">
           <h2 class="page-title"><i class="ti ti-brand-php me-2"></i>PHP Yönetimi</h2>
-          <div class="text-muted mt-1">PHP sürümleri, eklentiler ve FPM servisleri.</div>
+        </div>
+        <div class="col-auto ms-auto">
+          <a href="{{ URL::base('phpmanager/obfuscation') }}" class="btn btn-outline-secondary">
+            <i class="ti ti-lock me-1"></i> Koruma Yönetimi
+          </a>
         </div>
       </div>
     </div>
@@ -14,170 +18,171 @@
     <div class="container-xl">
 
       @if(!empty($success))
-        <div class="alert alert-success alert-dismissible">{[ echo $success; ]}<button type="button" class="btn-close" data-bs-dismiss="alert"></button></div>
+        <div class="alert alert-success alert-dismissible fade show mb-3">
+          <i class="ti ti-circle-check me-2"></i>{{ $success }}
+          <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
       @endif
       @if(!empty($error))
-        <div class="alert alert-danger alert-dismissible"><pre class="mb-0">{{ $error }}</pre><button type="button" class="btn-close" data-bs-dismiss="alert"></button></div>
+        <div class="alert alert-danger alert-dismissible fade show mb-3">
+          <i class="ti ti-alert-circle me-2"></i>{{ $error }}
+          <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
       @endif
 
-      <div class="row">
+      {[
+        $info       = $phpInfo;
+        $versions   = $info['versions']   ?? [];
+        $active     = $info['active']     ?? 'Bilinmiyor';
+        $extensions = $info['extensions'] ?? [];
+        $fpmStatus  = $info['fpm_status'] ?? [];
+        $os         = $info['os']         ?? 'unknown';
+      ]}
 
-        <!-- Sol: Sürüm listesi + FPM -->
-        <div class="col-lg-5">
-
-          <!-- Kurulu Sürümler -->
-          <div class="card mb-3">
-            <div class="card-header">
-              <h3 class="card-title">Kurulu PHP Sürümleri</h3>
-            </div>
-            <div class="card-body p-0">
-              <table class="table table-vcenter mb-0">
-                <thead>
-                  <tr>
-                    <th>Sürüm</th>
-                    <th>PHP-FPM</th>
-                    <th></th>
-                  </tr>
-                </thead>
-                <tbody>
-                  @forelse($phpInfo['versions'] as $v)
-                    {[ $fpmState = $phpInfo['fpm_status'][$v] ?? 'unknown'; ]}
-                    <tr>
-                      <td><strong>PHP {{ $v }}</strong></td>
-                      <td>
-                        @if($fpmState === 'active')
-                          <span class="badge bg-success">Çalışıyor</span>
-                        @elseif($fpmState === 'inactive')
-                          <span class="badge bg-warning">Durdu</span>
-                        @else
-                          <span class="badge bg-secondary">{{ $fpmState }}</span>
-                        @endif
-                      </td>
-                      <td>
-                        <form method="POST" action="{{ URL::base('phpmanager/restartFpm') }}" class="d-inline">
-                          {[ echo $csrfField ?? ""; ]}
-                          <input type="hidden" name="php_version" value="{{ $v }}">
-                          <button type="submit" class="btn btn-sm btn-secondary" title="FPM Yeniden Başlat">
-                            <i class="ti ti-refresh"></i>
-                          </button>
-                        </form>
-                      </td>
-                    </tr>
-                  @empty
-                    <tr>
-                      <td colspan="3" class="text-center text-muted py-3">Kurulu PHP sürümü bulunamadı.</td>
-                    </tr>
-                  @endforelse
-                </tbody>
-              </table>
-            </div>
-          </div>
-
-          <!-- Yeni Sürüm Kur -->
+      <!-- ── Sistem Bilgisi ── -->
+      <div class="row row-deck row-cards mb-3">
+        <div class="col-md-6">
           <div class="card">
             <div class="card-header">
-              <h3 class="card-title">Yeni PHP Sürümü Kur</h3>
+              <h3 class="card-title"><i class="ti ti-info-circle me-2"></i>Sistem Durumu</h3>
             </div>
             <div class="card-body">
-              <form method="POST" action="{{ URL::base('phpmanager/installVersion') }}">
-                {[ echo $csrfField ?? ""; ]}
+              <dl class="row mb-0">
+                <dt class="col-5 text-muted">Aktif PHP</dt>
+                <dd class="col-7"><code>{{ $active }}</code></dd>
+                <dt class="col-5 text-muted">İşletim Sistemi</dt>
+                <dd class="col-7"><span class="badge bg-blue-lt">{{ strtoupper($os) }}</span></dd>
+                <dt class="col-5 text-muted">Kurulu Sürümler</dt>
+                <dd class="col-7">{{ count($versions) }} adet</dd>
+              </dl>
+            </div>
+          </div>
+        </div>
+
+        <!-- ── PHP Sürümü Kur ── -->
+        <div class="col-md-6">
+          <div class="card">
+            <div class="card-header">
+              <h3 class="card-title"><i class="ti ti-download me-2"></i>PHP Sürümü Kur</h3>
+            </div>
+            <div class="card-body">
+              <form method="post" action="{{ URL::base('phpmanager/installversion') }}" data-ajax>
+                {{ $csrfField }}
                 <div class="input-group">
-                  <select name="php_version" class="form-select">
-                    @foreach(['7.4','8.0','8.1','8.2','8.3'] as $ver)
-                      <option value="{{ $ver }}">PHP {{ $ver }}</option>
-                    @endforeach
+                  <select name="php_version" class="form-select" required>
+                    <option value="">Sürüm seç…</option>
+                    <option value="8.4">PHP 8.4</option>
+                    <option value="8.3">PHP 8.3</option>
+                    <option value="8.2">PHP 8.2</option>
+                    <option value="8.1">PHP 8.1</option>
+                    <option value="8.0">PHP 8.0</option>
+                    <option value="7.4">PHP 7.4</option>
                   </select>
-                  <button type="submit" class="btn btn-success"
-                          onclick="return confirm('PHP kurulumu başlayacak. Bu işlem birkaç dakika sürebilir.')">
-                    <i class="ti ti-download me-1"></i>Kur
+                  <button type="submit" class="btn btn-primary">
+                    <i class="ti ti-download me-1"></i> Kur
                   </button>
                 </div>
-                <div class="form-text">{{ $phpInfo['os'] === 'debian' ? 'PPA:ondrej/php üzerinden kurulur' : 'Remi Repository üzerinden kurulur' }}</div>
+                <small class="text-muted mt-1 d-block">Kurulum birkaç dakika sürebilir.</small>
               </form>
             </div>
           </div>
         </div>
-
-        <!-- Sağ: Eklentiler -->
-        <div class="col-lg-7">
-          <div class="card">
-            <div class="card-header">
-              <h3 class="card-title">Yüklü Eklentiler (Aktif PHP)</h3>
-              <div class="card-options">
-                <span class="badge bg-blue">PHP {{ $phpInfo['active'] }}</span>
-              </div>
-            </div>
-            <div class="card-body" style="max-height:300px; overflow-y:auto;">
-              <div class="row g-1">
-                @foreach($phpInfo['extensions'] as $ext)
-                  <div class="col-auto">
-                    <span class="badge bg-azure-lt">{{ $ext }}</span>
-                  </div>
-                @endforeach
-              </div>
-            </div>
-          </div>
-
-          <!-- Eklenti Kur/Kaldır -->
-          <div class="card mt-3">
-            <div class="card-header">
-              <h3 class="card-title">Eklenti Yönetimi</h3>
-            </div>
-            <div class="card-body">
-              <form method="POST" action="{{ URL::base('phpmanager/toggleExtension') }}">
-                {[ echo $csrfField ?? ""; ]}
-                <div class="row g-2">
-                  <div class="col-4">
-                    <label class="form-label">PHP Sürümü</label>
-                    <select name="php_version" class="form-select">
-                      @foreach($phpInfo['versions'] as $v)
-                        <option value="{{ $v }}">PHP {{ $v }}</option>
-                      @endforeach
-                    </select>
-                  </div>
-                  <div class="col-4">
-                    <label class="form-label">Eklenti Adı</label>
-                    <input type="text" name="extension" class="form-control" placeholder="Örn: redis, imagick">
-                  </div>
-                  <div class="col-4">
-                    <label class="form-label">İşlem</label>
-                    <div class="d-flex gap-2">
-                      <button type="submit" name="action" value="install" class="btn btn-success flex-fill">
-                        <i class="ti ti-plus"></i> Kur
-                      </button>
-                      <button type="submit" name="action" value="remove" class="btn btn-danger flex-fill"
-                              onclick="return confirm('Bu eklenti kaldırılsın mı?')">
-                        <i class="ti ti-minus"></i> Kaldır
-                      </button>
-                    </div>
-                  </div>
-                </div>
-              </form>
-            </div>
-          </div>
-
-          <!-- Yaygın Eklentiler -->
-          <div class="card mt-3">
-            <div class="card-header"><h3 class="card-title">Yaygın Eklentiler</h3></div>
-            <div class="card-body">
-              <div class="row g-1">
-                {[
-                  $common = ['redis','imagick','memcached','gmp','bcmath','soap','xsl','zip','intl','mbstring','xml','curl','pdo_mysql','gd','opcache'];
-                  foreach ($common as $ext):
-                    $loaded = in_array($ext, $phpInfo['extensions']);
-                ]}
-                <div class="col-auto">
-                  <span class="badge {{ $loaded ? 'bg-green' : 'bg-secondary' }}">
-                    {{ $ext }} {{ $loaded ? '✓' : '' }}
-                  </span>
-                </div>
-                {[ endforeach; ]}
-              </div>
-            </div>
-          </div>
-        </div>
-
       </div>
+
+      <!-- ── Kurulu PHP Sürümleri & FPM Durumu ── -->
+      <div class="card mb-3">
+        <div class="card-header">
+          <h3 class="card-title"><i class="ti ti-list me-2"></i>Kurulu PHP Sürümleri</h3>
+        </div>
+        <div class="table-responsive">
+          <table class="table table-vcenter card-table">
+            <thead>
+              <tr>
+                <th>Sürüm</th>
+                <th>PHP-FPM Durumu</th>
+                <th class="w-1"></th>
+              </tr>
+            </thead>
+            <tbody>
+              @forelse($versions as $v)
+                {[
+                  $fpmSt  = $fpmStatus[$v] ?? 'unknown';
+                  $fpmClr = $fpmSt === 'active' ? 'success' : ($fpmSt === 'inactive' ? 'secondary' : 'danger');
+                ]}
+                <tr>
+                  <td><strong>PHP {{ $v }}</strong> @if(strpos($active, $v) === 0) <span class="badge bg-green-lt ms-1">Aktif</span> @endif</td>
+                  <td><span class="badge bg-{{ $fpmClr }}-lt text-{{ $fpmClr }}">{{ $fpmSt }}</span></td>
+                  <td>
+                    <form method="post" action="{{ URL::base('phpmanager/restartfpm') }}" class="d-inline" data-ajax>
+                      {{ $csrfField }}
+                      <input type="hidden" name="php_version" value="{{ $v }}">
+                      <button type="submit" class="btn btn-sm btn-ghost-warning" title="FPM Yeniden Başlat">
+                        <i class="ti ti-refresh"></i>
+                      </button>
+                    </form>
+                  </td>
+                </tr>
+              @empty
+                <tr><td colspan="3" class="text-center text-muted py-4">Kurulu PHP sürümü bulunamadı</td></tr>
+              @endforelse
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- ── Yüklü Eklentiler ── -->
+      <div class="card mb-3">
+        <div class="card-header d-flex align-items-center gap-2">
+          <h3 class="card-title mb-0"><i class="ti ti-puzzle me-2"></i>Yüklü Eklentiler (Aktif PHP)</h3>
+          <span class="badge bg-blue-lt ms-auto">{{ count($extensions) }} eklenti</span>
+        </div>
+        <div class="card-body">
+          <div class="d-flex flex-wrap gap-1">
+            @foreach($extensions as $ext)
+              <span class="badge bg-secondary-lt">{{ $ext }}</span>
+            @endforeach
+          </div>
+        </div>
+      </div>
+
+      <!-- ── Eklenti Yönetimi ── -->
+      @if(!empty($versions))
+      <div class="card">
+        <div class="card-header">
+          <h3 class="card-title"><i class="ti ti-plus me-2"></i>Eklenti Kur / Kaldır</h3>
+        </div>
+        <div class="card-body">
+          <form method="post" action="{{ URL::base('phpmanager/toggleextension') }}" data-ajax>
+            {{ $csrfField }}
+            <div class="row g-2">
+              <div class="col-md-3">
+                <select name="php_version" class="form-select" required>
+                  <option value="">PHP Sürümü…</option>
+                  @foreach($versions as $v)
+                    <option value="{{ $v }}">PHP {{ $v }}</option>
+                  @endforeach
+                </select>
+              </div>
+              <div class="col-md-5">
+                <input type="text" name="extension" class="form-control"
+                       placeholder="Eklenti adı (örn: mbstring, curl, gd)"
+                       pattern="[a-zA-Z0-9_-]+" required>
+              </div>
+              <div class="col-md-2">
+                <select name="action" class="form-select" required>
+                  <option value="install">Kur</option>
+                  <option value="remove">Kaldır</option>
+                </select>
+              </div>
+              <div class="col-md-2">
+                <button type="submit" class="btn btn-primary w-100">Uygula</button>
+              </div>
+            </div>
+          </form>
+        </div>
+      </div>
+      @endif
+
     </div>
   </div>
 </div>

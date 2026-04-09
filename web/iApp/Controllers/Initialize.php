@@ -22,11 +22,14 @@ class Initialize extends Controller
     /** Kimlik doğrulama gerektirmeyen controller'lar */
     private const PUBLIC_CONTROLLERS = ['auth', 'errors', 'api'];
 
+    /** JSON yanıt döndüren controller'lar (redirect yerine 401 JSON) */
+    private const JSON_CONTROLLERS = ['stats', 'jobs'];
+
     /** Settings içinde admin zorunluluğu olmayan metodlar (reseller de erişebilir) */
     private const SETTINGS_RESELLER_ALLOWED = ['twoFactor', 'setup2fa', 'enable2fa', 'disable2fa', 'backupCodes'];
 
     /** Admin-only controller'lar (reseller erişemez) */
-    private const ADMIN_ONLY = ['ipaddresses', 'firewall', 'phpmyadmin', 'phpmanager', 'nodemanager'];
+    private const ADMIN_ONLY = ['ipaddresses', 'firewall', 'phpmyadmin', 'phpmanager', 'nodemanager', 'filemanager'];
 
     public function main(): void
     {
@@ -35,7 +38,7 @@ class Initialize extends Controller
         $controller = strtolower(CURRENT_CONTROLLER ?? '');
         $method     = strtolower(CURRENT_CFUNCTION  ?? 'main');
 
-        // Genel sayfalara (auth, errors) kimlik doğrulaması gerekmez
+        // Genel sayfalara (auth, errors, api) kimlik doğrulaması gerekmez
         if (in_array($controller, self::PUBLIC_CONTROLLERS, true)) {
             if ($controller === 'auth') {
                 Masterpage::bodyPage('layouts/auth-body');
@@ -46,6 +49,13 @@ class Initialize extends Controller
         // Oturum kontrolü
         $user = Session::select('admin_user');
         if (empty($user)) {
+            // JSON endpoint'lerde redirect yerine 401 döndür
+            if (in_array($controller, self::JSON_CONTROLLERS, true)) {
+                Http::response(401);
+                header('Content-Type: application/json');
+                echo \Json::encode(['success' => false, 'message' => 'Oturum açılmamış.']);
+                exit;
+            }
             Redirect::action('auth/login');
             return;
         }

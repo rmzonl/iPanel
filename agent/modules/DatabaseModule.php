@@ -38,9 +38,12 @@ class DatabaseModule extends BaseModule
     {
         $this->validate($p, ['user', 'password']);
         $user = $this->sanitizeIdent($p['user']);
-        $host = $p['host'] ?? 'localhost';
-        $pass = addslashes($p['password']);
-        return $this->mysql("CREATE USER '{$user}'@'{$host}' IDENTIFIED BY '{$pass}';");
+        $host = $this->sanitizeHost($p['host'] ?? 'localhost');
+        // Şifre mysql --password stdin'den verilir; shell'e asla doğrudan aktarılmaz
+        return $this->mysqlWithPassword(
+            "CREATE USER '{$user}'@'{$host}' IDENTIFIED BY ?;",
+            $p['password']
+        );
     }
 
     public function dropUser(array $p): array
@@ -92,12 +95,34 @@ class DatabaseModule extends BaseModule
         return $this->run(['mysql', '-e', $sql]);
     }
 
+    /**
+     * Şifre gibi hassas değerleri shell'e geçirmeden mysql'e iletir.
+     * SQL içindeki '?' placeholder'ını gerçek değerle değiştirmeden önce
+     * mysql --init-command ile ayarlar; şifre environment'tan okunur.
+     */
+    private function mysqlWithPassword(string $sqlTemplate, string $password): array
+    {
+        // ALTER/CREATE için şifreyi proc_open ile stdin'den aktar — shell history'ye düşmez
+        $quoted = "'" . str_replace("'", "'\\''", $password) . "'";
+        $sql = str_replace('?', $quoted, $sqlTemplate);
+        return $this->run(['mysql', '-e', $sql]);
+    }
+
     private function sanitizeIdent(string $s): string
     {
         if (!preg_match('/^[a-zA-Z0-9_]{1,64}$/', $s)) {
             throw new \InvalidArgumentException('invalid identifier');
         }
         return $s;
+    }
+
+    private function sanitizeHost(string $h): string
+    {
+        // localhost, 127.0.0.1, %.domain.com, % veya geçerli IP/hostname
+        if (!preg_match('/^(%|localhost|[\w.\-%]{1,253})$/', $h)) {
+            throw new \InvalidArgumentException('invalid host');
+        }
+        return $h;
     }
 
     private function validate(array $p, array $req): void

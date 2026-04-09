@@ -201,6 +201,148 @@ class PhpManager extends Controller
         ];
     }
 
+    /* ── Obfuscation / Koruma Yönetimi ── */
+
+    /** ionCube Loader / PHPKoru / Zend Guard durumu ve yönetimi */
+    public function obfuscation(): void
+    {
+        View::pageTitle('PHP Koruma Yönetimi');
+        View::ioncubeStatus($this->detectIoncube());
+        View::phpkoruStatus($this->detectPhpkoru());
+        View::zendStatus($this->detectZendGuard());
+        View::success(Session::select('success'));
+        View::error(Session::select('error'));
+        Session::delete('success');
+        Session::delete('error');
+    }
+
+    /** ionCube Loader kur */
+    public function installIoncube(): void
+    {
+        if (!Http::isRequestMethod('post')) { Redirect::action('phpmanager/obfuscation'); return; }
+        if (!CsrfGuard::verify()) { Session::insert('error', 'Geçersiz form isteği.'); Redirect::action('phpmanager/obfuscation'); return; }
+
+        $version = Post::get('php_version') ?: '';
+        if (!preg_match('/^\d+\.\d+$/', $version)) {
+            Session::insert('error', 'Geçersiz PHP sürümü.'); Redirect::action('phpmanager/obfuscation'); return;
+        }
+
+        // ionCube indirme ve kurma
+        $arch    = php_uname('m') === 'x86_64' ? 'x86-64' : 'x86';
+        $tmpDir  = '/tmp/ioncube_install_' . time();
+        $tarball = "$tmpDir/ioncube_loader.tar.gz";
+        $dlUrl   = "https://downloads.ioncube.com/loader_downloads/ioncube_loaders_lin_{$arch}.tar.gz";
+
+        @mkdir($tmpDir, 0700, true);
+        $cmd = "curl -fsSL " . escapeshellarg($dlUrl) . " -o " . escapeshellarg($tarball)
+             . " && tar -xzf " . escapeshellarg($tarball) . " -C " . escapeshellarg($tmpDir)
+             . " 2>&1";
+        exec($cmd, $out, $rc);
+
+        if ($rc !== 0) {
+            Session::insert('error', 'ionCube indirilemedi: ' . htmlspecialchars(implode("\n", array_slice($out, -3))));
+            Redirect::action('phpmanager/obfuscation');
+            return;
+        }
+
+        // Uygun .so dosyasını bul
+        $ver      = str_replace('.', '_', $version);
+        $pattern  = "$tmpDir/ioncube/ioncube_loader_lin_{$ver}.so";
+        $soFiles  = glob($pattern) ?: [];
+        if (empty($soFiles)) {
+            Session::insert('error', "ionCube loader PHP $version için bulunamadı.");
+            Redirect::action('phpmanager/obfuscation');
+            return;
+        }
+        $soFile = $soFiles[0];
+
+        // PHP eklenti dizinine kopyala
+        exec("php$version -r 'echo ini_get(\"extension_dir\");' 2>/dev/null", $extDirOut);
+        $extDir = trim($extDirOut[0] ?? '');
+        if (!$extDir || !is_dir($extDir)) {
+            Session::insert('error', 'PHP eklenti dizini bulunamadı.'); Redirect::action('phpmanager/obfuscation'); return;
+        }
+
+        exec("cp " . escapeshellarg($soFile) . " " . escapeshellarg($extDir . '/') . " 2>&1", $out, $rc);
+        if ($rc !== 0) { Session::insert('error', 'Dosya kopyalanamadı.'); Redirect::action('phpmanager/obfuscation'); return; }
+
+        // php.ini'ye ekle
+        $phpIniDir = $this->detectOs() === 'debian' ? "/etc/php/$version/mods-available" : "/etc/php.d";
+        @mkdir($phpIniDir, 0755, true);
+        $iniContent = "zend_extension=" . basename($soFile) . "\n";
+        file_put_contents("$phpIniDir/ioncube.ini", $iniContent);
+
+        if ($this->detectOs() === 'debian') {
+            exec("phpenmod -v $version ioncube 2>&1");
+        }
+
+        // Temizlik
+        exec("rm -rf " . escapeshellarg($tmpDir));
+
+        AuditLogger::log('php.ioncube_install', 'system', null, "ionCube PHP $version kuruldu");
+        Session::insert('success', "ionCube Loader PHP $version için kuruldu.");
+        Redirect::action('phpmanager/obfuscation');
+    }
+
+    /** ionCube kaldır */
+    public function removeIoncube(): void
+    {
+        if (!Http::isRequestMethod('post')) { Redirect::action('phpmanager/obfuscation'); return; }
+        if (!CsrfGuard::verify()) { Session::insert('error', 'Geçersiz form isteği.'); Redirect::action('phpmanager/obfuscation'); return; }
+
+        $version = Post::get('php_version') ?: '';
+        if (!preg_match('/^\d+\.\d+$/', $version)) {
+            Session::insert('error', 'Geçersiz PHP sürümü.'); Redirect::action('phpmanager/obfuscation'); return;
+        }
+
+        if ($this->detectOs() === 'debian') {
+            exec("phpdismod -v $version ioncube 2>&1");
+        }
+
+        $iniFiles = [
+            "/etc/php/$version/mods-available/ioncube.ini",
+            "/etc/php.d/ioncube.ini",
+            "/etc/php/$version/cli/conf.d/00-ioncube.ini",
+            "/etc/php/$version/fpm/conf.d/00-ioncube.ini",
+        ];
+        foreach ($iniFiles as $f) { @unlink($f); }
+
+        // .so sil
+        exec("php$version -r 'echo ini_get(\"extension_dir\");' 2>/dev/null", $extDirOut);
+        $extDir = trim($extDirOut[0] ?? '');
+        if ($extDir) {
+            foreach (glob("$extDir/ioncube_loader_*.so") ?: [] as $f) { @unlink($f); }
+        }
+
+        AuditLogger::log('php.ioncube_remove', 'system', null, "ionCube PHP $version kaldırıldı");
+        Session::insert('success', "ionCube Loader PHP $version kaldırıldı.");
+        Redirect::action('phpmanager/obfuscation');
+    }
+
+    // ── Detect helpers ──
+
+    private function detectIoncube(): array
+    {
+        $loaded = extension_loaded('ionCube Loader') || function_exists('ioncube_loader_iversion');
+        return [
+            'loaded'  => $loaded,
+            'version' => $loaded ? (function_exists('ioncube_loader_version') ? ioncube_loader_version() : 'Bilinmiyor') : null,
+        ];
+    }
+
+    private function detectPhpkoru(): array
+    {
+        // PHPKoru eklentisi çeşitli isimlerle yüklenebilir
+        $loaded = extension_loaded('phpkoru') || extension_loaded('sg');
+        return ['loaded' => $loaded];
+    }
+
+    private function detectZendGuard(): array
+    {
+        $loaded = extension_loaded('Zend Guard Loader') || extension_loaded('Zend OPcache');
+        return ['loaded' => $loaded];
+    }
+
     private function detectOs(): string
     {
         return file_exists('/etc/debian_version') ? 'debian' : 'rhel';
