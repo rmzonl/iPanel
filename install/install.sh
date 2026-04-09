@@ -281,12 +281,21 @@ create_php_fpm_pool() {
         FPM_SVC="php-fpm"
     fi
 
+    # OS'a göre socket dizinini belirle
+    if [[ "$OS_ID" == "ubuntu" || "$OS_ID" == "debian" ]]; then
+        PHP_SOCK="/run/php/ipanel.sock"
+    else
+        # RHEL/AlmaLinux/Rocky: php-fpm paketi /run/php-fpm/ dizinini oluşturur
+        PHP_SOCK="/run/php-fpm/ipanel.sock"
+    fi
+    export PHP_SOCK
+
     cat > "$POOL_FILE" <<EOF
 ; iPanel Web UI — otomatik oluşturuldu
 [ipanel]
 user = $WEB_USER
 group = $WEB_USER
-listen = /run/php/ipanel.sock
+listen = ${PHP_SOCK}
 listen.owner = $WEB_USER
 listen.group = $WEB_USER
 listen.mode = 0660
@@ -302,7 +311,7 @@ EOF
 
     systemctl enable --now "$FPM_SVC"
     systemctl restart "$FPM_SVC"
-    ok "PHP-FPM pool: $FPM_SVC → /run/php/ipanel.sock"
+    ok "PHP-FPM pool: $FPM_SVC → ${PHP_SOCK}"
 }
 
 ###############################################################################
@@ -356,11 +365,17 @@ install_nginx_panel() {
         cp "$IPANEL_ROOT/install/nginx/panel.conf" /etc/nginx/conf.d/ipanel.conf
     fi
 
-    # Nginx config içindeki IPANEL_ROOT yolunu güncelle
-    sed -i "s|/usr/local/ipanel|$IPANEL_ROOT|g" \
-        /etc/nginx/sites-available/ipanel.conf \
-        /etc/nginx/conf.d/ipanel.conf \
-        2>/dev/null || true
+    # Rate limit direktiflerini http context'e kopyala (her iki OS'ta conf.d http context'te yüklenir)
+    cp "$IPANEL_ROOT/install/nginx/panel-ratelimit.conf" /etc/nginx/conf.d/ipanel-ratelimit.conf
+
+    # Nginx config içindeki IPANEL_ROOT yolunu ve PHP_SOCK placeholder'ını güncelle
+    for NGINX_CONF in /etc/nginx/sites-available/ipanel.conf /etc/nginx/conf.d/ipanel.conf; do
+        [[ -f "$NGINX_CONF" ]] || continue
+        sed -i \
+            -e "s|/usr/local/ipanel|$IPANEL_ROOT|g" \
+            -e "s|IPANEL_PHP_SOCK|${PHP_SOCK}|g" \
+            "$NGINX_CONF"
+    done
 
     systemctl enable --now nginx
     nginx -t || fail "Nginx config hatası var"
@@ -469,9 +484,9 @@ health_check() {
         && ok "Agent socket mevcut" \
         || { warn "Agent socket eksik: /run/ipanel/agent.sock"; ALL_OK=false; }
 
-    [[ -S /run/php/ipanel.sock ]] \
-        && ok "PHP-FPM socket mevcut" \
-        || { warn "PHP-FPM socket eksik: /run/php/ipanel.sock"; ALL_OK=false; }
+    [[ -S "${PHP_SOCK:-/run/php/ipanel.sock}" ]] \
+        && ok "PHP-FPM socket mevcut (${PHP_SOCK:-/run/php/ipanel.sock})" \
+        || { warn "PHP-FPM socket eksik: ${PHP_SOCK:-/run/php/ipanel.sock}"; ALL_OK=false; }
 
     if [[ -f /etc/ipanel/db.env ]]; then
         local DBPASS
