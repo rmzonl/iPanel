@@ -131,7 +131,8 @@ install_deps() {
             pure-ftpd \
             redis \
             certbot \
-            firewalld fail2ban
+            firewalld fail2ban \
+            policycoreutils-python-utils
 
         # headers-more modülü — isteğe bağlı, EPEL'de farklı isimlerle olabilir
         # Bulunamazsa install_nginx_panel() direktifi conf'tan siler
@@ -438,6 +439,17 @@ install_nginx_panel() {
     if ! $HEADERS_MORE_LOADED; then
         sed -i '/more_clear_headers/d' "$NGINX_CONF"
         warn "nginx headers-more modülü yüklü değil; more_clear_headers devre dışı (server_tokens off hâlâ aktif)"
+    fi
+
+    # SELinux — port 3333'ü nginx (http_port_t) için aç
+    # AlmaLinux/RHEL'de SELinux varsayılan olarak aktiftir ve nginx'in
+    # yalnızca bilinen portlara (80, 443, 8080…) bind olmasına izin verir.
+    if command -v semanage >/dev/null 2>&1 && command -v getenforce >/dev/null 2>&1 \
+            && [[ "$(getenforce 2>/dev/null)" != "Disabled" ]]; then
+        semanage port -a -t http_port_t -p tcp 3333 2>/dev/null \
+            || semanage port -m -t http_port_t -p tcp 3333 2>/dev/null \
+            || warn "SELinux: port 3333 http_port_t eklenemedi (zaten mevcut olabilir)"
+        ok "SELinux: port 3333 nginx'e açıldı (http_port_t)."
     fi
 
     # reload yerine restart — ilk kurulumda reload sessizce eski config'de kalabilir
