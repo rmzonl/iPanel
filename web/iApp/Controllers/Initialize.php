@@ -29,7 +29,7 @@ class Initialize extends Controller
     private const SETTINGS_RESELLER_ALLOWED = ['twoFactor', 'setup2fa', 'enable2fa', 'disable2fa', 'backupCodes'];
 
     /** Admin-only controller'lar (reseller erişemez) */
-    private const ADMIN_ONLY = ['ipaddresses', 'firewall', 'phpmyadmin', 'phpmanager', 'nodemanager'];
+    private const ADMIN_ONLY = ['ipaddresses', 'firewall', 'phpmyadmin', 'phpmanager', 'nodemanager', 'filemanager'];
 
     public function main(): void
     {

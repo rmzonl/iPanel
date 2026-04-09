@@ -49,9 +49,12 @@
 
             // Admin-only menü öğeleri
             $adminItems = [
-              ['url'=>'ipaddresses/main', 'icon'=>'ti-network', 'label'=>'IP Adresleri'],
-              ['url'=>'firewall/main',    'icon'=>'ti-shield',  'label'=>'Güvenlik Duvarı'],
-              ['url'=>'settings/main',    'icon'=>'ti-settings','label'=>'Ayarlar'],
+              ['url'=>'filemanager/main', 'icon'=>'ti-files',    'label'=>'Dosya Yöneticisi'],
+              ['url'=>'ipaddresses/main', 'icon'=>'ti-network',  'label'=>'IP Adresleri'],
+              ['url'=>'firewall/main',    'icon'=>'ti-shield',   'label'=>'Güvenlik Duvarı'],
+              ['url'=>'phpmanager/main',  'icon'=>'ti-brand-php','label'=>'PHP Yönetimi'],
+              ['url'=>'jobs/main',        'icon'=>'ti-list-check','label'=>'İş Kuyruğu'],
+              ['url'=>'settings/main',    'icon'=>'ti-settings', 'label'=>'Ayarlar'],
             ];
 
             $isAdmin = ($navRole === 'admin');

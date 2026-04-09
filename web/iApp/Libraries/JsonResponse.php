@@ -1,6 +1,7 @@
 <?php namespace Project\Libraries;
 
 use ZN\Request\Http;
+use Project\Libraries\CsrfGuard;
 
 /**
  * AJAX / API için standart JSON yanıt yardımcısı.
@@ -56,7 +57,8 @@ class JsonResponse
             header('Content-Type: application/json; charset=utf-8');
             header('X-Content-Type-Options: nosniff');
         }
-        // ZN Framework Json facade kullan (varsayılan: JSON_UNESCAPED_UNICODE)
+        // Her yanıtta güncel CSRF token gönder (token rotasyonu için JS tarafında güncellenir)
+        $payload['_csrf'] = CsrfGuard::token();
         echo \Json::encode($payload);
         exit;
     }

@@ -93,6 +93,13 @@
 
       const json = await res.json();
 
+      // Her yanıtta CSRF token'ı güncelle (token rotasyonu)
+      if (json._csrf) {
+        const m = document.querySelector('meta[name="csrf-token"]');
+        if (m) m.setAttribute('content', json._csrf);
+        document.querySelectorAll('input[name="_csrf"]').forEach(el => { el.value = json._csrf; });
+      }
+
       if (json.success) {
         Toast.success(json.message || 'İşlem başarılı.');
 
