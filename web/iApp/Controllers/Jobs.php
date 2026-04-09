@@ -21,7 +21,7 @@ use Project\Libraries\JsonResponse;
 class Jobs extends Controller
 {
     /** Kuyruk yönetim sayfası */
-    public function main(): void
+    public function main()
     {
         $user   = Session::select('admin_user');
         $isAdmin = ($user['role'] ?? '') === 'admin';

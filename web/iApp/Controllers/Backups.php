@@ -21,7 +21,7 @@ class Backups extends Controller
         $this->model = new \Project\Models\BackupModel();
     }
 
-    public function main(): void
+    public function main()
     {
         $user    = Acl::user();
         $backups = ($user['role'] === 'admin')

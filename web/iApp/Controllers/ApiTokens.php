@@ -21,7 +21,7 @@ class ApiTokens extends Controller
         $this->model = new ApiTokenModel();
     }
 
-    public function main(): void
+    public function main()
     {
         $user   = Acl::user();
         $tokens = $this->model->getByUser($user['id']);

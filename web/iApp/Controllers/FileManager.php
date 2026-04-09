@@ -38,7 +38,7 @@ class FileManager extends Controller
     // Ana sayfa
     // ────────────────────────────────────────────────────────────
 
-    public function main(): void
+    public function main()
     {
         $path = $this->safePath(Get::get('path') ?? '/home');
         View::pageTitle('Dosya Yöneticisi');

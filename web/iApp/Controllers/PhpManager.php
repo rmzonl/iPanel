@@ -14,7 +14,7 @@ use Project\Libraries\AuditLogger;
  */
 class PhpManager extends Controller
 {
-    public function main(): void
+    public function main()
     {
         View::pageTitle('PHP Yönetimi');
         View::phpInfo($this->collectInfo());
@@ -204,7 +204,7 @@ class PhpManager extends Controller
     /* ── Obfuscation / Koruma Yönetimi ── */
 
     /** ionCube Loader / PHPKoru / Zend Guard durumu ve yönetimi */
-    public function obfuscation(): void
+    public function obfuscation()
     {
         View::pageTitle('PHP Koruma Yönetimi');
         View::ioncubeStatus($this->detectIoncube());

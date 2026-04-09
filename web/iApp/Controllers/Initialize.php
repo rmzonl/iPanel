@@ -2,6 +2,7 @@
 
 use ZN\Controller;
 use ZN\Request\Http;
+use ZN\Inclusion\Project\Masterpage;
 use ZN\Inclusion\Project\View;
 use Session;
 use Redirect;
@@ -27,6 +28,7 @@ class Initialize extends Controller
     public function main(): void
     {
         header_remove('X-Powered-By');
+        Masterpage::headPage('layouts/head')->bodyPage('layouts/body');
 
         $user       = Session::select('admin_user');
         $controller = CURRENT_CONTROLLER ?? '';

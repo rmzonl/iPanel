@@ -17,7 +17,7 @@ class NodeManager extends Controller
 {
     private const NVM_DIR = '/usr/local/nvm';
 
-    public function main(): void
+    public function main()
     {
         View::pageTitle('Node.js Yönetimi');
         View::nodeInfo($this->collectInfo());

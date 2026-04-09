@@ -21,7 +21,7 @@ class Clients extends Controller
         $this->model = new \Project\Models\ClientModel();
     }
 
-    public function main(): void
+    public function main()
     {
         $user    = Acl::user();
         $clients = ($user['role'] === 'admin')
@@ -36,7 +36,7 @@ class Clients extends Controller
         Session::delete('error');
     }
 
-    public function create(): void
+    public function create()
     {
         View::pageTitle('Yeni Müşteri Ekle');
     }
@@ -82,7 +82,7 @@ class Clients extends Controller
         Redirect::action('clients/main');
     }
 
-    public function edit(int $id): void
+    public function edit(int $id)
     {
         Acl::requireOwnership(Acl::ownsClient($id));
         View::pageTitle('Müşteri Düzenle');

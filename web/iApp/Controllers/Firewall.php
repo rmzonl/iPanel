@@ -22,7 +22,7 @@ class Firewall extends Controller
         $this->model = new \Project\Models\FirewallModel();
     }
 
-    public function main(): void
+    public function main()
     {
         View::pageTitle('Güvenlik Duvarı');
         View::rules($this->model->getAll());
@@ -32,7 +32,7 @@ class Firewall extends Controller
         Session::delete('error');
     }
 
-    public function create(): void
+    public function create()
     {
         View::pageTitle('Yeni Kural Ekle');
     }

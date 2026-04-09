@@ -14,6 +14,6 @@ class InitializeAuth extends Controller
     public function main(): void
     {
         header_remove('X-Powered-By');
-        Masterpage::bodyPage('layouts/auth-body');
+        Masterpage::headPage('layouts/head')->bodyPage('layouts/auth-body');
     }
 }

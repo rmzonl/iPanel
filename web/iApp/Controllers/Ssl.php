@@ -21,7 +21,7 @@ class Ssl extends Controller
         $this->model = new \Project\Models\SslModel();
     }
 
-    public function main(): void
+    public function main()
     {
         $user  = Acl::user();
         $certs = ($user['role'] === 'admin')
@@ -36,7 +36,7 @@ class Ssl extends Controller
         Session::delete('error');
     }
 
-    public function create(): void
+    public function create()
     {
         $user        = Acl::user();
         $domainModel = new \Project\Models\DomainModel();

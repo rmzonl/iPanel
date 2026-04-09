@@ -22,7 +22,7 @@ class IpAddresses extends Controller
         $this->model = new \Project\Models\IpAddressModel();
     }
 
-    public function main(): void
+    public function main()
     {
         View::pageTitle('IP Adresleri');
         View::ips($this->model->getAll());
@@ -32,7 +32,7 @@ class IpAddresses extends Controller
         Session::delete('error');
     }
 
-    public function create(): void
+    public function create()
     {
         $clientModel = new \Project\Models\ClientModel();
         View::pageTitle('Yeni IP Adresi');

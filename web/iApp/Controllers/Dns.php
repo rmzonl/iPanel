@@ -21,7 +21,7 @@ class Dns extends Controller
         $this->model = new \Project\Models\DnsModel();
     }
 
-    public function main(): void
+    public function main()
     {
         $user  = Acl::user();
         $zones = ($user['role'] === 'admin')
@@ -36,7 +36,7 @@ class Dns extends Controller
         Session::delete('error');
     }
 
-    public function records(int $zoneId): void
+    public function records(int $zoneId)
     {
         Acl::requireOwnership(Acl::ownsDnsZone($zoneId));
 
@@ -52,7 +52,7 @@ class Dns extends Controller
         Session::delete('error');
     }
 
-    public function createRecord(int $zoneId): void
+    public function createRecord(int $zoneId)
     {
         Acl::requireOwnership(Acl::ownsDnsZone($zoneId));
 

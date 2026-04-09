@@ -21,7 +21,7 @@ class Domains extends Controller
         $this->model = new \Project\Models\DomainModel();
     }
 
-    public function main(): void
+    public function main()
     {
         $user    = Acl::user();
         $domains = ($user['role'] === 'admin')
@@ -36,7 +36,7 @@ class Domains extends Controller
         Session::delete('error');
     }
 
-    public function create(): void
+    public function create()
     {
         $user        = Acl::user();
         $siteModel   = new \Project\Models\SiteModel();

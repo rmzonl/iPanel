@@ -22,7 +22,7 @@ class PhpMyAdmin extends Controller
         '/usr/share/phpMyAdmin',
     ];
 
-    public function main(): void
+    public function main()
     {
         View::pageTitle('PHPMyAdmin Yönetimi');
         View::status($this->getStatus());
