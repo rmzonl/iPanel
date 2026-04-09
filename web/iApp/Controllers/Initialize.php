@@ -1,6 +1,7 @@
 <?php namespace Project\Controllers;
 
 use ZN\Controller;
+use ZN\Request\Http;
 use ZN\Inclusion\Project\Masterpage;
 use ZN\Inclusion\Project\View;
 use Session;
