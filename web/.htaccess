@@ -61,10 +61,10 @@ RedirectMatch 403 /(config)/.*$
 	RewriteBase /
 	RewriteCond %{REQUEST_FILENAME} !-f
 	RewriteCond %{REQUEST_FILENAME} !-d
-	RewriteRule ^(.*)$  /zn-ce/zeroneed.php?/$1 [QSA]
+	RewriteRule ^(.*)$  /zeroneed.php?/$1 [QSA]
 </IfModule>
 
-ErrorDocument 403 /zn-ce/zeroneed.php
+ErrorDocument 403 /zeroneed.php
 
 DirectoryIndex zeroneed.php
 

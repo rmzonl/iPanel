@@ -2,101 +2,68 @@
 
 use ZN\Controller;
 use ZN\Request\Http;
-use ZN\Inclusion\Project\Masterpage;
 use ZN\Inclusion\Project\View;
 use Session;
 use Redirect;
+use Json;
 use Project\Libraries\Acl;
 use Project\Libraries\CsrfGuard;
 
 /**
- * Her istekte çalışan global middleware (Starting.php constructors'da tanımlı).
- *
- * Sorumlulukları:
- *  1. Güvenlik HTTP başlıklarını gönder
- *  2. Auth/Errors dışındaki sayfalarda oturum zorunlu kıl
- *  3. Rol bazlı erişim kontrolü (ACL)
- *  4. View'a ortak değişkenleri enjekte et
+ * Korunan sayfalar için global middleware.
+ * Auth / Errors / Api controller'larında çalışmaz (const exclude).
+ * Auth sayfaları için InitializeAuth kullanılır.
  */
 class Initialize extends Controller
 {
-    /** Kimlik doğrulama gerektirmeyen controller'lar */
-    private const PUBLIC_CONTROLLERS = ['auth', 'errors', 'api'];
+    const exclude = ['Auth', 'Errors', 'Api'];
 
-    /** JSON yanıt döndüren controller'lar (redirect yerine 401 JSON) */
-    private const JSON_CONTROLLERS = ['stats', 'jobs'];
+    private const JSON_CONTROLLERS = ['Stats', 'Jobs'];
 
-    /** Settings içinde admin zorunluluğu olmayan metodlar (reseller de erişebilir) */
     private const SETTINGS_RESELLER_ALLOWED = ['twoFactor', 'setup2fa', 'enable2fa', 'disable2fa', 'backupCodes'];
 
-    /** Admin-only controller'lar (reseller erişemez) */
-    private const ADMIN_ONLY = ['ipaddresses', 'firewall', 'phpmyadmin', 'phpmanager', 'nodemanager', 'filemanager'];
+    private const ADMIN_ONLY = ['IpAddresses', 'Firewall', 'Phpmyadmin', 'Phpmanager', 'Nodemanager', 'Filemanager'];
 
     public function main(): void
     {
-        $this->sendSecurityHeaders();
+        header_remove('X-Powered-By');
 
-        $controller = strtolower(CURRENT_CONTROLLER ?? '');
-        $method     = strtolower(CURRENT_CFUNCTION  ?? 'main');
+        $user       = Session::select('admin_user');
+        $controller = CURRENT_CONTROLLER ?? '';
+        $method     = CURRENT_CFUNCTION  ?? 'main';
 
-        // Genel sayfalara (auth, errors, api) kimlik doğrulaması gerekmez
-        if (in_array($controller, self::PUBLIC_CONTROLLERS, true)) {
-            if ($controller === 'auth') {
-                Masterpage::bodyPage('layouts/auth-body');
-            }
-            return;
-        }
-
-        // Oturum kontrolü
-        $user = Session::select('admin_user');
         if (empty($user)) {
-            // JSON endpoint'lerde redirect yerine 401 döndür
-            if (in_array($controller, self::JSON_CONTROLLERS, true)) {
+            if (in_array($controller, self::JSON_CONTROLLERS)) {
                 Http::response(401);
                 header('Content-Type: application/json');
-                echo \Json::encode(['success' => false, 'message' => 'Oturum açılmamış.']);
-                exit;
+                echo Json::encode(['success' => false, 'message' => 'Oturum açılmamış.']);
+                die;
             }
             Redirect::action('auth/login');
-            return;
+            die;
         }
 
         // Admin-only erişim kontrolü
-        // Settings için reseller bazı metodlara erişebilir (2FA, API token)
-        $isAdminOnlyAccess = in_array($controller, self::ADMIN_ONLY, true)
-            || ($controller === 'settings' && !in_array($method, self::SETTINGS_RESELLER_ALLOWED, true));
+        $isAdminOnlyAccess = in_array($controller, self::ADMIN_ONLY)
+            || ($controller === 'Settings' && ! in_array($method, self::SETTINGS_RESELLER_ALLOWED));
 
         if ($isAdminOnlyAccess && ($user['role'] ?? '') !== 'admin') {
             Session::insert('error', 'Bu bölüme erişim yetkiniz yok.');
             Redirect::action('dashboard/main');
-            return;
+            die;
         }
 
-        // Controller→method bazlı ACL kontrolü
+        // ACL kontrolü
         $permission = Acl::permissionFor($controller, $method);
-        if ($permission !== null && !Acl::can($permission, $user)) {
+        if ($permission !== null && ! Acl::can($permission, $user)) {
             Session::insert('error', 'Bu işlem için yetkiniz yok.');
             Redirect::action('dashboard/main');
-            return;
+            die;
         }
 
         // Ortak view değişkenleri
         View::authUser($user);
         View::csrfField(CsrfGuard::field());
         View::csrfToken(CsrfGuard::token());
-    }
-
-    /** PHP seviyesinde güvenlik başlıkları (nginx ikinci katman) */
-    private function sendSecurityHeaders(): void
-    {
-        if (headers_sent()) return;
-
-        header('X-Frame-Options: SAMEORIGIN');
-        header('X-Content-Type-Options: nosniff');
-        header('X-XSS-Protection: 1; mode=block');
-        header('Referrer-Policy: strict-origin-when-cross-origin');
-
-        // PHP/Apache sürüm bilgisini gizle
-        header_remove('X-Powered-By');
     }
 }

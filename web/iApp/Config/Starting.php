@@ -15,7 +15,7 @@
     |
     */
 
-    'constructors' => ['Initialize:main'],
+    'constructors' => ['Initialize:main', 'InitializeAuth:main'],
 
     /*
     |--------------------------------------------------------------------------

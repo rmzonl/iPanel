@@ -1,20 +1,12 @@
 <?php namespace Project\Controllers;
-use ZN\Controller;
-use ZN\Request\Http;
-use ZN\Request\Post;
-use ZN\Request\Get;
-use ZN\Inclusion\Project\Masterpage;
-use ZN\Inclusion\Project\View;
-use DB;
-use Session;
-use Redirect;
-use URL;
 
+use ZN\Controller;
+use Redirect;
 
 class Home extends Controller
 {
     public function main()
     {
-        echo 'Welcome Creator`s Edition';
+        Redirect::action('dashboard/main');
     }
 }
