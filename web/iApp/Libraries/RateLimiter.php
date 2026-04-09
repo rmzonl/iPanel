@@ -35,7 +35,8 @@ class RateLimiter
         $count = DB::table('login_attempts')
             ->where('ip', $ip)
             ->where('attempted_at >=', $since)
-            ->count();
+            ->get()
+            ->totalRows();
 
         return $count >= self::MAX_ATTEMPTS;
     }
