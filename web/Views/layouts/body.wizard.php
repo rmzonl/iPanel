@@ -163,4 +163,4 @@
 </div>
 
 <script src="https://cdn.jsdelivr.net/npm/@tabler/core@latest/dist/js/tabler.min.js"></script>
-<script src="{{ URL::base('assets/js/ipanel.js') }}"></script>
+<script src="{{ URL::base('iApp/Themes/Tabler/js/ipanel.js') }}"></script>
