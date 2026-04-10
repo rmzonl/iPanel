@@ -39,9 +39,14 @@ class Stats extends Controller
      */
     public function stream(): void
     {
-        // SSE için output buffering kapat
-        if (ob_get_level()) {
+        // Tüm output buffer seviyelerini kapat (ZN Framework birden fazla açar)
+        while (ob_get_level() > 0) {
             ob_end_clean();
+        }
+
+        // Session kilidini bırak — uzun süren SSE diğer istekleri bloklamasın
+        if (session_status() === PHP_SESSION_ACTIVE) {
+            session_write_close();
         }
 
         // SSE headers
@@ -85,6 +90,8 @@ class Stats extends Controller
         // SSE döngüsü bitti — JS otomatik yeniden bağlanır
         echo "event: end\ndata: {\"reason\":\"cycle_limit\"}\n\n";
         flush();
+        // ZN Framework masterpage render'ını engelle (text/html header baskısı)
+        exit(0);
     }
 
     // ────────────────────────────────────────
