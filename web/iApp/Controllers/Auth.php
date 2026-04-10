@@ -229,6 +229,7 @@ class Auth extends Controller
         return (int) DB::table('login_attempts')
             ->where('ip', $ip)
             ->where('attempted_at >=', $since)
-            ->count();
+            ->get()
+            ->totalRows();
     }
 }
