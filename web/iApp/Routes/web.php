@@ -88,5 +88,17 @@ Route::change('{start}firewall/delete/({number}){end}')->uri('Firewall/delete/$1
 Route::change('{start}settings{end}')->uri('Settings/main');
 Route::change('{start}settings/save{end}')->uri('Settings/save');
 
+// Stats (SSE + JSON endpoints)
+Route::change('{start}stats/stream{end}')->uri('Stats/stream');
+Route::change('{start}stats/snapshot{end}')->uri('Stats/snapshot');
+Route::change('{start}stats/services{end}')->uri('Stats/services');
+
+// Jobs
+Route::change('{start}jobs{end}')->uri('Jobs/main');
+Route::change('{start}jobs/status/({number}){end}')->uri('Jobs/status/$1');
+Route::change('{start}jobs/active{end}')->uri('Jobs/active');
+Route::change('{start}jobs/refreshRows{end}')->uri('Jobs/refreshRows');
+Route::change('{start}jobs/cancel/({number}){end}')->uri('Jobs/cancel/$1');
+
 // Errors
 Route::change('{start}errors/notFound{end}')->uri('Errors/notFound');
