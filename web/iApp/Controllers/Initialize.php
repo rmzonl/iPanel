@@ -28,11 +28,15 @@ class Initialize extends Controller
     public function main(): void
     {
         header_remove('X-Powered-By');
-        Masterpage::headPage('layouts/head')->bodyPage('layouts/body');
 
         $user       = Session::select('admin_user');
         $controller = CURRENT_CONTROLLER ?? '';
         $method     = CURRENT_CFUNCTION  ?? 'main';
+
+        // JSON/SSE controller'lar için masterpage kurma — kendi header'larını yönetirler
+        if (!in_array($controller, self::JSON_CONTROLLERS)) {
+            Masterpage::headPage('layouts/head')->bodyPage('layouts/body');
+        }
 
         if (empty($user)) {
             if (in_array($controller, self::JSON_CONTROLLERS)) {
