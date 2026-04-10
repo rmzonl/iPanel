@@ -96,7 +96,7 @@ class Email extends Controller
         Acl::requireOwnership(Acl::ownsSiteResource('email_accounts', $id));
         $account = $this->model->getById($id);
         $this->model->delete($id);
-        AuditLogger::log('email.delete', 'email_account', $id, 'E-posta hesabı silindi: ' . ($account->email ?? $id));
+        AuditLogger::log('email.delete', 'email_account', $id, 'E-posta hesabı silindi: ' . ($account?->email ?? $id));
         Session::insert('success', 'E-posta hesabı başarıyla silindi.');
         Redirect::action('email/main');
     }

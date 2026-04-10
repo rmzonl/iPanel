@@ -79,7 +79,7 @@ class IpAddresses extends Controller
     {
         $ip = $this->model->getById($id);
         $this->model->delete($id);
-        AuditLogger::log('ipaddresses.delete', 'ip_address', $id, 'IP silindi: ' . ($ip->ip ?? $id));
+        AuditLogger::log('ipaddresses.delete', 'ip_address', $id, 'IP silindi: ' . ($ip?->ip ?? $id));
         Session::insert('success', 'IP adresi başarıyla silindi.');
         Redirect::action('ipaddresses/main');
     }
