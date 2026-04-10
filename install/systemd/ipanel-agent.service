@@ -12,8 +12,9 @@ ExecStart=/usr/bin/php /usr/local/ipanel/agent/agent.php
 ExecReload=/bin/kill -HUP $MAINPID
 Restart=always
 RestartSec=5
-StandardOutput=append:/var/log/ipanel/agent.out
-StandardError=append:/var/log/ipanel/agent.err
+StandardOutput=journal
+StandardError=journal
+SyslogIdentifier=ipanel-agent
 
 # Hardening
 NoNewPrivileges=false

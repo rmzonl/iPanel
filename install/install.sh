@@ -268,13 +268,20 @@ SQL
     mysql -u ipanel -p"${DBPASS}" ipanel < "$IPANEL_ROOT/install/schema.sql"
     ok "Veritabanı oluşturuldu ve şema yüklendi."
 
-    # Admin şifresini oluştur ve doğrudan PHP ile hash'le
-    ADMIN_PASS=$(head -c 16 /dev/urandom | base64 | tr -d '/+=' | head -c 16)
-    ADMIN_HASH=$(php -r "echo password_hash('${ADMIN_PASS}', PASSWORD_BCRYPT);")
+    # Admin şifresini oluştur — sadece alfanümerik ($ işareti yok, shell güvenli)
+    ADMIN_PASS=$(head -c 16 /dev/urandom | base64 | tr -dc 'A-Za-z0-9' | head -c 16)
 
-    mysql -u ipanel -p"${DBPASS}" ipanel <<SQL
-UPDATE users SET password='${ADMIN_HASH}', status=1 WHERE username='admin';
-SQL
+    # Hash'i dosyaya yaz, shell expansion'dan koru
+    HASH_FILE=$(mktemp)
+    php -r "file_put_contents('${HASH_FILE}', password_hash('${ADMIN_PASS}', PASSWORD_BCRYPT));"
+    ADMIN_HASH=$(cat "${HASH_FILE}")
+    rm -f "${HASH_FILE}"
+
+    # SQL'i temp dosya üzerinden çalıştır — bcrypt hash içindeki $ işaretleri bozulmasın
+    SQL_FILE=$(mktemp)
+    printf "UPDATE users SET password='%s', status=1 WHERE username='admin';\n" "${ADMIN_HASH}" > "${SQL_FILE}"
+    mysql -u ipanel -p"${DBPASS}" ipanel < "${SQL_FILE}"
+    rm -f "${SQL_FILE}"
 
     # Kimlik bilgilerini kaydet
     {
@@ -284,19 +291,30 @@ SQL
     chmod 600 /etc/ipanel/db.env
     ok "Admin şifresi oluşturuldu → /etc/ipanel/db.env"
 
-    # Database.php bağlantı bilgilerini güncelle
-    # PHP dosyasını doğrudan yaz — sed yerine, özel karakter sorunlarından kaçınmak için
+    # Database.php bağlantı bilgilerini güncelle (PHP ile — özel karakter güvenli)
     php -r "
 \$file = '${IPANEL_ROOT}/web/iApp/Config/Database.php';
 \$content = file_get_contents(\$file);
-\$content = preg_replace(\"/('user'\\s*=>\\s*)'[^']*'/\", \"\\\\1'ipanel'\", \$content);
+\$content = preg_replace(\"/('user'\\s*=>\\s*)'[^']*'/\",     \"\\\\1'ipanel'\", \$content);
 \$content = preg_replace(\"/('password'\\s*=>\\s*)'[^']*'/\", \"\\\\1'${DBPASS}'\", \$content);
 file_put_contents(\$file, \$content);
-echo 'Database.php guncellendi.' . PHP_EOL;
 "
-    ok "Database.php: bağlantı bilgileri güncellendi."
+    ok "Database.php: bağlantı bilgileri güncellendi (user: ipanel)."
 
-    # ZN Framework önbelleğini temizle (stale config önlemek için)
+    # Doğrulama: DB bağlantısını ve admin şifresini test et
+    php -r "
+try {
+    \$pdo = new PDO('mysql:host=127.0.0.1;dbname=ipanel;charset=utf8mb4', 'ipanel', '${DBPASS}');
+    \$row = \$pdo->query(\"SELECT password,status FROM users WHERE username='admin'\")->fetch();
+    if (!\$row) { echo 'FAIL:no_user'; exit; }
+    if (!\$row['status']) { echo 'FAIL:disabled'; exit; }
+    if (password_verify('${ADMIN_PASS}', \$row['password'])) { echo 'OK'; }
+    else { echo 'FAIL:hash_mismatch'; }
+} catch(Exception \$e) { echo 'FAIL:' . \$e->getMessage(); }
+" | grep -q '^OK' && ok "Admin girişi doğrulandı ✓" \
+    || { warn "Admin giriş doğrulaması başarısız! Manuel kontrol: cat /etc/ipanel/db.env"; }
+
+    # ZN Framework önbelleğini temizle
     rm -rf "${IPANEL_ROOT}/web/iApp/Storage/cache/"*  2>/dev/null || true
     ok "Framework cache temizlendi."
 }

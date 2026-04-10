@@ -85,7 +85,7 @@ function claimJob(\PDO $db): ?object
         "SELECT * FROM jobs
           WHERE status = 'pending' AND attempts < max_attempts
           ORDER BY priority ASC, created_at ASC
-          LIMIT 1 FOR UPDATE SKIP LOCKED"
+          LIMIT 1 FOR UPDATE"
     );
     $job = $stmt->fetch();
     if (!$job) {

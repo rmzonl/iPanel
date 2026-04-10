@@ -1,2 +1,2 @@
 <?php
-define('IPANEL_VERSION', '0.3.5');
+define('IPANEL_VERSION', '0.3.6');
