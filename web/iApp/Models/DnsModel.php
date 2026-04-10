@@ -41,7 +41,7 @@ class DnsModel extends Model
 
     public function createZone($data): int
     {
-        DB::table('dns_zones')->insert($data);
+        DB::insert('dns_zones', $data);
         return (int) DB::pdo()->lastInsertId();
     }
 
@@ -62,12 +62,12 @@ class DnsModel extends Model
 
     public function createRecord($data)
     {
-        return DB::table('dns_records')->insert($data);
+        return DB::insert('dns_records', $data);
     }
 
     public function updateRecord($id, $data)
     {
-        return DB::table('dns_records')->where('id', $id)->update($data);
+        return DB::where('id', $id)->update('dns_records', $data);
     }
 
     public function deleteRecord($id)

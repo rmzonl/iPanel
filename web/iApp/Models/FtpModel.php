@@ -37,13 +37,13 @@ class FtpModel extends Model
 
     public function create($data): int
     {
-        DB::table('ftp_accounts')->insert($data);
+        DB::insert('ftp_accounts', $data);
         return (int) DB::pdo()->lastInsertId();
     }
 
     public function update($id, $data)
     {
-        return DB::table('ftp_accounts')->where('id', $id)->update($data);
+        return DB::where('id', $id)->update('ftp_accounts', $data);
     }
 
     public function delete($id)

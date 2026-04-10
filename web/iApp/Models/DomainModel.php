@@ -43,7 +43,7 @@ class DomainModel extends Model
 
     public function create($data): int
     {
-        DB::table('domains')->insert($data);
+        DB::insert('domains', $data);
         return (int) DB::pdo()->lastInsertId();
     }
 

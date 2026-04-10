@@ -35,7 +35,7 @@ class JobQueue
         string $username = 'system'
     ): string {
         $uuid = self::generateUuid();
-        DB::table('jobs')->insert([
+        DB::insert('jobs', [
             'uuid'        => $uuid,
             'type'        => $type,
             'payload'     => \Json::encode($payload),
@@ -89,7 +89,7 @@ class JobQueue
     {
         $job = DB::table('jobs')->where('uuid', $uuid)->get()->row();
         if (!$job || $job->status === self::STATUS_RUNNING) return false;
-        DB::table('jobs')->where('uuid', $uuid)->update(['status' => self::STATUS_CANCELLED]);
+        DB::where('uuid', $uuid)->update('jobs', ['status' => self::STATUS_CANCELLED]);
         return true;
     }
 

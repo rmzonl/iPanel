@@ -28,7 +28,7 @@ class ApiTokenModel
     /** Yeni token oluştur */
     public function create(int $userId, string $name, string $tokenHash, ?array $permissions, ?string $expiresAt): int
     {
-        DB::table(self::TABLE)->insert([
+        DB::insert(self::TABLE, [
             'user_id'     => $userId,
             'name'        => $name,
             'token_hash'  => $tokenHash,
@@ -42,27 +42,24 @@ class ApiTokenModel
     /** Token son kullanım zamanını güncelle */
     public function touch(int $tokenId): void
     {
-        DB::table(self::TABLE)
-            ->where('id', $tokenId)
-            ->update(['last_used' => date('Y-m-d H:i:s')]);
+        DB::where('id', $tokenId)
+            ->update(self::TABLE, ['last_used' => date('Y-m-d H:i:s')]);
     }
 
     /** Token'ı iptal et */
     public function revoke(int $tokenId, int $userId): bool
     {
-        $affected = DB::table(self::TABLE)
-            ->where('id', $tokenId)
+        $affected = DB::where('id', $tokenId)
             ->where('user_id', $userId) // sahiplik kontrolü
-            ->update(['status' => 'revoked']);
+            ->update(self::TABLE, ['status' => 'revoked']);
         return (bool) $affected;
     }
 
     /** Tüm süresi dolmuş token'ları temizle */
     public function purgeExpired(): void
     {
-        DB::table(self::TABLE)
-            ->where('expires_at IS NOT NULL', null, false)
+        DB::where('expires_at IS NOT NULL', null, false)
             ->where('expires_at <', date('Y-m-d H:i:s'))
-            ->update(['status' => 'revoked']);
+            ->update(self::TABLE, ['status' => 'revoked']);
     }
 }

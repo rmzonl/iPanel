@@ -37,13 +37,13 @@ class SslModel extends Model
 
     public function create($data): int
     {
-        DB::table('ssl_certificates')->insert($data);
+        DB::insert('ssl_certificates', $data);
         return (int) DB::pdo()->lastInsertId();
     }
 
     public function update($id, $data)
     {
-        return DB::table('ssl_certificates')->where('id', $id)->update($data);
+        return DB::where('id', $id)->update('ssl_certificates', $data);
     }
 
     public function delete($id)

@@ -125,7 +125,7 @@ function markRetry(\PDO $db, int $id): void
 function executeJob(object $job): array
 {
     require_once IPANEL_ROOT . '/web/iApp/Libraries/AgentClient.php';
-    require_once IPANEL_ROOT . '/etc/ipanel/agent.conf.php';
+    require_once '/etc/ipanel/agent.conf.php';
 
     $payload = json_decode($job->payload, true) ?? [];
 

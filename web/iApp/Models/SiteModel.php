@@ -25,6 +25,11 @@ class SiteModel extends Model
             ->get()->row();
     }
 
+    public function getRecent($limit = 5)
+    {
+        return DB::table('sites')->orderBy('id', 'desc')->limit(0, $limit)->get();
+    }
+
     public function getByClientId($clientId)
     {
         return DB::table('sites')
@@ -51,13 +56,13 @@ class SiteModel extends Model
 
     public function create($data): int
     {
-        DB::table('sites')->insert($data);
+        DB::insert('sites', $data);
         return (int) DB::pdo()->lastInsertId();
     }
 
     public function update($id, $data)
     {
-        return DB::table('sites')->where('id', $id)->update($data);
+        return DB::where('id', $id)->update('sites', $data);
     }
 
     public function delete($id)

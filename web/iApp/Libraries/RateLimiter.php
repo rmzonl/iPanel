@@ -18,7 +18,7 @@ class RateLimiter
         static::cleanup();
 
         // Kaydet
-        DB::table('login_attempts')->insert([
+        DB::insert('login_attempts', [
             'ip'           => $ip,
             'username'     => $username,
             'attempted_at' => date('Y-m-d H:i:s'),

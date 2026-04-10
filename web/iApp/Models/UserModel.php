@@ -25,12 +25,12 @@ class UserModel extends Model
 
     public function create($data)
     {
-        return DB::table('users')->insert($data);
+        return DB::insert('users', $data);
     }
 
     public function update($id, $data)
     {
-        return DB::table('users')->where('id', $id)->update($data);
+        return DB::where('id', $id)->update('users', $data);
     }
 
     public function delete($id)

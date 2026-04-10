@@ -37,13 +37,13 @@ class DatabaseModel extends Model
 
     public function create($data): int
     {
-        DB::table('site_databases')->insert($data);
+        DB::insert('site_databases', $data);
         return (int) DB::pdo()->lastInsertId();
     }
 
     public function update($id, $data)
     {
-        return DB::table('site_databases')->where('id', $id)->update($data);
+        return DB::where('id', $id)->update('site_databases', $data);
     }
 
     public function delete($id)

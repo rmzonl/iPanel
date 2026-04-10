@@ -33,13 +33,13 @@ class BackupModel extends Model
 
     public function create($data): int
     {
-        DB::table('backups')->insert($data);
+        DB::insert('backups', $data);
         return (int) DB::pdo()->lastInsertId();
     }
 
     public function update($id, $data)
     {
-        return DB::table('backups')->where('id', $id)->update($data);
+        return DB::where('id', $id)->update('backups', $data);
     }
 
     public function delete($id)
