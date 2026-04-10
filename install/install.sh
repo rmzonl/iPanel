@@ -199,6 +199,15 @@ create_users() {
 write_config() {
     mkdir -p /etc/ipanel /var/log/ipanel /var/backups/ipanel
 
+    # Nginx log dizini için izinler (nginx kullanıcısı yazabilmeli)
+    chown root:"$WEB_USER" /var/log/ipanel
+    chmod 775 /var/log/ipanel
+    # SELinux: log dizinine httpd_log_t bağlamı ata (AlmaLinux/RHEL)
+    if command -v chcon >/dev/null 2>&1 && command -v getenforce >/dev/null 2>&1 \
+            && [[ "$(getenforce 2>/dev/null)" != "Disabled" ]]; then
+        chcon -t httpd_log_t /var/log/ipanel 2>/dev/null || true
+    fi
+
     # Socket çalışma dizini (tmpfiles.d ile kalıcı hale getir)
     mkdir -p /run/ipanel
     chown root:ipanel /run/ipanel
