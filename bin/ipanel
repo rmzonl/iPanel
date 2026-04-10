@@ -170,7 +170,7 @@ function cmdLogs(array $argv): void
     $map = [
         'agent' => '/var/log/ipanel/agent.log',
         'panel' => IPANEL_ROOT . '/web/iApp/Storage/logs/*.log',
-        'nginx' => '/var/log/nginx/error.log',
+        'nginx' => '/var/log/nginx/ipanel.error.log',
     ];
     if (!isset($map[$target])) {
         fwrite(STDERR, "Unknown log: $target (agent|nginx|panel)\n");
