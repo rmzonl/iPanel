@@ -7,7 +7,7 @@
 #
 set -euo pipefail
 
-IPANEL_VERSION="0.6.1"
+IPANEL_VERSION="0.3.3"
 IPANEL_ROOT="/usr/local/ipanel"
 IPANEL_REPO="${IPANEL_REPO:-https://github.com/rmzonl/iPanel.git}"
 IPANEL_BRANCH="${IPANEL_BRANCH:-develop}"
