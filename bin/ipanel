@@ -24,7 +24,13 @@ if (posix_geteuid() !== 0 && (($argv[1] ?? '') !== 'version')) {
 define('IPANEL_ROOT', '/usr/local/ipanel');
 define('IPANEL_CONFIG', '/etc/ipanel/agent.conf.php');
 define('IPANEL_SOCKET', '/run/ipanel/agent.sock');
-define('IPANEL_VERSION', '0.3.3');
+
+// Versiyon tek kaynaktan: version.php
+if (file_exists(IPANEL_ROOT . '/version.php')) {
+    require_once IPANEL_ROOT . '/version.php';
+} else {
+    define('IPANEL_VERSION', 'unknown');
+}
 
 $cmd = $argv[1] ?? 'help';
 array_shift($argv);
@@ -65,8 +71,9 @@ switch ($cmd) {
 
     case 'help':
     default:
+        $v = IPANEL_VERSION;
         echo <<<HELP
-iPanel CLI — v0.3.3
+iPanel CLI — v{$v}
 
 Usage: ipanel <command> [args]
 

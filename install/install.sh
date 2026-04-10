@@ -7,10 +7,12 @@
 #
 set -euo pipefail
 
-IPANEL_VERSION="0.3.3"
 IPANEL_ROOT="/usr/local/ipanel"
 IPANEL_REPO="${IPANEL_REPO:-https://github.com/rmzonl/iPanel.git}"
 IPANEL_BRANCH="${IPANEL_BRANCH:-develop}"
+
+# Versiyon fetch_sources() sonrasında version.php'den okunur
+IPANEL_VERSION="?"
 
 C_RED='\033[0;31m'; C_GRN='\033[0;32m'; C_YEL='\033[1;33m'; C_BLU='\033[0;34m'; C_RST='\033[0m'
 log()  { echo -e "${C_BLU}==>${C_RST} $*"; }
@@ -159,7 +161,9 @@ fetch_sources() {
     fi
     # Framework önbelleğini temizle (git reset sonrası stale cache önlemek için)
     rm -rf "$IPANEL_ROOT/web/iApp/Storage/cache/"* 2>/dev/null || true
-    ok "Kaynak kod: $IPANEL_ROOT"
+    # Versiyon numarasını tek kaynaktan oku: version.php
+    IPANEL_VERSION=$(php -r "require '${IPANEL_ROOT}/version.php'; echo IPANEL_VERSION;" 2>/dev/null || echo "?")
+    ok "Kaynak kod: $IPANEL_ROOT (v${IPANEL_VERSION})"
 }
 
 ###############################################################################
@@ -586,7 +590,7 @@ health_check() {
 ###############################################################################
 echo ""
 echo -e "${C_BLU}╔══════════════════════════════════════════╗"
-echo -e "║   iPanel ${IPANEL_VERSION} — Kurulum Başlıyor       ║"
+echo -e "║         iPanel — Kurulum Başlıyor        ║"
 echo -e "╚══════════════════════════════════════════╝${C_RST}"
 echo ""
 
@@ -607,7 +611,7 @@ SERVER_IP=$(hostname -I | awk '{print $1}')
 cat <<EOF
 
 ${C_GRN}╔══════════════════════════════════════════════════════════╗
-║          iPanel kurulumu tamamlandı!                     ║
+║          iPanel v${IPANEL_VERSION} — Kurulum tamamlandı!             ║
 ╚══════════════════════════════════════════════════════════╝${C_RST}
 
   Panel URL   :  https://${SERVER_IP}:3333
