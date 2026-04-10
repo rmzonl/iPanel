@@ -154,8 +154,11 @@ fetch_sources() {
         git -C "$IPANEL_ROOT" reset --hard "origin/$IPANEL_BRANCH" --quiet
     else
         log "iPanel kaynak kodu indiriliyor..."
+        rm -rf "$IPANEL_ROOT"
         git clone --depth 1 --branch "$IPANEL_BRANCH" "$IPANEL_REPO" "$IPANEL_ROOT"
     fi
+    # Framework önbelleğini temizle (git reset sonrası stale cache önlemek için)
+    rm -rf "$IPANEL_ROOT/web/iApp/Storage/cache/"* 2>/dev/null || true
     ok "Kaynak kod: $IPANEL_ROOT"
 }
 
@@ -234,66 +237,55 @@ setup_database() {
         sleep 1
     done
 
-    if ! mysql -e 'SHOW DATABASES' | grep -q '^ipanel$'; then
-        DBPASS=$(head -c 24 /dev/urandom | base64 | tr -d '/+=' | head -c 24)
+    # Eski veritabanı ve kullanıcıyı temizle (sıfırdan kurulum için)
+    log "Eski veritabanı temizleniyor..."
+    mysql -e "DROP DATABASE IF EXISTS ipanel;" 2>/dev/null || true
+    mysql -e "DROP USER IF EXISTS 'ipanel'@'localhost';" 2>/dev/null || true
+    mysql -e "FLUSH PRIVILEGES;" 2>/dev/null || true
 
-        mysql <<SQL
-CREATE DATABASE ipanel CHARACTER SET utf8 COLLATE utf8_general_ci;
-CREATE USER 'ipanel'@'localhost' IDENTIFIED BY '$DBPASS';
+    DBPASS=$(head -c 24 /dev/urandom | base64 | tr -d '/+=' | head -c 24)
+
+    mysql <<SQL
+CREATE DATABASE ipanel CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
+CREATE USER 'ipanel'@'localhost' IDENTIFIED BY '${DBPASS}';
 GRANT ALL PRIVILEGES ON ipanel.* TO 'ipanel'@'localhost';
 FLUSH PRIVILEGES;
 SQL
-        mysql ipanel < "$IPANEL_ROOT/install/schema.sql"
-        echo "DB_PASS=$DBPASS" > /etc/ipanel/db.env
-        chmod 600 /etc/ipanel/db.env
-        ok "Veritabanı oluşturuldu ve şema yüklendi."
 
-        # Database.php içindeki bağlantı bilgilerini güncelle
-        sed -i \
-            -e "s/'user'\s*=>\s*'[^']*'/'user' => 'ipanel'/" \
-            -e "s/'password'\s*=>\s*'[^']*'/'password' => '$DBPASS'/" \
-            "$IPANEL_ROOT/web/iApp/Config/Database.php" || warn "Database.php sed başarısız"
+    mysql -u ipanel -p"${DBPASS}" ipanel < "$IPANEL_ROOT/install/schema.sql"
+    ok "Veritabanı oluşturuldu ve şema yüklendi."
 
-        # Varsayılan admin şifresini rastgele güvenli bir şifre ile değiştir
-        ADMIN_PASS=$(head -c 16 /dev/urandom | base64 | tr -d '/+=' | head -c 16)
-        ADMIN_HASH=$(php -r "echo password_hash('$ADMIN_PASS', PASSWORD_BCRYPT);")
-        mysql ipanel -e "UPDATE users SET password='$ADMIN_HASH' WHERE username='admin';" 2>/dev/null || true
-        echo "ADMIN_PASS=$ADMIN_PASS" >> /etc/ipanel/db.env
-        chmod 600 /etc/ipanel/db.env
-        ok "Admin şifresi rastgele oluşturuldu → /etc/ipanel/db.env"
-    else
-        warn "Veritabanı 'ipanel' zaten mevcut, şema yüklemesi atlandı."
-        if [[ ! -f /etc/ipanel/db.env ]]; then
-            # db.env eksik (önceki kurulum yarıda kalmış olabilir) — yeni şifre oluştur
-            warn "db.env bulunamadı — MariaDB şifresi sıfırlanıyor..."
-            DBPASS=$(head -c 24 /dev/urandom | base64 | tr -d '/+=' | head -c 24)
-            mysql <<SQL
-ALTER USER 'ipanel'@'localhost' IDENTIFIED BY '$DBPASS';
-FLUSH PRIVILEGES;
+    # Admin şifresini oluştur ve doğrudan PHP ile hash'le
+    ADMIN_PASS=$(head -c 16 /dev/urandom | base64 | tr -d '/+=' | head -c 16)
+    ADMIN_HASH=$(php -r "echo password_hash('${ADMIN_PASS}', PASSWORD_BCRYPT);")
+
+    mysql -u ipanel -p"${DBPASS}" ipanel <<SQL
+UPDATE users SET password='${ADMIN_HASH}', status=1 WHERE username='admin';
 SQL
-            # Database.php — geçici düzeltme; fonksiyon sonunda tekrar tam güncelleme yapılır
-            true
-            ADMIN_PASS=$(head -c 16 /dev/urandom | base64 | tr -d '/+=' | head -c 16)
-            ADMIN_HASH=$(php -r "echo password_hash('$ADMIN_PASS', PASSWORD_BCRYPT);")
-            mysql ipanel -e "UPDATE users SET password='$ADMIN_HASH' WHERE username='admin';" 2>/dev/null || true
-            { echo "DB_PASS=$DBPASS"; echo "ADMIN_PASS=$ADMIN_PASS"; } > /etc/ipanel/db.env
-            chmod 600 /etc/ipanel/db.env
-            ok "db.env yeniden oluşturuldu → /etc/ipanel/db.env"
-        else
-            DBPASS=$(grep DB_PASS /etc/ipanel/db.env | cut -d= -f2 || echo "")
-        fi
-    fi
 
-    # git reset --hard sonrası Database.php her zaman sıfırlanır.
-    # Hangi dal çalışmış olursa olsun, her zaman doğru bilgileri yaz.
-    if [[ -n "$DBPASS" ]]; then
-        sed -i \
-            -e "s/'user'\s*=>\s*'[^']*'/'user' => 'ipanel'/" \
-            -e "s/'password'\s*=>\s*'[^']*'/'password' => '$DBPASS'/" \
-            "$IPANEL_ROOT/web/iApp/Config/Database.php" \
-            || warn "Database.php kimlik bilgileri güncellenemedi"
-        ok "Database.php: bağlantı bilgileri güncellendi (ipanel kullanıcısı)."
-    fi
+    # Kimlik bilgilerini kaydet
+    {
+        echo "DB_PASS=${DBPASS}"
+        echo "ADMIN_PASS=${ADMIN_PASS}"
+    } > /etc/ipanel/db.env
+    chmod 600 /etc/ipanel/db.env
+    ok "Admin şifresi oluşturuldu → /etc/ipanel/db.env"
+
+    # Database.php bağlantı bilgilerini güncelle
+    # PHP dosyasını doğrudan yaz — sed yerine, özel karakter sorunlarından kaçınmak için
+    php -r "
+\$file = '${IPANEL_ROOT}/web/iApp/Config/Database.php';
+\$content = file_get_contents(\$file);
+\$content = preg_replace(\"/('user'\\s*=>\\s*)'[^']*'/\", \"\\\\1'ipanel'\", \$content);
+\$content = preg_replace(\"/('password'\\s*=>\\s*)'[^']*'/\", \"\\\\1'${DBPASS}'\", \$content);
+file_put_contents(\$file, \$content);
+echo 'Database.php guncellendi.' . PHP_EOL;
+"
+    ok "Database.php: bağlantı bilgileri güncellendi."
+
+    # ZN Framework önbelleğini temizle (stale config önlemek için)
+    rm -rf "${IPANEL_ROOT}/web/iApp/Storage/cache/"*  2>/dev/null || true
+    ok "Framework cache temizlendi."
 }
 
 ###############################################################################
