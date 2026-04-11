@@ -398,6 +398,9 @@ chdir = $IPANEL_ROOT/web
 php_admin_value[error_log] = /var/log/ipanel/php-fpm.log
 php_admin_flag[log_errors] = on
 php_admin_value[open_basedir] = $IPANEL_ROOT/web:/tmp:/var/log/ipanel:/etc/ipanel
+; RHEL/AlmaLinux varsayılan session path (/var/lib/php/session) open_basedir
+; dışında kalır. ZN Framework Storage altındaki session dizinini kullan.
+php_value[session.save_path] = $IPANEL_ROOT/web/iApp/Storage/session
 EOF
 
     systemctl enable --now "$FPM_SVC"
