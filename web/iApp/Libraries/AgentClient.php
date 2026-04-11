@@ -41,12 +41,17 @@ class AgentClient
             'sig'    => $sig,
         ]) . "\n";
 
-        $sock = @stream_socket_client(
+        // ZN Framework'ün custom error handler'ı @ operatörünü yok sayar;
+        // stream_socket_client hatasını HTML olarak stream'e yazmasın.
+        set_error_handler(static fn() => true);
+        $sock = stream_socket_client(
             'unix://' . $this->socket,
             $errno,
             $errstr,
             $this->timeout
         );
+        restore_error_handler();
+
         if (!$sock) {
             throw new \RuntimeException("agent unreachable: $errstr");
         }
