@@ -99,6 +99,6 @@ class Stats extends Controller
     {
         $config = require '/etc/ipanel/agent.conf.php';
         $client = new AgentClient('/run/ipanel/agent.sock', $config['secret_key']);
-        return $client->call($module, $method, $params);
+        return $client->call(strtolower($module) . '.' . $method, $params);
     }
 }

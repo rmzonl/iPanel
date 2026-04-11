@@ -155,8 +155,7 @@ function executeJob(object $job): array
         return ['error' => "Bilinmeyen iş türü: {$job->type}"];
     }
 
-    [$module, $method] = $map[$job->type];
-
+    // $map yalnızca tip doğrulaması için — agent action job type'ın kendisidir
     $config = require '/etc/ipanel/agent.conf.php';
     $client = new \Project\Libraries\AgentClient(
         '/run/ipanel/agent.sock',
@@ -164,7 +163,7 @@ function executeJob(object $job): array
     );
 
     try {
-        return $client->call($module, $method, $payload);
+        return $client->call($job->type, $payload);
     } catch (\Throwable $e) {
         return ['error' => $e->getMessage()];
     }
