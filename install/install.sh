@@ -217,6 +217,17 @@ write_config() {
 d /run/ipanel 0750 root ipanel -
 EOF
 
+    # SELinux: /run/ipanel socket dizinine httpd_var_run_t bağlamı ata
+    # PHP-FPM (httpd_t domain) agent socket'e bağlanabilsin
+    if command -v semanage >/dev/null 2>&1 && command -v getenforce >/dev/null 2>&1 \
+            && [[ "$(getenforce 2>/dev/null)" != "Disabled" ]]; then
+        semanage fcontext -a -t httpd_var_run_t '/run/ipanel(/.*)?' 2>/dev/null \
+            || semanage fcontext -m -t httpd_var_run_t '/run/ipanel(/.*)?' 2>/dev/null \
+            || true
+        restorecon -Rv /run/ipanel/ 2>/dev/null || true
+        ok "SELinux: /run/ipanel → httpd_var_run_t bağlamı atandı."
+    fi
+
     if [[ ! -f /etc/ipanel/agent.conf.php ]]; then
         SECRET=$(head -c 48 /dev/urandom | base64 | tr -d '\n/+=' | head -c 64)
         cat > /etc/ipanel/agent.conf.php <<PHP

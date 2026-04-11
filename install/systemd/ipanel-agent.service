@@ -9,6 +9,7 @@ Type=simple
 User=root
 Group=root
 ExecStart=/usr/bin/php /usr/local/ipanel/agent/agent.php
+ExecStartPost=/bin/bash -c 'sleep 0.5; restorecon /run/ipanel/agent.sock 2>/dev/null || true'
 ExecReload=/bin/kill -HUP $MAINPID
 Restart=always
 RestartSec=5
