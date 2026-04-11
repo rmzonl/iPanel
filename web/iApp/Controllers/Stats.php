@@ -59,7 +59,7 @@ class Stats extends Controller
         set_time_limit(0);
         ignore_user_abort(false);
 
-        $interval  = max(2, (int)(Get::get('interval') ?? 3)); // min 2 sn
+        $interval  = max(2, (int)(Get::interval() ?? 3)); // min 2 sn
         $maxCycles = 200;  // ~10 dakika sonra SSE kesilir, JS yeniden bağlanır
         $cycle     = 0;
 

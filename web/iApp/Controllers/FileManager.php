@@ -40,7 +40,7 @@ class FileManager extends Controller
 
     public function main(): void
     {
-        $path = $this->safePath(Get::get('path') ?? '/home');
+        $path = $this->safePath(Get::path() ?? '/home');
         View::pageTitle('Dosya Yöneticisi');
         View::currentPath($path);
         View::breadcrumb($this->buildBreadcrumb($path));
@@ -54,7 +54,7 @@ class FileManager extends Controller
 
     public function browse(): void
     {
-        $path = $this->safePath(Get::get('path') ?? '/home');
+        $path = $this->safePath(Get::path() ?? '/home');
         View::files($this->listDir($path));
         View::currentPath($path);
         View::breadcrumb($this->buildBreadcrumb($path));
@@ -69,7 +69,7 @@ class FileManager extends Controller
 
     public function editor(): void
     {
-        $path = $this->safePath(Get::get('path'));
+        $path = $this->safePath(Get::path());
         if (!is_file($path)) JsonResponse::error('Dosya bulunamadı.', [], 404);
 
         $ext = strtolower(pathinfo($path, PATHINFO_EXTENSION));
@@ -145,7 +145,7 @@ class FileManager extends Controller
 
     public function download(): void
     {
-        $path = $this->safePath(Get::get('path'));
+        $path = $this->safePath(Get::path());
         if (!is_file($path)) {
             http_response_code(404); echo 'Dosya bulunamadı.'; exit;
         }

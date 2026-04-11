@@ -26,7 +26,7 @@ class Jobs extends Controller
         $user   = Session::select('admin_user');
         $isAdmin = ($user['role'] ?? '') === 'admin';
 
-        $filter = Get::get('status') ?? '';
+        $filter = Get::status() ?? '';
         $jobs   = $isAdmin
             ? JobQueue::listAll($filter, 200)
             : JobQueue::listForUser((int)$user['id'], 100);
@@ -39,7 +39,7 @@ class Jobs extends Controller
     /** AJAX: tek işin durumu */
     public function status()
     {
-        $uuid = Get::get('uuid') ?? '';
+        $uuid = Get::uuid() ?? '';
         if (!$uuid) JsonResponse::error('UUID gerekli.', [], 400);
 
         $job = JobQueue::status($uuid);
@@ -93,7 +93,7 @@ class Jobs extends Controller
     {
         $user    = Session::select('admin_user');
         $isAdmin = ($user['role'] ?? '') === 'admin';
-        $filter  = Get::get('status') ?? '';
+        $filter  = Get::status() ?? '';
 
         $jobs = $isAdmin
             ? JobQueue::listAll($filter, 200)
