@@ -219,19 +219,37 @@ write_config() {
 d /run/ipanel 0750 root ipanel -
 EOF
 
-    # SELinux: /run/ipanel socket dizinine httpd_var_run_t bağlamı ata
-    # PHP-FPM (httpd_t domain) agent socket'e bağlanabilsin
-    # NOT: /run, /var/run'a sembolik bağ olduğundan semanage /var/run ile kullanılmalı.
+    # SELinux bağlamları — tüm RHEL/AlmaLinux/Rocky ayarları tek blokta
     if command -v semanage >/dev/null 2>&1 && command -v getenforce >/dev/null 2>&1 \
             && [[ "$(getenforce 2>/dev/null)" != "Disabled" ]]; then
+
+        # 1. Agent socket dizini: httpd_var_run_t
+        # PHP-FPM (httpd_t) agent'a bağlanabilsin.
+        # /run sembolik bağ olduğundan semanage /var/run ile kullanılır.
         semanage fcontext -a -t httpd_var_run_t '/var/run/ipanel(/.*)?' 2>/dev/null \
             || semanage fcontext -m -t httpd_var_run_t '/var/run/ipanel(/.*)?' 2>/dev/null \
             || true
         restorecon -Rv /run/ipanel/ 2>/dev/null || true
-        ok "SELinux: /var/run/ipanel → httpd_var_run_t bağlamı atandı."
+        ok "SELinux: /var/run/ipanel → httpd_var_run_t"
 
-        # Özel SELinux modülü: httpd_t'nin httpd_var_run_t:sock_file'a connectto
-        # izni varsayılan RHEL 9 politikasında yok; bu modül eksikliği tamamlar.
+        # 2. Web/Storage dizini: httpd_sys_rw_content_t
+        # /usr/local/ipanel/ varsayılan olarak usr_t alır; httpd_t bu tipe yazamaz.
+        # ZN Framework cache/session/log dosyaları için yazma izni gerekli.
+        semanage fcontext -a -t httpd_sys_rw_content_t "$IPANEL_ROOT/web/iApp/Storage(/.*)?" 2>/dev/null \
+            || semanage fcontext -m -t httpd_sys_rw_content_t "$IPANEL_ROOT/web/iApp/Storage(/.*)?" 2>/dev/null \
+            || true
+        restorecon -Rv "$IPANEL_ROOT/web/iApp/Storage/" 2>/dev/null || true
+        ok "SELinux: web/iApp/Storage → httpd_sys_rw_content_t"
+
+        # 3. uploads/ dizini de yazılabilir olmalı
+        semanage fcontext -a -t httpd_sys_rw_content_t "$IPANEL_ROOT/web/uploads(/.*)?" 2>/dev/null \
+            || semanage fcontext -m -t httpd_sys_rw_content_t "$IPANEL_ROOT/web/uploads(/.*)?" 2>/dev/null \
+            || true
+        restorecon -Rv "$IPANEL_ROOT/web/uploads/" 2>/dev/null || true
+        ok "SELinux: web/uploads → httpd_sys_rw_content_t"
+
+        # 4. Özel policy modülü: httpd_t → httpd_var_run_t:sock_file connectto
+        # Varsayılan RHEL 9 politikası bu izni içermez.
         if command -v checkmodule >/dev/null 2>&1 && command -v semodule_package >/dev/null 2>&1; then
             TE_FILE="$IPANEL_ROOT/install/selinux/ipanel_agent.te"
             MOD_TMP="$(mktemp -d)"

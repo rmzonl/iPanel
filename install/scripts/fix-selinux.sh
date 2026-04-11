@@ -1,11 +1,13 @@
 #!/usr/bin/env bash
-# fix-selinux.sh — Mevcut kurulumlar için SELinux agent socket düzeltmesi
+# fix-selinux.sh — Mevcut kurulumlar için SELinux düzeltmesi
 #
-# Kullanım: sudo bash install/scripts/fix-selinux.sh
+# Kullanım: sudo bash /usr/local/ipanel/install/scripts/fix-selinux.sh
 #
-# Bu betik iki şeyi yapar:
-#   1. /var/run/ipanel için doğru SELinux bağlamını (httpd_var_run_t) ayarlar
-#   2. httpd_t'nin agent socket'e bağlanmasına izin veren policy modülünü yükler
+# Bu betik üç şeyi yapar:
+#   1. /var/run/ipanel için httpd_var_run_t bağlamı (agent socket)
+#   2. web/iApp/Storage ve web/uploads için httpd_sys_rw_content_t bağlamı
+#      (session, cache, uploads yazma izni)
+#   3. httpd_t → httpd_var_run_t:sock_file connectto policy modülü
 #
 # AlmaLinux/RHEL 9 kurulumlarında gereklidir.
 
@@ -26,19 +28,38 @@ fi
 
 echo "SELinux modu: $(getenforce)"
 
-# 1. Bağlam düzeltmesi
-echo "→ /var/run/ipanel için httpd_var_run_t bağlamı ayarlanıyor..."
+# ─── 1. Agent socket dizini ─────────────────────────────────────────────────
+echo ""
+echo "→ [1/3] /var/run/ipanel → httpd_var_run_t"
 semanage fcontext -a -t httpd_var_run_t '/var/run/ipanel(/.*)?' 2>/dev/null \
     || semanage fcontext -m -t httpd_var_run_t '/var/run/ipanel(/.*)?' 2>/dev/null \
-    || { echo "WARN: semanage başarısız — zaten eklenmiş olabilir."; }
-
+    || echo "    WARN: semanage başarısız (zaten eklenmiş olabilir)."
 restorecon -Rv /run/ipanel/ 2>/dev/null || true
+echo "    Mevcut socket bağlamı:"
+ls -laZ /run/ipanel/ 2>/dev/null || echo "    (socket henüz yok — agent başlatıldığında ayarlanacak)"
 
-echo "→ Mevcut socket bağlamı:"
-ls -laZ /run/ipanel/ 2>/dev/null || echo "  (socket henüz yok)"
+# ─── 2. Web Storage dizini ──────────────────────────────────────────────────
+echo ""
+echo "→ [2/3] web/iApp/Storage → httpd_sys_rw_content_t"
+echo "         (PHP-FPM session, cache, ZN Framework log yazma izni)"
+semanage fcontext -a -t httpd_sys_rw_content_t "$IPANEL_ROOT/web/iApp/Storage(/.*)?" 2>/dev/null \
+    || semanage fcontext -m -t httpd_sys_rw_content_t "$IPANEL_ROOT/web/iApp/Storage(/.*)?" 2>/dev/null \
+    || echo "    WARN: semanage başarısız."
+restorecon -Rv "$IPANEL_ROOT/web/iApp/Storage/" 2>/dev/null || true
 
-# 2. Policy modülü
-echo "→ ipanel_agent SELinux policy modülü derleniyor..."
+echo ""
+echo "→ [2/3] web/uploads → httpd_sys_rw_content_t"
+semanage fcontext -a -t httpd_sys_rw_content_t "$IPANEL_ROOT/web/uploads(/.*)?" 2>/dev/null \
+    || semanage fcontext -m -t httpd_sys_rw_content_t "$IPANEL_ROOT/web/uploads(/.*)?" 2>/dev/null \
+    || echo "    WARN: semanage başarısız."
+restorecon -Rv "$IPANEL_ROOT/web/uploads/" 2>/dev/null || true
+
+echo "    Bağlamlar:"
+ls -laZ "$IPANEL_ROOT/web/iApp/Storage/" 2>/dev/null | head -5
+
+# ─── 3. Policy modülü ───────────────────────────────────────────────────────
+echo ""
+echo "→ [3/3] ipanel_agent SELinux policy modülü derleniyor..."
 
 if ! command -v checkmodule >/dev/null 2>&1; then
     echo "HATA: checkmodule bulunamadı. Kurun: dnf install policycoreutils-devel" >&2
@@ -56,13 +77,14 @@ trap 'rm -rf "$MOD_TMP"' EXIT
 checkmodule -M -m -o "$MOD_TMP/ipanel_agent.mod" "$TE_FILE"
 semodule_package -o "$MOD_TMP/ipanel_agent.pp" -m "$MOD_TMP/ipanel_agent.mod"
 semodule -i "$MOD_TMP/ipanel_agent.pp"
+echo "    ✓ ipanel_agent policy modülü yüklendi."
 
-echo "✓ ipanel_agent policy modülü yüklendi."
+# ─── Servisler ───────────────────────────────────────────────────────────────
 echo ""
-echo "→ Agent servisini yeniden başlatın:"
-echo "    systemctl restart ipanel-agent"
+echo "→ Servisler yeniden başlatılıyor..."
+systemctl restart ipanel-agent
+systemctl restart php-fpm
+echo "    ✓ ipanel-agent ve php-fpm yeniden başlatıldı."
 echo ""
-echo "→ PHP-FPM'i yeniden başlatın:"
-echo "    systemctl restart php-fpm"
-echo ""
-echo "Ardından /stats/stream endpoint'ini test edin."
+echo "Tüm SELinux düzeltmeleri tamamlandı."
+echo "Panel: https://$(hostname -I | awk '{print $1}'):3333"
