@@ -14,7 +14,7 @@ use Project\Libraries\Totp;
 
 class Auth extends Controller
 {
-    public function login()
+    public function login(): void
     {
         if (Session::select('admin_user')) {
             Redirect::action('dashboard/main');
@@ -32,8 +32,8 @@ class Auth extends Controller
     private function handleLogin(): void
     {
         $ip       = RateLimiter::clientIp();
-        $username = trim((string) Post::get('username'));
-        $password = (string) Post::get('password');
+        $username = trim((string) Post::username());
+        $password = (string) Post::password();
 
         // 1. IP blok kontrolü
         if (RateLimiter::isBlocked($ip)) {
@@ -87,9 +87,7 @@ class Auth extends Controller
         // 7. 2FA etkin mi?
         if (!empty($user->totp_enabled) && !empty($user->totp_secret)) {
             // Şifre doğru ama 2FA gerekli — geçici session
-            if (session_status() === PHP_SESSION_ACTIVE) {
-                session_regenerate_id(true);
-            }
+            session_regenerate_id(true);
             Session::insert('auth_2fa_pending', [
                 'user_id'  => (int) $user->id,
                 'username' => $user->username,
@@ -109,7 +107,7 @@ class Auth extends Controller
     }
 
     /** 2FA doğrulama sayfası */
-    public function verify2fa()
+    public function verify2fa(): void
     {
         $pending = Session::select('auth_2fa_pending');
 
@@ -138,7 +136,7 @@ class Auth extends Controller
             return;
         }
 
-        $code   = trim((string) Post::get('code'));
+        $code   = trim((string) Post::code());
         $secret = $pending['secret'];
         $valid  = false;
         $usedBackup = false;
@@ -152,8 +150,9 @@ class Auth extends Controller
                 $valid      = true;
                 $usedBackup = true;
                 // Kullanılan yedek kodu sil
-                DB::where('id', $pending['user_id'])
-                    ->update('users', ['totp_backup' => $newBackup]);
+                DB::table('users')
+                    ->where('id', $pending['user_id'])
+                    ->update(['totp_backup' => $newBackup]);
             }
         }
 
@@ -188,12 +187,7 @@ class Auth extends Controller
     /** Session'ı oluştur ve dashboard'a yönlendir */
     private function completeLogin(object $user, string $ip): void
     {
-        // ZN Framework kendi session handler'ını kullanır; PHP native session
-        // aktif değilse session_regenerate_id() E_WARNING fırlatır ve
-        // ZN'nin error handler'ı bunu exception'a çevirir.
-        if (session_status() === PHP_SESSION_ACTIVE) {
-            session_regenerate_id(true);
-        }
+        session_regenerate_id(true);
 
         Session::insert('admin_user', [
             'id'       => (int) $user->id,
@@ -202,7 +196,7 @@ class Auth extends Controller
             'role'     => $user->role,
         ]);
 
-        DB::where('id', $user->id)->update('users', [
+        DB::table('users')->where('id', $user->id)->update([
             'last_login' => date('Y-m-d H:i:s'),
         ]);
 
@@ -224,10 +218,8 @@ class Auth extends Controller
         Session::delete('_csrf_token');
         Session::delete('auth_2fa_pending');
 
-        if (session_status() === PHP_SESSION_ACTIVE) {
-            session_unset();
-            session_destroy();
-        }
+        session_unset();
+        session_destroy();
 
         Redirect::action('auth/login');
     }
@@ -238,7 +230,6 @@ class Auth extends Controller
         return (int) DB::table('login_attempts')
             ->where('ip', $ip)
             ->where('attempted_at >=', $since)
-            ->get()
-            ->totalRows();
+            ->count();
     }
 }

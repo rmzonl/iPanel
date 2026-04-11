@@ -17,12 +17,12 @@ class FirewallModel extends Model
 
     public function create($data)
     {
-        return DB::insert('firewall_rules', $data);
+        return DB::table('firewall_rules')->insert($data);
     }
 
     public function update($id, $data)
     {
-        return DB::where('id', $id)->update('firewall_rules', $data);
+        return DB::table('firewall_rules')->where('id', $id)->update($data);
     }
 
     public function delete($id)

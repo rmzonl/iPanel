@@ -18,7 +18,7 @@ class RateLimiter
         static::cleanup();
 
         // Kaydet
-        DB::insert('login_attempts', [
+        DB::table('login_attempts')->insert([
             'ip'           => $ip,
             'username'     => $username,
             'attempted_at' => date('Y-m-d H:i:s'),
@@ -35,8 +35,7 @@ class RateLimiter
         $count = DB::table('login_attempts')
             ->where('ip', $ip)
             ->where('attempted_at >=', $since)
-            ->get()
-            ->totalRows();
+            ->count();
 
         return $count >= self::MAX_ATTEMPTS;
     }

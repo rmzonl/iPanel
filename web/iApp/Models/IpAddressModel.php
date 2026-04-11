@@ -34,12 +34,12 @@ class IpAddressModel extends Model
 
     public function create($data)
     {
-        return DB::insert('ip_addresses', $data);
+        return DB::table('ip_addresses')->insert($data);
     }
 
     public function update($id, $data)
     {
-        return DB::where('id', $id)->update('ip_addresses', $data);
+        return DB::table('ip_addresses')->where('id', $id)->update($data);
     }
 
     public function delete($id)

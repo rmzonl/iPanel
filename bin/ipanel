@@ -24,13 +24,7 @@ if (posix_geteuid() !== 0 && (($argv[1] ?? '') !== 'version')) {
 define('IPANEL_ROOT', '/usr/local/ipanel');
 define('IPANEL_CONFIG', '/etc/ipanel/agent.conf.php');
 define('IPANEL_SOCKET', '/run/ipanel/agent.sock');
-
-// Versiyon tek kaynaktan: version.php
-if (file_exists(IPANEL_ROOT . '/version.php')) {
-    require_once IPANEL_ROOT . '/version.php';
-} else {
-    define('IPANEL_VERSION', 'unknown');
-}
+define('IPANEL_VERSION', '0.6.1');
 
 $cmd = $argv[1] ?? 'help';
 array_shift($argv);
@@ -71,9 +65,8 @@ switch ($cmd) {
 
     case 'help':
     default:
-        $v = IPANEL_VERSION;
         echo <<<HELP
-iPanel CLI — v{$v}
+iPanel CLI — v0.6.1
 
 Usage: ipanel <command> [args]
 
@@ -170,7 +163,7 @@ function cmdLogs(array $argv): void
     $map = [
         'agent' => '/var/log/ipanel/agent.log',
         'panel' => IPANEL_ROOT . '/web/iApp/Storage/logs/*.log',
-        'nginx' => '/var/log/nginx/ipanel.error.log',
+        'nginx' => '/var/log/nginx/error.log',
     ];
     if (!isset($map[$target])) {
         fwrite(STDERR, "Unknown log: $target (agent|nginx|panel)\n");

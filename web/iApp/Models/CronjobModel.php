@@ -37,13 +37,13 @@ class CronjobModel extends Model
 
     public function create($data): int
     {
-        DB::insert('cron_jobs', $data);
+        DB::table('cron_jobs')->insert($data);
         return (int) DB::pdo()->lastInsertId();
     }
 
     public function update($id, $data)
     {
-        return DB::where('id', $id)->update('cron_jobs', $data);
+        return DB::table('cron_jobs')->where('id', $id)->update($data);
     }
 
     public function delete($id)

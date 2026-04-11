@@ -38,7 +38,7 @@ class FileManager extends Controller
     // Ana sayfa
     // ────────────────────────────────────────────────────────────
 
-    public function main()
+    public function main(): void
     {
         $path = $this->safePath(Get::get('path') ?? '/home');
         View::pageTitle('Dosya Yöneticisi');
@@ -97,7 +97,7 @@ class FileManager extends Controller
         if (!Http::isRequestMethod('post')) JsonResponse::error('POST gerekli.', [], 405);
         if (!CsrfGuard::verify())           JsonResponse::error('Geçersiz istek.', [], 403);
 
-        $path = $this->safePath(Post::get('path'));
+        $path = $this->safePath(Post::path());
         if (!is_dir($path)) JsonResponse::error('Geçersiz dizin.', [], 400);
 
         if (empty($_FILES['files']['name'])) {
@@ -170,7 +170,7 @@ class FileManager extends Controller
         if (!Http::isRequestMethod('post')) JsonResponse::error('POST gerekli.', [], 405);
         if (!CsrfGuard::verify())           JsonResponse::error('Geçersiz istek.', [], 403);
 
-        $path = $this->safePath(Post::get('path'));
+        $path = $this->safePath(Post::path());
         if (!file_exists($path)) JsonResponse::error('Dosya/dizin bulunamadı.', [], 404);
 
         // Kök dizini silmeye izin verme
@@ -199,8 +199,8 @@ class FileManager extends Controller
         if (!Http::isRequestMethod('post')) JsonResponse::error('POST gerekli.', [], 405);
         if (!CsrfGuard::verify())           JsonResponse::error('Geçersiz istek.', [], 403);
 
-        $oldPath = $this->safePath(Post::get('path'));
-        $newName = basename(str_replace("\0", '', Post::get('name') ?? ''));
+        $oldPath = $this->safePath(Post::path());
+        $newName = basename(str_replace("\0", '', Post::name() ?? ''));
 
         if (!file_exists($oldPath)) JsonResponse::error('Kaynak bulunamadı.', [], 404);
         if (!$newName)              JsonResponse::error('Yeni isim gerekli.');
@@ -223,8 +223,8 @@ class FileManager extends Controller
         if (!Http::isRequestMethod('post')) JsonResponse::error('POST gerekli.', [], 405);
         if (!CsrfGuard::verify())           JsonResponse::error('Geçersiz istek.', [], 403);
 
-        $src  = $this->safePath(Post::get('path'));
-        $dest = $this->safePath(Post::get('dest'));
+        $src  = $this->safePath(Post::path());
+        $dest = $this->safePath(Post::dest());
 
         if (!file_exists($src)) JsonResponse::error('Kaynak bulunamadı.', [], 404);
         if (!is_dir($dest))     JsonResponse::error('Hedef dizin geçersiz.', [], 400);
@@ -248,8 +248,8 @@ class FileManager extends Controller
         if (!Http::isRequestMethod('post')) JsonResponse::error('POST gerekli.', [], 405);
         if (!CsrfGuard::verify())           JsonResponse::error('Geçersiz istek.', [], 403);
 
-        $parentPath = $this->safePath(Post::get('path'));
-        $name       = basename(str_replace("\0", '', Post::get('name') ?? ''));
+        $parentPath = $this->safePath(Post::path());
+        $name       = basename(str_replace("\0", '', Post::name() ?? ''));
 
         if (!is_dir($parentPath)) JsonResponse::error('Dizin bulunamadı.', [], 400);
         if (!$name)               JsonResponse::error('Dizin adı gerekli.');
@@ -272,8 +272,8 @@ class FileManager extends Controller
         if (!Http::isRequestMethod('post')) JsonResponse::error('POST gerekli.', [], 405);
         if (!CsrfGuard::verify())           JsonResponse::error('Geçersiz istek.', [], 403);
 
-        $parentPath = $this->safePath(Post::get('path'));
-        $name       = basename(str_replace("\0", '', Post::get('name') ?? ''));
+        $parentPath = $this->safePath(Post::path());
+        $name       = basename(str_replace("\0", '', Post::name() ?? ''));
 
         if (!is_dir($parentPath)) JsonResponse::error('Dizin bulunamadı.', [], 400);
         if (!$name)               JsonResponse::error('Dosya adı gerekli.');
@@ -296,8 +296,8 @@ class FileManager extends Controller
         if (!Http::isRequestMethod('post')) JsonResponse::error('POST gerekli.', [], 405);
         if (!CsrfGuard::verify())           JsonResponse::error('Geçersiz istek.', [], 403);
 
-        $path    = $this->safePath(Post::get('path'));
-        $content = Post::get('content') ?? '';
+        $path    = $this->safePath(Post::path());
+        $content = Post::content() ?? '';
 
         if (!is_file($path)) JsonResponse::error('Dosya bulunamadı.', [], 404);
 
@@ -323,8 +323,8 @@ class FileManager extends Controller
         if (!Http::isRequestMethod('post')) JsonResponse::error('POST gerekli.', [], 405);
         if (!CsrfGuard::verify())           JsonResponse::error('Geçersiz istek.', [], 403);
 
-        $path = $this->safePath(Post::get('path'));
-        $mode = Post::get('mode') ?? '';
+        $path = $this->safePath(Post::path());
+        $mode = Post::mode() ?? '';
 
         if (!file_exists($path)) JsonResponse::error('Dosya/dizin bulunamadı.', [], 404);
 
@@ -349,7 +349,7 @@ class FileManager extends Controller
         if (!Http::isRequestMethod('post')) JsonResponse::error('POST gerekli.', [], 405);
         if (!CsrfGuard::verify())           JsonResponse::error('Geçersiz istek.', [], 403);
 
-        $path   = $this->safePath(Post::get('path'));
+        $path   = $this->safePath(Post::path());
         $parent = dirname($path);
 
         if (!file_exists($path)) JsonResponse::error('Dosya/dizin bulunamadı.', [], 404);
@@ -378,7 +378,7 @@ class FileManager extends Controller
         if (!Http::isRequestMethod('post')) JsonResponse::error('POST gerekli.', [], 405);
         if (!CsrfGuard::verify())           JsonResponse::error('Geçersiz istek.', [], 403);
 
-        $path   = $this->safePath(Post::get('path'));
+        $path   = $this->safePath(Post::path());
         $parent = dirname($path);
 
         if (!is_file($path) || strtolower(pathinfo($path, PATHINFO_EXTENSION)) !== 'zip') {

@@ -37,13 +37,13 @@ class EmailModel extends Model
 
     public function create($data): int
     {
-        DB::insert('email_accounts', $data);
+        DB::table('email_accounts')->insert($data);
         return (int) DB::pdo()->lastInsertId();
     }
 
     public function update($id, $data)
     {
-        return DB::where('id', $id)->update('email_accounts', $data);
+        return DB::table('email_accounts')->where('id', $id)->update($data);
     }
 
     public function delete($id)

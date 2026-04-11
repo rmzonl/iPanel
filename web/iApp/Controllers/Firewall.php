@@ -22,7 +22,7 @@ class Firewall extends Controller
         $this->model = new \Project\Models\FirewallModel();
     }
 
-    public function main()
+    public function main(): void
     {
         View::pageTitle('Güvenlik Duvarı');
         View::rules($this->model->getAll());
@@ -32,7 +32,7 @@ class Firewall extends Controller
         Session::delete('error');
     }
 
-    public function create()
+    public function create(): void
     {
         View::pageTitle('Yeni Kural Ekle');
     }
@@ -43,14 +43,14 @@ class Firewall extends Controller
         if (!CsrfGuard::verify()) { Session::insert('error', 'Geçersiz form isteği.'); Redirect::action('firewall/main'); return; }
 
         $raw = InputValidator::sanitize([
-            'name'      => Post::get('name'),
-            'action'    => Post::get('action') ?: 'allow',
-            'protocol'  => Post::get('protocol') ?: 'tcp',
-            'direction' => Post::get('direction') ?: 'in',
-            'source_ip' => Post::get('source_ip'),
-            'dest_port' => Post::get('dest_port'),
-            'priority'  => (int) (Post::get('priority') ?: 0),
-            'status'    => Post::get('status') ?: 'active',
+            'name'      => Post::name(),
+            'action'    => Post::action() ?: 'allow',
+            'protocol'  => Post::protocol() ?: 'tcp',
+            'direction' => Post::direction() ?: 'in',
+            'source_ip' => Post::source_ip(),
+            'dest_port' => Post::dest_port(),
+            'priority'  => (int) (Post::priority() ?: 0),
+            'status'    => Post::status() ?: 'active',
         ]);
 
         $v = InputValidator::from($raw)
@@ -81,7 +81,7 @@ class Firewall extends Controller
     {
         $rule = $this->model->getById($id);
         $this->model->delete($id);
-        AuditLogger::log('firewall.delete', 'firewall_rule', $id, 'Güvenlik duvarı kuralı silindi: ' . ($rule?->name ?? $id));
+        AuditLogger::log('firewall.delete', 'firewall_rule', $id, 'Güvenlik duvarı kuralı silindi: ' . ($rule->name ?? $id));
         Session::insert('success', 'Kural başarıyla silindi.');
         Redirect::action('firewall/main');
     }

@@ -24,7 +24,7 @@ class AuditLogger
         try {
             $user = Session::select('admin_user');
 
-            DB::insert('audit_logs', [
+            DB::table('audit_logs')->insert([
                 'user_id'       => $user['id']       ?? null,
                 'username'      => $user['username']  ?? 'system',
                 'action'        => $action,

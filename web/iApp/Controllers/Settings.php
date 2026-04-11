@@ -23,7 +23,7 @@ class Settings extends Controller
         $this->model = new \Project\Models\SettingsModel();
     }
 
-    public function main()
+    public function main(): void
     {
         View::pageTitle('Ayarlar');
         View::serverSettings($this->model->getServerSettings());
@@ -46,7 +46,7 @@ class Settings extends Controller
 
         $changes = [];
         foreach ($allowedKeys as $key) {
-            $value = Post::get($key);
+            $value = Post::$key();
             if ($value === null) continue;
 
             if ($key === 'server_ip') {
@@ -79,11 +79,10 @@ class Settings extends Controller
     // ---------------------------------------------------------------
 
     /** 2FA kurulum sayfası */
-    public function twoFactor()
+    public function twoFactor(): void
     {
         $user   = Acl::user();
         $dbUser = DB::table('users')->where('id', $user['id'])->get()->row();
-        if (!$dbUser) { Redirect::action('dashboard/main'); return; }
 
         View::pageTitle('İki Faktörlü Doğrulama');
         View::totpEnabled(!empty($dbUser->totp_enabled));
@@ -95,7 +94,7 @@ class Settings extends Controller
     }
 
     /** 2FA etkinleştirme başlat: secret üret, QR göster */
-    public function setup2fa()
+    public function setup2fa(): void
     {
         if (!Http::isRequestMethod('post')) { Redirect::action('settings/twoFactor'); return; }
         if (!CsrfGuard::verify()) { Session::insert('error', 'Geçersiz form isteği.'); Redirect::action('settings/twoFactor'); return; }
@@ -136,7 +135,7 @@ class Settings extends Controller
             return;
         }
 
-        $code = trim((string) Post::get('code'));
+        $code = trim((string) Post::code());
         if (!Totp::verify($secret, $code)) {
             Session::insert('error', 'Doğrulama kodu geçersiz. Lütfen uygulamanızdan güncel kodu girin.');
             Redirect::action('settings/setup2fa');
@@ -147,7 +146,7 @@ class Settings extends Controller
         $backupCodes = Totp::generateBackupCodes(8);
         $backupHash  = Totp::hashBackupCodes($backupCodes);
 
-        DB::where('id', $user['id'])->update('users', [
+        DB::table('users')->where('id', $user['id'])->update([
             'totp_secret'  => $secret,
             'totp_enabled' => 1,
             'totp_backup'  => $backupHash,
@@ -163,7 +162,7 @@ class Settings extends Controller
     }
 
     /** Yedek kodları göster */
-    public function backupCodes()
+    public function backupCodes(): void
     {
         $codes = Session::select('totp_backup_codes');
         if (empty($codes)) {
@@ -185,7 +184,7 @@ class Settings extends Controller
         $user = Acl::user();
 
         // Şifreyi doğrula (ek güvence)
-        $password = (string) Post::get('password');
+        $password = (string) Post::password();
         $dbUser   = DB::table('users')->where('id', $user['id'])->get()->row();
 
         if (!$dbUser || !password_verify($password, $dbUser->password)) {
@@ -194,7 +193,7 @@ class Settings extends Controller
             return;
         }
 
-        DB::where('id', $user['id'])->update('users', [
+        DB::table('users')->where('id', $user['id'])->update([
             'totp_secret'  => null,
             'totp_enabled' => 0,
             'totp_backup'  => null,

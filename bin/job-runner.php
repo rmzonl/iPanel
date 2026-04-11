@@ -85,7 +85,7 @@ function claimJob(\PDO $db): ?object
         "SELECT * FROM jobs
           WHERE status = 'pending' AND attempts < max_attempts
           ORDER BY priority ASC, created_at ASC
-          LIMIT 1 FOR UPDATE"
+          LIMIT 1 FOR UPDATE SKIP LOCKED"
     );
     $job = $stmt->fetch();
     if (!$job) {
@@ -125,7 +125,7 @@ function markRetry(\PDO $db, int $id): void
 function executeJob(object $job): array
 {
     require_once IPANEL_ROOT . '/web/iApp/Libraries/AgentClient.php';
-    require_once '/etc/ipanel/agent.conf.php';
+    require_once IPANEL_ROOT . '/etc/ipanel/agent.conf.php';
 
     $payload = json_decode($job->payload, true) ?? [];
 
@@ -155,7 +155,8 @@ function executeJob(object $job): array
         return ['error' => "Bilinmeyen iş türü: {$job->type}"];
     }
 
-    // $map yalnızca tip doğrulaması için — agent action job type'ın kendisidir
+    [$module, $method] = $map[$job->type];
+
     $config = require '/etc/ipanel/agent.conf.php';
     $client = new \Project\Libraries\AgentClient(
         '/run/ipanel/agent.sock',
@@ -163,7 +164,7 @@ function executeJob(object $job): array
     );
 
     try {
-        return $client->call($job->type, $payload);
+        return $client->call($module, $method, $payload);
     } catch (\Throwable $e) {
         return ['error' => $e->getMessage()];
     }

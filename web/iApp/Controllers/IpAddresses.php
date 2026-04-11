@@ -22,7 +22,7 @@ class IpAddresses extends Controller
         $this->model = new \Project\Models\IpAddressModel();
     }
 
-    public function main()
+    public function main(): void
     {
         View::pageTitle('IP Adresleri');
         View::ips($this->model->getAll());
@@ -32,7 +32,7 @@ class IpAddresses extends Controller
         Session::delete('error');
     }
 
-    public function create()
+    public function create(): void
     {
         $clientModel = new \Project\Models\ClientModel();
         View::pageTitle('Yeni IP Adresi');
@@ -45,13 +45,13 @@ class IpAddresses extends Controller
         if (!CsrfGuard::verify()) { Session::insert('error', 'Geçersiz form isteği.'); Redirect::action('ipaddresses/main'); return; }
 
         $raw = InputValidator::sanitize([
-            'ip'        => Post::get('ip'),
-            'netmask'   => Post::get('netmask'),
-            'gateway'   => Post::get('gateway'),
-            'type'      => Post::get('type') ?: 'shared',
-            'client_id' => Post::get('client_id') ? (int) Post::get('client_id') : null,
-            'status'    => Post::get('status') ?: 'active',
-            'notes'     => Post::get('notes'),
+            'ip'        => Post::ip(),
+            'netmask'   => Post::netmask(),
+            'gateway'   => Post::gateway(),
+            'type'      => Post::type() ?: 'shared',
+            'client_id' => Post::client_id() ? (int) Post::client_id() : null,
+            'status'    => Post::status() ?: 'active',
+            'notes'     => Post::notes(),
         ]);
 
         $v = InputValidator::from($raw)
@@ -79,7 +79,7 @@ class IpAddresses extends Controller
     {
         $ip = $this->model->getById($id);
         $this->model->delete($id);
-        AuditLogger::log('ipaddresses.delete', 'ip_address', $id, 'IP silindi: ' . ($ip?->ip ?? $id));
+        AuditLogger::log('ipaddresses.delete', 'ip_address', $id, 'IP silindi: ' . ($ip->ip ?? $id));
         Session::insert('success', 'IP adresi başarıyla silindi.');
         Redirect::action('ipaddresses/main');
     }

@@ -21,7 +21,7 @@ class Domains extends Controller
         $this->model = new \Project\Models\DomainModel();
     }
 
-    public function main()
+    public function main(): void
     {
         $user    = Acl::user();
         $domains = ($user['role'] === 'admin')
@@ -36,7 +36,7 @@ class Domains extends Controller
         Session::delete('error');
     }
 
-    public function create()
+    public function create(): void
     {
         $user        = Acl::user();
         $siteModel   = new \Project\Models\SiteModel();
@@ -55,16 +55,16 @@ class Domains extends Controller
         if (!Http::isRequestMethod('post')) { Redirect::action('domains/main'); return; }
         if (!CsrfGuard::verify()) { Session::insert('error', 'Geçersiz form isteği.'); Redirect::action('domains/main'); return; }
 
-        $siteId = (int) Post::get('site_id');
+        $siteId = (int) Post::site_id();
         Acl::requireOwnership(Acl::ownsSite($siteId));
 
         $raw = InputValidator::sanitize([
             'site_id'     => $siteId,
-            'client_id'   => (int) Post::get('client_id'),
-            'name'        => Post::get('name'),
-            'type'        => Post::get('type') ?: 'addon',
-            'redirect_to' => Post::get('redirect_to'),
-            'status'      => Post::get('status') ?: 'active',
+            'client_id'   => (int) Post::client_id(),
+            'name'        => Post::name(),
+            'type'        => Post::type() ?: 'addon',
+            'redirect_to' => Post::redirect_to(),
+            'status'      => Post::status() ?: 'active',
         ]);
 
         $v = InputValidator::from($raw)
@@ -91,7 +91,7 @@ class Domains extends Controller
         Acl::requireOwnership(Acl::ownsDomain($id));
         $domain = $this->model->getById($id);
         $this->model->delete($id);
-        AuditLogger::log('domains.delete', 'domain', $id, 'Domain silindi: ' . ($domain?->name ?? $id));
+        AuditLogger::log('domains.delete', 'domain', $id, 'Domain silindi: ' . ($domain->name ?? $id));
         Session::insert('success', 'Domain başarıyla silindi.');
         Redirect::action('domains/main');
     }

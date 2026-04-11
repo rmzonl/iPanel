@@ -21,7 +21,7 @@ class Email extends Controller
         $this->model = new \Project\Models\EmailModel();
     }
 
-    public function main()
+    public function main(): void
     {
         $user   = Acl::user();
         $emails = ($user['role'] === 'admin')
@@ -36,7 +36,7 @@ class Email extends Controller
         Session::delete('error');
     }
 
-    public function create()
+    public function create(): void
     {
         $user      = Acl::user();
         $siteModel = new \Project\Models\SiteModel();
@@ -51,12 +51,12 @@ class Email extends Controller
         if (!Http::isRequestMethod('post')) { Redirect::action('email/main'); return; }
         if (!CsrfGuard::verify()) { Session::insert('error', 'Geçersiz form isteği.'); Redirect::action('email/main'); return; }
 
-        $siteId = (int) Post::get('site_id');
+        $siteId = (int) Post::site_id();
         Acl::requireOwnership(Acl::ownsSite($siteId));
 
-        $username    = trim((string) Post::get('username'));
-        $domain      = trim((string) Post::get('domain'));
-        $rawPassword = (string) Post::get('password');
+        $username    = trim((string) Post::username());
+        $domain      = trim((string) Post::domain());
+        $rawPassword = (string) Post::password();
 
         $v = InputValidator::from(['username' => $username, 'domain' => $domain, 'site_id' => $siteId])
             ->required('site_id', 'Site')
@@ -82,8 +82,8 @@ class Email extends Controller
             'username' => htmlspecialchars($username, ENT_QUOTES, 'UTF-8'),
             'email'    => $emailAddress,
             'password' => password_hash($rawPassword, PASSWORD_BCRYPT),
-            'quota'    => (int) (Post::get('quota') ?: 1024),
-            'status'   => Post::get('status') === 'suspended' ? 'suspended' : 'active',
+            'quota'    => (int) (Post::quota() ?: 1024),
+            'status'   => Post::status() === 'suspended' ? 'suspended' : 'active',
         ]);
 
         AuditLogger::log('email.create', 'email_account', $id, "E-posta hesabı oluşturuldu: $emailAddress");
@@ -96,7 +96,7 @@ class Email extends Controller
         Acl::requireOwnership(Acl::ownsSiteResource('email_accounts', $id));
         $account = $this->model->getById($id);
         $this->model->delete($id);
-        AuditLogger::log('email.delete', 'email_account', $id, 'E-posta hesabı silindi: ' . ($account?->email ?? $id));
+        AuditLogger::log('email.delete', 'email_account', $id, 'E-posta hesabı silindi: ' . ($account->email ?? $id));
         Session::insert('success', 'E-posta hesabı başarıyla silindi.');
         Redirect::action('email/main');
     }

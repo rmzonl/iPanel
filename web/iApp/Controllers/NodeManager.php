@@ -17,7 +17,7 @@ class NodeManager extends Controller
 {
     private const NVM_DIR = '/usr/local/nvm';
 
-    public function main()
+    public function main(): void
     {
         View::pageTitle('Node.js Yönetimi');
         View::nodeInfo($this->collectInfo());
@@ -56,7 +56,7 @@ class NodeManager extends Controller
         if (!Http::isRequestMethod('post')) { Redirect::action('nodemanager/main'); return; }
         if (!CsrfGuard::verify()) { Session::insert('error', 'Geçersiz form isteği.'); Redirect::action('nodemanager/main'); return; }
 
-        $version = trim((string) Post::get('node_version'));
+        $version = trim((string) Post::node_version());
         // Geçerli format: 18, 20, 22, lts, latest veya v18.0.0
         if (!preg_match('/^(lts|latest|v?\d+(\.\d+){0,2})$/', $version)) {
             Session::insert('error', 'Geçersiz Node.js sürümü.');
@@ -96,7 +96,7 @@ class NodeManager extends Controller
         if (!Http::isRequestMethod('post')) { Redirect::action('nodemanager/main'); return; }
         if (!CsrfGuard::verify()) { Session::insert('error', 'Geçersiz form isteği.'); Redirect::action('nodemanager/main'); return; }
 
-        $version = trim((string) Post::get('node_version'));
+        $version = trim((string) Post::node_version());
         if (!preg_match('/^v?\d+(\.\d+){0,2}$/', $version)) {
             Session::insert('error', 'Geçersiz sürüm formatı.');
             Redirect::action('nodemanager/main');
@@ -125,7 +125,7 @@ class NodeManager extends Controller
         if (!Http::isRequestMethod('post')) { Redirect::action('nodemanager/main'); return; }
         if (!CsrfGuard::verify()) { Session::insert('error', 'Geçersiz form isteği.'); Redirect::action('nodemanager/main'); return; }
 
-        $version = trim((string) Post::get('node_version'));
+        $version = trim((string) Post::node_version());
         if (!preg_match('/^v?\d+(\.\d+){0,2}$/', $version)) {
             Session::insert('error', 'Geçersiz sürüm formatı.');
             Redirect::action('nodemanager/main');
@@ -160,7 +160,7 @@ class NodeManager extends Controller
         if (!Http::isRequestMethod('post')) { Redirect::action('nodemanager/main'); return; }
         if (!CsrfGuard::verify()) { Session::insert('error', 'Geçersiz form isteği.'); Redirect::action('nodemanager/main'); return; }
 
-        $action = Post::get('action');
+        $action = Post::action();
         if (!in_array($action, ['install', 'list'], true)) {
             Session::insert('error', 'Geçersiz işlem.');
             Redirect::action('nodemanager/main');

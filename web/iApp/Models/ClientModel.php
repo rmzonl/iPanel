@@ -35,13 +35,13 @@ class ClientModel extends Model
 
     public function create($data): int
     {
-        DB::insert('clients', $data);
+        DB::table('clients')->insert($data);
         return (int) DB::pdo()->lastInsertId();
     }
 
     public function update($id, $data)
     {
-        return DB::where('id', $id)->update('clients', $data);
+        return DB::table('clients')->where('id', $id)->update($data);
     }
 
     public function delete($id)

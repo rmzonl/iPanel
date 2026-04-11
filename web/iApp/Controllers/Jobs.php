@@ -112,7 +112,7 @@ class Jobs extends Controller
         if (!Http::isRequestMethod('post')) {
             JsonResponse::error('POST gerekli.', [], 405);
         }
-        $uuid = Post::get('uuid') ?? '';
+        $uuid = Post::uuid() ?? '';
         if (!$uuid) JsonResponse::error('UUID gerekli.', [], 400);
 
         $job  = JobQueue::status($uuid);

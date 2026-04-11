@@ -21,7 +21,7 @@ class Databases extends Controller
         $this->model = new \Project\Models\DatabaseModel();
     }
 
-    public function main()
+    public function main(): void
     {
         $user = Acl::user();
         $dbs  = ($user['role'] === 'admin')
@@ -36,7 +36,7 @@ class Databases extends Controller
         Session::delete('error');
     }
 
-    public function create()
+    public function create(): void
     {
         $user      = Acl::user();
         $siteModel = new \Project\Models\SiteModel();
@@ -51,17 +51,17 @@ class Databases extends Controller
         if (!Http::isRequestMethod('post')) { Redirect::action('databases/main'); return; }
         if (!CsrfGuard::verify()) { Session::insert('error', 'Geçersiz form isteği.'); Redirect::action('databases/main'); return; }
 
-        $siteId = (int) Post::get('site_id');
+        $siteId = (int) Post::site_id();
         Acl::requireOwnership(Acl::ownsSite($siteId));
 
-        $rawPassword = (string) Post::get('db_password');
+        $rawPassword = (string) Post::db_password();
 
         $raw = InputValidator::sanitize([
             'site_id'  => $siteId,
-            'db_name'  => Post::get('db_name'),
-            'db_user'  => Post::get('db_user'),
-            'charset'  => Post::get('charset') ?: 'utf8mb4',
-            'status'   => Post::get('status') ?: 'active',
+            'db_name'  => Post::db_name(),
+            'db_user'  => Post::db_user(),
+            'charset'  => Post::charset() ?: 'utf8mb4',
+            'status'   => Post::status() ?: 'active',
         ]);
 
         $v = InputValidator::from($raw)
@@ -97,7 +97,7 @@ class Databases extends Controller
         Acl::requireOwnership(Acl::ownsSiteResource('site_databases', $id));
         $db = $this->model->getById($id);
         $this->model->delete($id);
-        AuditLogger::log('databases.delete', 'database', $id, 'Veritabanı silindi: ' . ($db?->db_name ?? $id));
+        AuditLogger::log('databases.delete', 'database', $id, 'Veritabanı silindi: ' . ($db->db_name ?? $id));
         Session::insert('success', 'Veritabanı başarıyla silindi.');
         Redirect::action('databases/main');
     }

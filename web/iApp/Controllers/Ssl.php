@@ -21,7 +21,7 @@ class Ssl extends Controller
         $this->model = new \Project\Models\SslModel();
     }
 
-    public function main()
+    public function main(): void
     {
         $user  = Acl::user();
         $certs = ($user['role'] === 'admin')
@@ -36,7 +36,7 @@ class Ssl extends Controller
         Session::delete('error');
     }
 
-    public function create()
+    public function create(): void
     {
         $user        = Acl::user();
         $domainModel = new \Project\Models\DomainModel();
@@ -51,19 +51,19 @@ class Ssl extends Controller
         if (!Http::isRequestMethod('post')) { Redirect::action('ssl/main'); return; }
         if (!CsrfGuard::verify()) { Session::insert('error', 'Geçersiz form isteği.'); Redirect::action('ssl/main'); return; }
 
-        $domainId = (int) Post::get('domain_id');
+        $domainId = (int) Post::domain_id();
         Acl::requireOwnership(Acl::ownsDomain($domainId));
 
         $raw = InputValidator::sanitize([
             'domain_id'  => $domainId,
-            'type'       => Post::get('type') ?: 'letsencrypt',
-            'cert_file'  => Post::get('cert_file'),
-            'key_file'   => Post::get('key_file'),
-            'chain_file' => Post::get('chain_file'),
-            'issued_at'  => Post::get('issued_at') ?: null,
-            'expires_at' => Post::get('expires_at') ?: null,
-            'auto_renew' => Post::get('auto_renew') ? 1 : 0,
-            'status'     => Post::get('status') ?: 'pending',
+            'type'       => Post::type() ?: 'letsencrypt',
+            'cert_file'  => Post::cert_file(),
+            'key_file'   => Post::key_file(),
+            'chain_file' => Post::chain_file(),
+            'issued_at'  => Post::issued_at() ?: null,
+            'expires_at' => Post::expires_at() ?: null,
+            'auto_renew' => Post::auto_renew() ? 1 : 0,
+            'status'     => Post::status() ?: 'pending',
         ]);
 
         $v = InputValidator::from($raw)

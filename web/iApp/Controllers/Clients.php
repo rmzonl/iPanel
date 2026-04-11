@@ -21,7 +21,7 @@ class Clients extends Controller
         $this->model = new \Project\Models\ClientModel();
     }
 
-    public function main()
+    public function main(): void
     {
         $user    = Acl::user();
         $clients = ($user['role'] === 'admin')
@@ -36,7 +36,7 @@ class Clients extends Controller
         Session::delete('error');
     }
 
-    public function create()
+    public function create(): void
     {
         View::pageTitle('Yeni Müşteri Ekle');
     }
@@ -47,16 +47,16 @@ class Clients extends Controller
         if (!CsrfGuard::verify()) { Session::insert('error', 'Geçersiz form isteği.'); Redirect::action('clients/main'); return; }
 
         $raw = InputValidator::sanitize([
-            'company_name' => Post::get('company_name'),
-            'first_name'   => Post::get('first_name'),
-            'last_name'    => Post::get('last_name'),
-            'email'        => Post::get('email'),
-            'phone'        => Post::get('phone'),
-            'address'      => Post::get('address'),
-            'city'         => Post::get('city'),
-            'country'      => Post::get('country') ?: 'TR',
-            'status'       => Post::get('status') ?: 'active',
-            'notes'        => Post::get('notes'),
+            'company_name' => Post::company_name(),
+            'first_name'   => Post::first_name(),
+            'last_name'    => Post::last_name(),
+            'email'        => Post::email(),
+            'phone'        => Post::phone(),
+            'address'      => Post::address(),
+            'city'         => Post::city(),
+            'country'      => Post::country() ?: 'TR',
+            'status'       => Post::status() ?: 'active',
+            'notes'        => Post::notes(),
         ]);
 
         $v = InputValidator::from($raw)
@@ -82,7 +82,7 @@ class Clients extends Controller
         Redirect::action('clients/main');
     }
 
-    public function edit(int $id)
+    public function edit(int $id): void
     {
         Acl::requireOwnership(Acl::ownsClient($id));
         View::pageTitle('Müşteri Düzenle');
@@ -98,16 +98,16 @@ class Clients extends Controller
         Acl::requireOwnership(Acl::ownsClient($id));
 
         $raw = InputValidator::sanitize([
-            'company_name' => Post::get('company_name'),
-            'first_name'   => Post::get('first_name'),
-            'last_name'    => Post::get('last_name'),
-            'email'        => Post::get('email'),
-            'phone'        => Post::get('phone'),
-            'address'      => Post::get('address'),
-            'city'         => Post::get('city'),
-            'country'      => Post::get('country') ?: 'TR',
-            'status'       => Post::get('status') ?: 'active',
-            'notes'        => Post::get('notes'),
+            'company_name' => Post::company_name(),
+            'first_name'   => Post::first_name(),
+            'last_name'    => Post::last_name(),
+            'email'        => Post::email(),
+            'phone'        => Post::phone(),
+            'address'      => Post::address(),
+            'city'         => Post::city(),
+            'country'      => Post::country() ?: 'TR',
+            'status'       => Post::status() ?: 'active',
+            'notes'        => Post::notes(),
         ]);
 
         $v = InputValidator::from($raw)
@@ -134,7 +134,7 @@ class Clients extends Controller
         Acl::requireOwnership(Acl::ownsClient($id));
         $client = $this->model->getById($id);
         $this->model->delete($id);
-        AuditLogger::log('clients.delete', 'client', $id, "Müşteri silindi: " . ($client?->email ?? $id));
+        AuditLogger::log('clients.delete', 'client', $id, "Müşteri silindi: " . ($client->email ?? $id));
         Session::insert('success', 'Müşteri başarıyla silindi.');
         Redirect::action('clients/main');
     }

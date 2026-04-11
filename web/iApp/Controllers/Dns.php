@@ -21,7 +21,7 @@ class Dns extends Controller
         $this->model = new \Project\Models\DnsModel();
     }
 
-    public function main()
+    public function main(): void
     {
         $user  = Acl::user();
         $zones = ($user['role'] === 'admin')
@@ -36,7 +36,7 @@ class Dns extends Controller
         Session::delete('error');
     }
 
-    public function records(int $zoneId)
+    public function records(int $zoneId): void
     {
         Acl::requireOwnership(Acl::ownsDnsZone($zoneId));
 
@@ -52,7 +52,7 @@ class Dns extends Controller
         Session::delete('error');
     }
 
-    public function createRecord(int $zoneId)
+    public function createRecord(int $zoneId): void
     {
         Acl::requireOwnership(Acl::ownsDnsZone($zoneId));
 
@@ -69,16 +69,16 @@ class Dns extends Controller
         if (!Http::isRequestMethod('post')) { Redirect::action('dns/main'); return; }
         if (!CsrfGuard::verify()) { Session::insert('error', 'Geçersiz form isteği.'); Redirect::action('dns/main'); return; }
 
-        $zoneId = (int) Post::get('zone_id');
+        $zoneId = (int) Post::zone_id();
         Acl::requireOwnership(Acl::ownsDnsZone($zoneId));
 
         $raw = InputValidator::sanitize([
             'zone_id'  => $zoneId,
-            'type'     => Post::get('type'),
-            'name'     => Post::get('name'),
-            'value'    => Post::get('value'),
-            'priority' => (int) (Post::get('priority') ?: 0),
-            'ttl'      => (int) (Post::get('ttl') ?: 3600),
+            'type'     => Post::type(),
+            'name'     => Post::name(),
+            'value'    => Post::value(),
+            'priority' => (int) (Post::priority() ?: 0),
+            'ttl'      => (int) (Post::ttl() ?: 3600),
         ]);
 
         $v = InputValidator::from($raw)

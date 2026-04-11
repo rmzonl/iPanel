@@ -14,7 +14,7 @@ use Project\Libraries\AuditLogger;
  */
 class PhpManager extends Controller
 {
-    public function main()
+    public function main(): void
     {
         View::pageTitle('PHP Yönetimi');
         View::phpInfo($this->collectInfo());
@@ -30,7 +30,7 @@ class PhpManager extends Controller
         if (!Http::isRequestMethod('post')) { Redirect::action('phpmanager/main'); return; }
         if (!CsrfGuard::verify()) { Session::insert('error', 'Geçersiz form isteği.'); Redirect::action('phpmanager/main'); return; }
 
-        $version = Post::get('php_version');
+        $version = Post::php_version();
         if (!preg_match('/^\d+\.\d+$/', $version)) {
             Session::insert('error', 'Geçersiz PHP sürümü formatı.');
             Redirect::action('phpmanager/main');
@@ -64,9 +64,9 @@ class PhpManager extends Controller
         if (!Http::isRequestMethod('post')) { Redirect::action('phpmanager/main'); return; }
         if (!CsrfGuard::verify()) { Session::insert('error', 'Geçersiz form isteği.'); Redirect::action('phpmanager/main'); return; }
 
-        $version   = Post::get('php_version');
-        $extension = Post::get('extension');
-        $action    = Post::get('action'); // install|remove
+        $version   = Post::php_version();
+        $extension = Post::extension();
+        $action    = Post::action(); // install|remove
 
         if (!preg_match('/^\d+\.\d+$/', $version) || !preg_match('/^[a-zA-Z0-9_-]+$/', $extension)) {
             Session::insert('error', 'Geçersiz parametre.');
@@ -117,7 +117,7 @@ class PhpManager extends Controller
         if (!Http::isRequestMethod('post')) { Redirect::action('phpmanager/main'); return; }
         if (!CsrfGuard::verify()) { Session::insert('error', 'Geçersiz form isteği.'); Redirect::action('phpmanager/main'); return; }
 
-        $version = Post::get('php_version');
+        $version = Post::php_version();
         if (!preg_match('/^\d+\.\d+$/', $version)) {
             Session::insert('error', 'Geçersiz PHP sürümü.');
             Redirect::action('phpmanager/main');
@@ -204,7 +204,7 @@ class PhpManager extends Controller
     /* ── Obfuscation / Koruma Yönetimi ── */
 
     /** ionCube Loader / PHPKoru / Zend Guard durumu ve yönetimi */
-    public function obfuscation()
+    public function obfuscation(): void
     {
         View::pageTitle('PHP Koruma Yönetimi');
         View::ioncubeStatus($this->detectIoncube());
@@ -222,7 +222,7 @@ class PhpManager extends Controller
         if (!Http::isRequestMethod('post')) { Redirect::action('phpmanager/obfuscation'); return; }
         if (!CsrfGuard::verify()) { Session::insert('error', 'Geçersiz form isteği.'); Redirect::action('phpmanager/obfuscation'); return; }
 
-        $version = Post::get('php_version') ?: '';
+        $version = Post::php_version() ?: '';
         if (!preg_match('/^\d+\.\d+$/', $version)) {
             Session::insert('error', 'Geçersiz PHP sürümü.'); Redirect::action('phpmanager/obfuscation'); return;
         }
@@ -290,7 +290,7 @@ class PhpManager extends Controller
         if (!Http::isRequestMethod('post')) { Redirect::action('phpmanager/obfuscation'); return; }
         if (!CsrfGuard::verify()) { Session::insert('error', 'Geçersiz form isteği.'); Redirect::action('phpmanager/obfuscation'); return; }
 
-        $version = Post::get('php_version') ?: '';
+        $version = Post::php_version() ?: '';
         if (!preg_match('/^\d+\.\d+$/', $version)) {
             Session::insert('error', 'Geçersiz PHP sürümü.'); Redirect::action('phpmanager/obfuscation'); return;
         }
