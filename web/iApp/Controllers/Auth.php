@@ -87,7 +87,9 @@ class Auth extends Controller
         // 7. 2FA etkin mi?
         if (!empty($user->totp_enabled) && !empty($user->totp_secret)) {
             // Şifre doğru ama 2FA gerekli — geçici session
-            session_regenerate_id(true);
+            if (session_status() === PHP_SESSION_ACTIVE) {
+                session_regenerate_id(true);
+            }
             Session::insert('auth_2fa_pending', [
                 'user_id'  => (int) $user->id,
                 'username' => $user->username,
@@ -186,7 +188,12 @@ class Auth extends Controller
     /** Session'ı oluştur ve dashboard'a yönlendir */
     private function completeLogin(object $user, string $ip): void
     {
-        session_regenerate_id(true);
+        // ZN Framework kendi session handler'ını kullanır; PHP native session
+        // aktif değilse session_regenerate_id() E_WARNING fırlatır ve
+        // ZN'nin error handler'ı bunu exception'a çevirir.
+        if (session_status() === PHP_SESSION_ACTIVE) {
+            session_regenerate_id(true);
+        }
 
         Session::insert('admin_user', [
             'id'       => (int) $user->id,
@@ -217,8 +224,10 @@ class Auth extends Controller
         Session::delete('_csrf_token');
         Session::delete('auth_2fa_pending');
 
-        session_unset();
-        session_destroy();
+        if (session_status() === PHP_SESSION_ACTIVE) {
+            session_unset();
+            session_destroy();
+        }
 
         Redirect::action('auth/login');
     }
