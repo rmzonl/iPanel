@@ -219,13 +219,29 @@ EOF
 
     # SELinux: /run/ipanel socket dizinine httpd_var_run_t bağlamı ata
     # PHP-FPM (httpd_t domain) agent socket'e bağlanabilsin
+    # NOT: /run, /var/run'a sembolik bağ olduğundan semanage /var/run ile kullanılmalı.
     if command -v semanage >/dev/null 2>&1 && command -v getenforce >/dev/null 2>&1 \
             && [[ "$(getenforce 2>/dev/null)" != "Disabled" ]]; then
-        semanage fcontext -a -t httpd_var_run_t '/run/ipanel(/.*)?' 2>/dev/null \
-            || semanage fcontext -m -t httpd_var_run_t '/run/ipanel(/.*)?' 2>/dev/null \
+        semanage fcontext -a -t httpd_var_run_t '/var/run/ipanel(/.*)?' 2>/dev/null \
+            || semanage fcontext -m -t httpd_var_run_t '/var/run/ipanel(/.*)?' 2>/dev/null \
             || true
         restorecon -Rv /run/ipanel/ 2>/dev/null || true
-        ok "SELinux: /run/ipanel → httpd_var_run_t bağlamı atandı."
+        ok "SELinux: /var/run/ipanel → httpd_var_run_t bağlamı atandı."
+
+        # Özel SELinux modülü: httpd_t'nin httpd_var_run_t:sock_file'a connectto
+        # izni varsayılan RHEL 9 politikasında yok; bu modül eksikliği tamamlar.
+        if command -v checkmodule >/dev/null 2>&1 && command -v semodule_package >/dev/null 2>&1; then
+            TE_FILE="$IPANEL_ROOT/install/selinux/ipanel_agent.te"
+            MOD_TMP="$(mktemp -d)"
+            checkmodule -M -m -o "$MOD_TMP/ipanel_agent.mod" "$TE_FILE" 2>/dev/null \
+                && semodule_package -o "$MOD_TMP/ipanel_agent.pp" -m "$MOD_TMP/ipanel_agent.mod" 2>/dev/null \
+                && semodule -i "$MOD_TMP/ipanel_agent.pp" 2>/dev/null \
+                && ok "SELinux: ipanel_agent policy modülü yüklendi." \
+                || warn "SELinux: policy modülü yüklenemedi (policycoreutils-devel kurulu mu?)."
+            rm -rf "$MOD_TMP"
+        else
+            warn "SELinux: checkmodule/semodule_package bulunamadı. 'policycoreutils-devel' paketini kurun."
+        fi
     fi
 
     if [[ ! -f /etc/ipanel/agent.conf.php ]]; then

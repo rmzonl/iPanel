@@ -1,0 +1,22 @@
+policy_module(ipanel_agent, 1.0)
+
+########################################
+# iPanel Agent Unix Socket — SELinux Policy
+#
+# Allows PHP-FPM (httpd_t domain) to connect to the iPanel agent
+# Unix socket at /run/ipanel/agent.sock (labeled httpd_var_run_t).
+#
+# Without this module, RHEL/AlmaLinux 9 default policy does not
+# grant httpd_t the connectto permission on httpd_var_run_t:sock_file.
+########################################
+
+require {
+    type httpd_t;
+    type httpd_var_run_t;
+    class sock_file { read write connectto };
+    class unix_stream_socket { read write connectto };
+}
+
+#============= httpd_t ==============
+# Allow PHP-FPM to connect to agent socket file
+allow httpd_t httpd_var_run_t:sock_file { read write connectto };
