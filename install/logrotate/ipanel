@@ -1,0 +1,14 @@
+/var/log/ipanel/*.log {
+    daily
+    rotate 14
+    compress
+    delaycompress
+    missingok
+    notifempty
+    sharedscripts
+    create 0640 root ipanel
+    postrotate
+        # Agent daemon'ını SIGHUP ile yeniden aç (log dosyasını yeniden açar)
+        systemctl kill -s HUP ipanel-agent.service 2>/dev/null || true
+    endscript
+}

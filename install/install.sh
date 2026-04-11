@@ -134,7 +134,9 @@ install_deps() {
             redis \
             certbot \
             firewalld fail2ban \
-            policycoreutils-python-utils
+            policycoreutils-python-utils \
+            policycoreutils-devel \
+            selinux-policy-devel
 
         # headers-more modülü — isteğe bağlı, EPEL'de farklı isimlerle olabilir
         # Bulunamazsa install_nginx_panel() direktifi conf'tan siler
@@ -568,6 +570,10 @@ finalize() {
     ln -sf "$IPANEL_ROOT/bin/ipanel" /usr/local/bin/ipanel
     chmod +x "$IPANEL_ROOT/bin/ipanel" "$IPANEL_ROOT/agent/agent.php"
     ok "CLI: 'ipanel' komutu kullanılabilir."
+
+    # Logrotate yapılandırması
+    cp "$IPANEL_ROOT/install/logrotate/ipanel" /etc/logrotate.d/ipanel
+    ok "Logrotate: /var/log/ipanel/*.log günlük döndürme ayarlandı."
 
     # Temel güvenlik duvarı kuralları
     if command -v ufw >/dev/null 2>&1; then
