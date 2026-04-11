@@ -16,14 +16,14 @@ use Project\Libraries\JsonResponse;
 class Stats extends Controller
 {
     /** Tek seferlik JSON anlık görüntü */
-    public function snapshot(): void
+    public function snapshot()
     {
         $data = $this->callAgent('Stats', 'snapshot', []);
         JsonResponse::success('', $data);
     }
 
     /** Servis durumları */
-    public function services(): void
+    public function services()
     {
         $data = $this->callAgent('Stats', 'services', []);
         JsonResponse::success('', $data);
@@ -37,7 +37,7 @@ class Stats extends Controller
      *   es.addEventListener('stats', e => { const d = JSON.parse(e.data); ... });
      *   es.addEventListener('error', e => { ... });
      */
-    public function stream(): void
+    public function stream()
     {
         // Tüm output buffer seviyelerini kapat (ZN Framework birden fazla açar)
         while (ob_get_level() > 0) {

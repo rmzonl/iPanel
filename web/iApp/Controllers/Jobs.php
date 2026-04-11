@@ -37,7 +37,7 @@ class Jobs extends Controller
     }
 
     /** AJAX: tek işin durumu */
-    public function status(): void
+    public function status()
     {
         $uuid = Get::get('uuid') ?? '';
         if (!$uuid) JsonResponse::error('UUID gerekli.', [], 400);
@@ -63,7 +63,7 @@ class Jobs extends Controller
     }
 
     /** AJAX: sidebar widget verisi — aktif + son 10 iş */
-    public function active(): void
+    public function active()
     {
         $user    = Session::select('admin_user');
         $isAdmin = ($user['role'] ?? '') === 'admin';
@@ -89,7 +89,7 @@ class Jobs extends Controller
      * AJAX GET: tablo satırlarını Import::usable ile wizard.php'den al.
      * JS tarafında innerHTML ile inject edilir.
      */
-    public function refreshRows(): void
+    public function refreshRows()
     {
         $user    = Session::select('admin_user');
         $isAdmin = ($user['role'] ?? '') === 'admin';
@@ -107,7 +107,7 @@ class Jobs extends Controller
     }
 
     /** AJAX POST: iptal */
-    public function cancel(): void
+    public function cancel()
     {
         if (!Http::isRequestMethod('post')) {
             JsonResponse::error('POST gerekli.', [], 405);
