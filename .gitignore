@@ -1,6 +1,3 @@
-# ZN Framework — otomatik oluşturulan dosyalar
-web/map.php
-
 # ZN Storage — çalışma zamanı içerikleri
 web/iApp/Storage/Cache/*
 web/iApp/Storage/Logs/*

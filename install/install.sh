@@ -248,15 +248,6 @@ EOF
         restorecon -Rv "$IPANEL_ROOT/web/Uploads/" 2>/dev/null || true
         ok "SELinux: web/Uploads → httpd_sys_rw_content_t"
 
-        # 4. map.php — ZN Autoloader bu dosyaya yazar; usr_t bağlamında httpd_t yazamaz.
-        # Dosyayı önceden oluşturup httpd_sys_rw_content_t bağlamı veriyoruz.
-        semanage fcontext -a -t httpd_sys_rw_content_t "$IPANEL_ROOT/web/map\\.php" 2>/dev/null \
-            || semanage fcontext -m -t httpd_sys_rw_content_t "$IPANEL_ROOT/web/map\\.php" 2>/dev/null \
-            || true
-        touch "$IPANEL_ROOT/web/map.php"
-        restorecon "$IPANEL_ROOT/web/map.php" 2>/dev/null || true
-        ok "SELinux: web/map.php → httpd_sys_rw_content_t"
-
         # 4. Özel policy modülü: httpd_t → httpd_var_run_t:sock_file connectto
         # Varsayılan RHEL 9 politikası bu izni içermez.
         if command -v checkmodule >/dev/null 2>&1 && command -v semodule_package >/dev/null 2>&1; then
@@ -594,7 +585,7 @@ finalize() {
     # Yazılabilir alanlar
     chmod -R 775 "$IPANEL_ROOT/web/iApp/Storage"
     chmod 775 "$IPANEL_ROOT/web/Uploads"
-    chmod 664 "$IPANEL_ROOT/web/map.php"   # map.php SELinux'ta zaten oluşturuldu
+    chmod 664 "$IPANEL_ROOT/web/map.php"
     # Config dizini diğer kullanıcılara kapalı
     chmod -R o-rwx "$IPANEL_ROOT/web/iApp/Config"
     # Sahiplik
