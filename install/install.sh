@@ -248,7 +248,15 @@ EOF
         restorecon -Rv "$IPANEL_ROOT/web/Uploads/" 2>/dev/null || true
         ok "SELinux: web/Uploads → httpd_sys_rw_content_t"
 
-        # 4. Özel policy modülü: httpd_t → httpd_var_run_t:sock_file connectto
+        # 4. map.php — git'ten gelir ama /usr/local/ varsayılan usr_t bağlamı alır.
+        # httpd_t (PHP-FPM) usr_t dosyasına yazamaz → ZN Autoloader hata verir.
+        semanage fcontext -a -t httpd_sys_rw_content_t "$IPANEL_ROOT/web/map\\.php" 2>/dev/null \
+            || semanage fcontext -m -t httpd_sys_rw_content_t "$IPANEL_ROOT/web/map\\.php" 2>/dev/null \
+            || true
+        restorecon "$IPANEL_ROOT/web/map.php" 2>/dev/null || true
+        ok "SELinux: web/map.php → httpd_sys_rw_content_t"
+
+        # 5. Özel policy modülü: httpd_t → httpd_var_run_t:sock_file connectto
         # Varsayılan RHEL 9 politikası bu izni içermez.
         if command -v checkmodule >/dev/null 2>&1 && command -v semodule_package >/dev/null 2>&1; then
             TE_FILE="$IPANEL_ROOT/install/selinux/ipanel_agent.te"
