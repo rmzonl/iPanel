@@ -162,7 +162,7 @@ fetch_sources() {
         git clone --depth 1 --branch "$IPANEL_BRANCH" "$IPANEL_REPO" "$IPANEL_ROOT"
     fi
     # Framework önbelleğini temizle (git reset sonrası stale cache önlemek için)
-    rm -rf "$IPANEL_ROOT/web/iApp/Storage/cache/"* 2>/dev/null || true
+    rm -rf "$IPANEL_ROOT/web/iApp/Storage/Cache/"* 2>/dev/null || true
     # Versiyon numarasını tek kaynaktan oku: version.php
     IPANEL_VERSION=$(php -r "require '${IPANEL_ROOT}/version.php'; echo IPANEL_VERSION;" 2>/dev/null || echo "?")
     ok "Kaynak kod: $IPANEL_ROOT (v${IPANEL_VERSION})"
@@ -362,7 +362,7 @@ try {
     || { warn "Admin giriş doğrulaması başarısız! Manuel kontrol: cat /etc/ipanel/db.env"; }
 
     # ZN Framework önbelleğini temizle
-    rm -rf "${IPANEL_ROOT}/web/iApp/Storage/cache/"*  2>/dev/null || true
+    rm -rf "${IPANEL_ROOT}/web/iApp/Storage/Cache/"*  2>/dev/null || true
     ok "Framework cache temizlendi."
 }
 
@@ -544,11 +544,16 @@ install_nginx_panel() {
 finalize() {
     log "Dosya izinleri ve son ayarlar yapılıyor..."
 
-    # iApp/Storage — ZN Framework cache/session/DB + sistem dosyaları
-    mkdir -p "$IPANEL_ROOT/web/iApp/Storage"/{cache,logs,session,database,Files}
+    # iApp/Storage — ZN Framework, kapitalize isimler kullanır (Cache, Logs, Session, vs.)
+    # Sadece ZN'nin oluşturmadığı Files/ dizinini oluşturuyoruz; diğerlerini ZN kendisi oluşturur.
+    mkdir -p "$IPANEL_ROOT/web/iApp/Storage/Files"
+    # map.php — ZN otomatik oluşturur; disk üzerinde yazılabilir olmalı
+    touch "$IPANEL_ROOT/web/map.php"
     chown -R ${WEB_USER}:${WEB_USER} "$IPANEL_ROOT/web/iApp/Storage"
+    chown ${WEB_USER}:${WEB_USER} "$IPANEL_ROOT/web/map.php"
     chmod -R 775 "$IPANEL_ROOT/web/iApp/Storage"
-    ok "Storage dizinleri hazırlandı."
+    chmod 664 "$IPANEL_ROOT/web/map.php"
+    ok "Storage dizini ve map.php hazırlandı."
 
     # Çoklu dil desteği dizinleri
     mkdir -p "$IPANEL_ROOT/web/iApp/Languages"/{tr,en}
