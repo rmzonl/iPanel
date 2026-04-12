@@ -232,29 +232,32 @@ EOF
         restorecon -Rv /run/ipanel/ 2>/dev/null || true
         ok "SELinux: /var/run/ipanel → httpd_var_run_t"
 
-        # 2. Web/Storage dizini: httpd_sys_rw_content_t
-        # /usr/local/ipanel/ varsayılan olarak usr_t alır; httpd_t bu tipe yazamaz.
-        # ZN Framework cache/session/log dosyaları için yazma izni gerekli.
+        # 2. Web dizini: httpd_sys_content_t (okunabilir) + dizinin kendisi rw (dosya oluşturmak için)
+        # /usr/local/ipanel/ varsayılan olarak usr_t alır; httpd_t bu tipte çalışamaz.
+        # Dizinin kendisi rw olmazsa ZN Autoloader map.php gibi dosyaları oluşturamaz.
+        semanage fcontext -a -t httpd_sys_content_t "$IPANEL_ROOT/web(/.*)?" 2>/dev/null \
+            || semanage fcontext -m -t httpd_sys_content_t "$IPANEL_ROOT/web(/.*)?" 2>/dev/null \
+            || true
+        semanage fcontext -a -t httpd_sys_rw_content_t "$IPANEL_ROOT/web" 2>/dev/null \
+            || semanage fcontext -m -t httpd_sys_rw_content_t "$IPANEL_ROOT/web" 2>/dev/null \
+            || true
+        ok "SELinux: web/ ağacı → httpd_sys_content_t, web/ dizini → httpd_sys_rw_content_t"
+
+        # 3. Storage dizini: httpd_sys_rw_content_t (ZN cache/session/log yazar)
         semanage fcontext -a -t httpd_sys_rw_content_t "$IPANEL_ROOT/web/iApp/Storage(/.*)?" 2>/dev/null \
             || semanage fcontext -m -t httpd_sys_rw_content_t "$IPANEL_ROOT/web/iApp/Storage(/.*)?" 2>/dev/null \
             || true
-        restorecon -Rv "$IPANEL_ROOT/web/iApp/Storage/" 2>/dev/null || true
         ok "SELinux: web/iApp/Storage → httpd_sys_rw_content_t"
 
-        # 3. Uploads/ dizini de yazılabilir olmalı
+        # 4. Uploads/ dizini: httpd_sys_rw_content_t
         semanage fcontext -a -t httpd_sys_rw_content_t "$IPANEL_ROOT/web/Uploads(/.*)?" 2>/dev/null \
             || semanage fcontext -m -t httpd_sys_rw_content_t "$IPANEL_ROOT/web/Uploads(/.*)?" 2>/dev/null \
             || true
-        restorecon -Rv "$IPANEL_ROOT/web/Uploads/" 2>/dev/null || true
         ok "SELinux: web/Uploads → httpd_sys_rw_content_t"
 
-        # 4. map.php — git'ten gelir ama /usr/local/ varsayılan usr_t bağlamı alır.
-        # httpd_t (PHP-FPM) usr_t dosyasına yazamaz → ZN Autoloader hata verir.
-        semanage fcontext -a -t httpd_sys_rw_content_t "$IPANEL_ROOT/web/map\\.php" 2>/dev/null \
-            || semanage fcontext -m -t httpd_sys_rw_content_t "$IPANEL_ROOT/web/map\\.php" 2>/dev/null \
-            || true
-        restorecon "$IPANEL_ROOT/web/map.php" 2>/dev/null || true
-        ok "SELinux: web/map.php → httpd_sys_rw_content_t"
+        # Tüm web ağacını yeniden etiketle
+        restorecon -Rv "$IPANEL_ROOT/web/" 2>/dev/null || true
+        ok "SELinux: web/ ağacı yeniden etiketlendi"
 
         # 5. Özel policy modülü: httpd_t → httpd_var_run_t:sock_file connectto
         # Varsayılan RHEL 9 politikası bu izni içermez.
@@ -593,7 +596,6 @@ finalize() {
     # Yazılabilir alanlar
     chmod -R 775 "$IPANEL_ROOT/web/iApp/Storage"
     chmod 775 "$IPANEL_ROOT/web/Uploads"
-    chmod 664 "$IPANEL_ROOT/web/map.php"
     # Config dizini diğer kullanıcılara kapalı
     chmod -R o-rwx "$IPANEL_ROOT/web/iApp/Config"
     # Sahiplik
