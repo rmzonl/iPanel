@@ -54,7 +54,20 @@ semanage fcontext -a -t httpd_sys_rw_content_t "$IPANEL_ROOT/web/Uploads(/.*)?" 
     || echo "    WARN: semanage başarısız."
 restorecon -Rv "$IPANEL_ROOT/web/Uploads/" 2>/dev/null || true
 
-echo "    Bağlamlar:"
+echo ""
+echo "→ [2/3] web/map.php → httpd_sys_rw_content_t"
+echo "         (ZN Autoloader bu dosyaya yazar; usr_t bağlamında httpd_t yazamaz)"
+semanage fcontext -a -t httpd_sys_rw_content_t "$IPANEL_ROOT/web/map\\.php" 2>/dev/null \
+    || semanage fcontext -m -t httpd_sys_rw_content_t "$IPANEL_ROOT/web/map\\.php" 2>/dev/null \
+    || echo "    WARN: semanage başarısız."
+touch "$IPANEL_ROOT/web/map.php"
+restorecon "$IPANEL_ROOT/web/map.php" 2>/dev/null || true
+chown nginx:nginx "$IPANEL_ROOT/web/map.php" 2>/dev/null || true
+chmod 664 "$IPANEL_ROOT/web/map.php"
+echo "    map.php bağlamı:"
+ls -laZ "$IPANEL_ROOT/web/map.php" 2>/dev/null
+
+echo "    Storage bağlamları:"
 ls -laZ "$IPANEL_ROOT/web/iApp/Storage/" 2>/dev/null | head -5
 
 # ─── 3. Policy modülü ───────────────────────────────────────────────────────

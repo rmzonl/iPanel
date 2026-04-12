@@ -248,6 +248,15 @@ EOF
         restorecon -Rv "$IPANEL_ROOT/web/Uploads/" 2>/dev/null || true
         ok "SELinux: web/Uploads → httpd_sys_rw_content_t"
 
+        # 4. map.php — ZN Autoloader bu dosyaya yazar; usr_t bağlamında httpd_t yazamaz.
+        # Dosyayı önceden oluşturup httpd_sys_rw_content_t bağlamı veriyoruz.
+        semanage fcontext -a -t httpd_sys_rw_content_t "$IPANEL_ROOT/web/map\\.php" 2>/dev/null \
+            || semanage fcontext -m -t httpd_sys_rw_content_t "$IPANEL_ROOT/web/map\\.php" 2>/dev/null \
+            || true
+        touch "$IPANEL_ROOT/web/map.php"
+        restorecon "$IPANEL_ROOT/web/map.php" 2>/dev/null || true
+        ok "SELinux: web/map.php → httpd_sys_rw_content_t"
+
         # 4. Özel policy modülü: httpd_t → httpd_var_run_t:sock_file connectto
         # Varsayılan RHEL 9 politikası bu izni içermez.
         if command -v checkmodule >/dev/null 2>&1 && command -v semodule_package >/dev/null 2>&1; then
@@ -547,13 +556,7 @@ finalize() {
     # iApp/Storage — ZN Framework, kapitalize isimler kullanır (Cache, Logs, Session, vs.)
     # Sadece ZN'nin oluşturmadığı Files/ dizinini oluşturuyoruz; diğerlerini ZN kendisi oluşturur.
     mkdir -p "$IPANEL_ROOT/web/iApp/Storage/Files"
-    # map.php — ZN otomatik oluşturur; disk üzerinde yazılabilir olmalı
-    touch "$IPANEL_ROOT/web/map.php"
-    chown -R ${WEB_USER}:${WEB_USER} "$IPANEL_ROOT/web/iApp/Storage"
-    chown ${WEB_USER}:${WEB_USER} "$IPANEL_ROOT/web/map.php"
-    chmod -R 775 "$IPANEL_ROOT/web/iApp/Storage"
-    chmod 664 "$IPANEL_ROOT/web/map.php"
-    ok "Storage dizini ve map.php hazırlandı."
+    ok "Storage/Files dizini hazırlandı."
 
     # Çoklu dil desteği dizinleri
     mkdir -p "$IPANEL_ROOT/web/iApp/Languages"/{tr,en}
@@ -585,9 +588,18 @@ finalize() {
     chmod 775 "$IPANEL_ROOT/web/Uploads"
     ok "Uploads/ dizini hazırlandı (web-accessible)."
 
-    # Web dizini sahipliği
-    chown -R ${WEB_USER}:${WEB_USER} "$IPANEL_ROOT/web"
+    # Web dizini izinleri: dosyalar 644, dizinler 755 (ZN Framework standardı)
+    find "$IPANEL_ROOT/web" -type f -exec chmod 644 {} \;
+    find "$IPANEL_ROOT/web" -type d -exec chmod 755 {} \;
+    # Yazılabilir alanlar
+    chmod -R 775 "$IPANEL_ROOT/web/iApp/Storage"
+    chmod 775 "$IPANEL_ROOT/web/Uploads"
+    chmod 664 "$IPANEL_ROOT/web/map.php"   # map.php SELinux'ta zaten oluşturuldu
+    # Config dizini diğer kullanıcılara kapalı
     chmod -R o-rwx "$IPANEL_ROOT/web/iApp/Config"
+    # Sahiplik
+    chown -R ${WEB_USER}:${WEB_USER} "$IPANEL_ROOT/web"
+    ok "Web dizini izinleri: dosyalar 644, dizinler 755, Storage/Uploads/map.php yazılabilir."
 
     # CLI aracı symlink
     ln -sf "$IPANEL_ROOT/bin/ipanel" /usr/local/bin/ipanel
