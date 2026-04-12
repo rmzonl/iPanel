@@ -21,7 +21,7 @@ class Cronjobs extends Controller
         $this->model = new \Project\Models\CronjobModel();
     }
 
-    public function main(): void
+    public function main()
     {
         $user     = Acl::user();
         $cronjobs = ($user['role'] === 'admin')
@@ -36,7 +36,7 @@ class Cronjobs extends Controller
         Session::delete('error');
     }
 
-    public function create(): void
+    public function create()
     {
         $user      = Acl::user();
         $siteModel = new \Project\Models\SiteModel();
@@ -46,7 +46,7 @@ class Cronjobs extends Controller
         View::sites($sites);
     }
 
-    public function store(): void
+    public function store()
     {
         if (!Http::isRequestMethod('post')) { Redirect::action('cronjobs/main'); return; }
         if (!CsrfGuard::verify()) { Session::insert('error', 'Geçersiz form isteği.'); Redirect::action('cronjobs/main'); return; }
@@ -82,7 +82,7 @@ class Cronjobs extends Controller
         Redirect::action('cronjobs/main');
     }
 
-    public function delete(int $id): void
+    public function delete(int $id)
     {
         Acl::requireOwnership(Acl::ownsSiteResource('cron_jobs', $id));
         $job = $this->model->getById($id);

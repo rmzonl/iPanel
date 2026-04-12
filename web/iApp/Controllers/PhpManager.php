@@ -14,7 +14,7 @@ use Project\Libraries\AuditLogger;
  */
 class PhpManager extends Controller
 {
-    public function main(): void
+    public function main()
     {
         View::pageTitle('PHP Yönetimi');
         View::phpInfo($this->collectInfo());
@@ -25,7 +25,7 @@ class PhpManager extends Controller
     }
 
     /** PHP sürümü kur */
-    public function installVersion(): void
+    public function installVersion()
     {
         if (!Http::isRequestMethod('post')) { Redirect::action('phpmanager/main'); return; }
         if (!CsrfGuard::verify()) { Session::insert('error', 'Geçersiz form isteği.'); Redirect::action('phpmanager/main'); return; }
@@ -59,7 +59,7 @@ class PhpManager extends Controller
     }
 
     /** PHP eklentisi kur/kaldır */
-    public function toggleExtension(): void
+    public function toggleExtension()
     {
         if (!Http::isRequestMethod('post')) { Redirect::action('phpmanager/main'); return; }
         if (!CsrfGuard::verify()) { Session::insert('error', 'Geçersiz form isteği.'); Redirect::action('phpmanager/main'); return; }
@@ -112,7 +112,7 @@ class PhpManager extends Controller
     }
 
     /** PHP-FPM'i yeniden başlat */
-    public function restartFpm(): void
+    public function restartFpm()
     {
         if (!Http::isRequestMethod('post')) { Redirect::action('phpmanager/main'); return; }
         if (!CsrfGuard::verify()) { Session::insert('error', 'Geçersiz form isteği.'); Redirect::action('phpmanager/main'); return; }
@@ -204,7 +204,7 @@ class PhpManager extends Controller
     /* ── Obfuscation / Koruma Yönetimi ── */
 
     /** ionCube Loader / PHPKoru / Zend Guard durumu ve yönetimi */
-    public function obfuscation(): void
+    public function obfuscation()
     {
         View::pageTitle('PHP Koruma Yönetimi');
         View::ioncubeStatus($this->detectIoncube());
@@ -217,7 +217,7 @@ class PhpManager extends Controller
     }
 
     /** ionCube Loader kur */
-    public function installIoncube(): void
+    public function installIoncube()
     {
         if (!Http::isRequestMethod('post')) { Redirect::action('phpmanager/obfuscation'); return; }
         if (!CsrfGuard::verify()) { Session::insert('error', 'Geçersiz form isteği.'); Redirect::action('phpmanager/obfuscation'); return; }
@@ -285,7 +285,7 @@ class PhpManager extends Controller
     }
 
     /** ionCube kaldır */
-    public function removeIoncube(): void
+    public function removeIoncube()
     {
         if (!Http::isRequestMethod('post')) { Redirect::action('phpmanager/obfuscation'); return; }
         if (!CsrfGuard::verify()) { Session::insert('error', 'Geçersiz form isteği.'); Redirect::action('phpmanager/obfuscation'); return; }

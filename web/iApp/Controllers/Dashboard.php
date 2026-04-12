@@ -7,7 +7,7 @@ use Project\Libraries\Acl;
 
 class Dashboard extends Controller
 {
-    public function main(): void
+    public function main()
     {
         $user        = Acl::user();
         $clientModel = new \Project\Models\ClientModel();

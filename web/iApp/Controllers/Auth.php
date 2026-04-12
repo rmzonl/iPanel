@@ -14,7 +14,7 @@ use Project\Libraries\Totp;
 
 class Auth extends Controller
 {
-    public function login(): void
+    public function login()
     {
         if (Session::select('admin_user')) {
             Redirect::action('dashboard/main');
@@ -107,7 +107,7 @@ class Auth extends Controller
     }
 
     /** 2FA doğrulama sayfası */
-    public function verify2fa(): void
+    public function verify2fa()
     {
         $pending = Session::select('auth_2fa_pending');
 
@@ -207,7 +207,7 @@ class Auth extends Controller
         Redirect::action('dashboard/main');
     }
 
-    public function logout(): void
+    public function logout()
     {
         $user = Session::select('admin_user');
         if ($user) {

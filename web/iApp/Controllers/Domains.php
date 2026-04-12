@@ -21,7 +21,7 @@ class Domains extends Controller
         $this->model = new \Project\Models\DomainModel();
     }
 
-    public function main(): void
+    public function main()
     {
         $user    = Acl::user();
         $domains = ($user['role'] === 'admin')
@@ -36,7 +36,7 @@ class Domains extends Controller
         Session::delete('error');
     }
 
-    public function create(): void
+    public function create()
     {
         $user        = Acl::user();
         $siteModel   = new \Project\Models\SiteModel();
@@ -50,7 +50,7 @@ class Domains extends Controller
         View::clients($clients);
     }
 
-    public function store(): void
+    public function store()
     {
         if (!Http::isRequestMethod('post')) { Redirect::action('domains/main'); return; }
         if (!CsrfGuard::verify()) { Session::insert('error', 'Geçersiz form isteği.'); Redirect::action('domains/main'); return; }
@@ -86,7 +86,7 @@ class Domains extends Controller
         Redirect::action('domains/main');
     }
 
-    public function delete(int $id): void
+    public function delete(int $id)
     {
         Acl::requireOwnership(Acl::ownsDomain($id));
         $domain = $this->model->getById($id);

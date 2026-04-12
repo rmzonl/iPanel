@@ -21,7 +21,7 @@ class Dns extends Controller
         $this->model = new \Project\Models\DnsModel();
     }
 
-    public function main(): void
+    public function main()
     {
         $user  = Acl::user();
         $zones = ($user['role'] === 'admin')
@@ -36,7 +36,7 @@ class Dns extends Controller
         Session::delete('error');
     }
 
-    public function records(int $zoneId): void
+    public function records(int $zoneId)
     {
         Acl::requireOwnership(Acl::ownsDnsZone($zoneId));
 
@@ -52,7 +52,7 @@ class Dns extends Controller
         Session::delete('error');
     }
 
-    public function createRecord(int $zoneId): void
+    public function createRecord(int $zoneId)
     {
         Acl::requireOwnership(Acl::ownsDnsZone($zoneId));
 
@@ -64,7 +64,7 @@ class Dns extends Controller
         View::zoneId($zoneId);
     }
 
-    public function storeRecord(): void
+    public function storeRecord()
     {
         if (!Http::isRequestMethod('post')) { Redirect::action('dns/main'); return; }
         if (!CsrfGuard::verify()) { Session::insert('error', 'Geçersiz form isteği.'); Redirect::action('dns/main'); return; }
@@ -99,7 +99,7 @@ class Dns extends Controller
         Redirect::action('dns/records/' . $zoneId);
     }
 
-    public function deleteZone(int $id): void
+    public function deleteZone(int $id)
     {
         Acl::requireOwnership(Acl::ownsDnsZone($id));
         $this->model->deleteZone($id);
@@ -108,7 +108,7 @@ class Dns extends Controller
         Redirect::action('dns/main');
     }
 
-    public function deleteRecord(int $id): void
+    public function deleteRecord(int $id)
     {
         Acl::requireOwnership(Acl::ownsDnsRecord($id));
         $record = $this->model->getRecordById($id);

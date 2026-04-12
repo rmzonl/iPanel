@@ -17,7 +17,7 @@ class NodeManager extends Controller
 {
     private const NVM_DIR = '/usr/local/nvm';
 
-    public function main(): void
+    public function main()
     {
         View::pageTitle('Node.js Yönetimi');
         View::nodeInfo($this->collectInfo());
@@ -28,7 +28,7 @@ class NodeManager extends Controller
     }
 
     /** nvm kur */
-    public function installNvm(): void
+    public function installNvm()
     {
         if (!Http::isRequestMethod('post')) { Redirect::action('nodemanager/main'); return; }
         if (!CsrfGuard::verify()) { Session::insert('error', 'Geçersiz form isteği.'); Redirect::action('nodemanager/main'); return; }
@@ -51,7 +51,7 @@ class NodeManager extends Controller
     }
 
     /** Belirli bir Node.js sürümünü kur */
-    public function installVersion(): void
+    public function installVersion()
     {
         if (!Http::isRequestMethod('post')) { Redirect::action('nodemanager/main'); return; }
         if (!CsrfGuard::verify()) { Session::insert('error', 'Geçersiz form isteği.'); Redirect::action('nodemanager/main'); return; }
@@ -91,7 +91,7 @@ class NodeManager extends Controller
     }
 
     /** Varsayılan Node.js sürümünü değiştir (nvm use --default) */
-    public function setDefault(): void
+    public function setDefault()
     {
         if (!Http::isRequestMethod('post')) { Redirect::action('nodemanager/main'); return; }
         if (!CsrfGuard::verify()) { Session::insert('error', 'Geçersiz form isteği.'); Redirect::action('nodemanager/main'); return; }
@@ -120,7 +120,7 @@ class NodeManager extends Controller
     }
 
     /** Node.js kaldır */
-    public function remove(): void
+    public function remove()
     {
         if (!Http::isRequestMethod('post')) { Redirect::action('nodemanager/main'); return; }
         if (!CsrfGuard::verify()) { Session::insert('error', 'Geçersiz form isteği.'); Redirect::action('nodemanager/main'); return; }
@@ -155,7 +155,7 @@ class NodeManager extends Controller
     }
 
     /** pm2 aracını yönet (start/stop global) */
-    public function pm2(): void
+    public function pm2()
     {
         if (!Http::isRequestMethod('post')) { Redirect::action('nodemanager/main'); return; }
         if (!CsrfGuard::verify()) { Session::insert('error', 'Geçersiz form isteği.'); Redirect::action('nodemanager/main'); return; }

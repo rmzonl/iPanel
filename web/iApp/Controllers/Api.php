@@ -66,7 +66,7 @@ class Api extends Controller
     }
 
     /** GET /api/clients */
-    public function clients(): void
+    public function clients()
     {
         $this->requirePermission('clients.view');
 
@@ -83,7 +83,7 @@ class Api extends Controller
     }
 
     /** GET /api/sites */
-    public function sites(): void
+    public function sites()
     {
         $this->requirePermission('sites.view');
 
@@ -100,7 +100,7 @@ class Api extends Controller
     }
 
     /** GET /api/me */
-    public function me(): void
+    public function me()
     {
         $this->json([
             'id'       => $this->apiUser['id'],
@@ -110,7 +110,7 @@ class Api extends Controller
     }
 
     /** GET /api/status */
-    public function status(): void
+    public function status()
     {
         $this->json([
             'status'    => 'ok',

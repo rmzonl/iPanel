@@ -19,7 +19,7 @@ class Logs extends Controller
     private const SYS_LOG_DIR = '/var/log/ipanel/';
     private const MAX_LINES   = 500;
 
-    public function main(): void
+    public function main()
     {
         View::pageTitle('Log İzleme');
         View::znLogFiles($this->listLogFiles(self::ZN_LOG_DIR));

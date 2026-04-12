@@ -21,7 +21,7 @@ class Ssl extends Controller
         $this->model = new \Project\Models\SslModel();
     }
 
-    public function main(): void
+    public function main()
     {
         $user  = Acl::user();
         $certs = ($user['role'] === 'admin')
@@ -36,7 +36,7 @@ class Ssl extends Controller
         Session::delete('error');
     }
 
-    public function create(): void
+    public function create()
     {
         $user        = Acl::user();
         $domainModel = new \Project\Models\DomainModel();
@@ -46,7 +46,7 @@ class Ssl extends Controller
         View::domains($domains);
     }
 
-    public function store(): void
+    public function store()
     {
         if (!Http::isRequestMethod('post')) { Redirect::action('ssl/main'); return; }
         if (!CsrfGuard::verify()) { Session::insert('error', 'Geçersiz form isteği.'); Redirect::action('ssl/main'); return; }
@@ -83,7 +83,7 @@ class Ssl extends Controller
         Redirect::action('ssl/main');
     }
 
-    public function delete(int $id): void
+    public function delete(int $id)
     {
         Acl::requireOwnership(Acl::ownsSslCert($id));
         $this->model->delete($id);

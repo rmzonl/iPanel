@@ -23,7 +23,7 @@ class Settings extends Controller
         $this->model = new \Project\Models\SettingsModel();
     }
 
-    public function main(): void
+    public function main()
     {
         View::pageTitle('Ayarlar');
         View::serverSettings($this->model->getServerSettings());
@@ -33,7 +33,7 @@ class Settings extends Controller
         Session::delete('error');
     }
 
-    public function save(): void
+    public function save()
     {
         if (!Http::isRequestMethod('post')) { Redirect::action('settings/main'); return; }
         if (!CsrfGuard::verify()) { Session::insert('error', 'Geçersiz form isteği.'); Redirect::action('settings/main'); return; }
@@ -79,7 +79,7 @@ class Settings extends Controller
     // ---------------------------------------------------------------
 
     /** 2FA kurulum sayfası */
-    public function twoFactor(): void
+    public function twoFactor()
     {
         $user   = Acl::user();
         $dbUser = DB::table('users')->where('id', $user['id'])->get()->row();
@@ -94,7 +94,7 @@ class Settings extends Controller
     }
 
     /** 2FA etkinleştirme başlat: secret üret, QR göster */
-    public function setup2fa(): void
+    public function setup2fa()
     {
         if (!Http::isRequestMethod('post')) { Redirect::action('settings/twoFactor'); return; }
         if (!CsrfGuard::verify()) { Session::insert('error', 'Geçersiz form isteği.'); Redirect::action('settings/twoFactor'); return; }
@@ -121,7 +121,7 @@ class Settings extends Controller
     }
 
     /** 2FA etkinleştir: kullanıcının kodu doğru girdiğini teyit et */
-    public function enable2fa(): void
+    public function enable2fa()
     {
         if (!Http::isRequestMethod('post')) { Redirect::action('settings/twoFactor'); return; }
         if (!CsrfGuard::verify()) { Session::insert('error', 'Geçersiz form isteği.'); Redirect::action('settings/twoFactor'); return; }
@@ -162,7 +162,7 @@ class Settings extends Controller
     }
 
     /** Yedek kodları göster */
-    public function backupCodes(): void
+    public function backupCodes()
     {
         $codes = Session::select('totp_backup_codes');
         if (empty($codes)) {
@@ -176,7 +176,7 @@ class Settings extends Controller
     }
 
     /** 2FA devre dışı bırak */
-    public function disable2fa(): void
+    public function disable2fa()
     {
         if (!Http::isRequestMethod('post')) { Redirect::action('settings/twoFactor'); return; }
         if (!CsrfGuard::verify()) { Session::insert('error', 'Geçersiz form isteği.'); Redirect::action('settings/twoFactor'); return; }

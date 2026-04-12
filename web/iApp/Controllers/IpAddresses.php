@@ -22,7 +22,7 @@ class IpAddresses extends Controller
         $this->model = new \Project\Models\IpAddressModel();
     }
 
-    public function main(): void
+    public function main()
     {
         View::pageTitle('IP Adresleri');
         View::ips($this->model->getAll());
@@ -32,14 +32,14 @@ class IpAddresses extends Controller
         Session::delete('error');
     }
 
-    public function create(): void
+    public function create()
     {
         $clientModel = new \Project\Models\ClientModel();
         View::pageTitle('Yeni IP Adresi');
         View::clients($clientModel->getAll());
     }
 
-    public function store(): void
+    public function store()
     {
         if (!Http::isRequestMethod('post')) { Redirect::action('ipaddresses/main'); return; }
         if (!CsrfGuard::verify()) { Session::insert('error', 'Geçersiz form isteği.'); Redirect::action('ipaddresses/main'); return; }
@@ -75,7 +75,7 @@ class IpAddresses extends Controller
         Redirect::action('ipaddresses/main');
     }
 
-    public function delete(int $id): void
+    public function delete(int $id)
     {
         $ip = $this->model->getById($id);
         $this->model->delete($id);

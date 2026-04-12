@@ -21,7 +21,7 @@ class Ftp extends Controller
         $this->model = new \Project\Models\FtpModel();
     }
 
-    public function main(): void
+    public function main()
     {
         $user        = Acl::user();
         $ftpAccounts = ($user['role'] === 'admin')
@@ -36,7 +36,7 @@ class Ftp extends Controller
         Session::delete('error');
     }
 
-    public function create(): void
+    public function create()
     {
         $user      = Acl::user();
         $siteModel = new \Project\Models\SiteModel();
@@ -46,7 +46,7 @@ class Ftp extends Controller
         View::sites($sites);
     }
 
-    public function store(): void
+    public function store()
     {
         if (!Http::isRequestMethod('post')) { Redirect::action('ftp/main'); return; }
         if (!CsrfGuard::verify()) { Session::insert('error', 'Geçersiz form isteği.'); Redirect::action('ftp/main'); return; }
@@ -88,7 +88,7 @@ class Ftp extends Controller
         Redirect::action('ftp/main');
     }
 
-    public function delete(int $id): void
+    public function delete(int $id)
     {
         Acl::requireOwnership(Acl::ownsSiteResource('ftp_accounts', $id));
         $account = $this->model->getById($id);

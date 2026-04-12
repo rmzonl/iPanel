@@ -21,7 +21,7 @@ class ApiTokens extends Controller
         $this->model = new ApiTokenModel();
     }
 
-    public function main(): void
+    public function main()
     {
         $user   = Acl::user();
         $tokens = $this->model->getByUser($user['id']);
@@ -34,7 +34,7 @@ class ApiTokens extends Controller
         Session::delete('error');
     }
 
-    public function create(): void
+    public function create()
     {
         if (!Http::isRequestMethod('post')) { Redirect::action('apitokens/main'); return; }
         if (!CsrfGuard::verify()) { Session::insert('error', 'Geçersiz form isteği.'); Redirect::action('apitokens/main'); return; }
@@ -76,7 +76,7 @@ class ApiTokens extends Controller
         Redirect::action('apitokens/main');
     }
 
-    public function revoke(): void
+    public function revoke()
     {
         if (!Http::isRequestMethod('post')) { Redirect::action('apitokens/main'); return; }
         if (!CsrfGuard::verify()) { Session::insert('error', 'Geçersiz form isteği.'); Redirect::action('apitokens/main'); return; }

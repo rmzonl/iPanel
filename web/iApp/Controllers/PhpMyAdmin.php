@@ -22,7 +22,7 @@ class PhpMyAdmin extends Controller
         '/usr/share/phpMyAdmin',
     ];
 
-    public function main(): void
+    public function main()
     {
         View::pageTitle('PHPMyAdmin Yönetimi');
         View::status($this->getStatus());
@@ -33,7 +33,7 @@ class PhpMyAdmin extends Controller
     }
 
     /** PHPMyAdmin kur */
-    public function install(): void
+    public function install()
     {
         if (!Http::isRequestMethod('post')) { Redirect::action('phpmyadmin/main'); return; }
         if (!CsrfGuard::verify()) { Session::insert('error', 'Geçersiz form isteği.'); Redirect::action('phpmyadmin/main'); return; }
@@ -59,7 +59,7 @@ class PhpMyAdmin extends Controller
     }
 
     /** PHPMyAdmin kaldır */
-    public function remove(): void
+    public function remove()
     {
         if (!Http::isRequestMethod('post')) { Redirect::action('phpmyadmin/main'); return; }
         if (!CsrfGuard::verify()) { Session::insert('error', 'Geçersiz form isteği.'); Redirect::action('phpmyadmin/main'); return; }
@@ -87,7 +87,7 @@ class PhpMyAdmin extends Controller
      * Geçici güvenli erişim URL'si oluştur (30 dakika geçerli).
      * Bir tek kullanımlık token oluşturur.
      */
-    public function generateAccess(): void
+    public function generateAccess()
     {
         if (!Http::isRequestMethod('post')) { Redirect::action('phpmyadmin/main'); return; }
         if (!CsrfGuard::verify()) { Session::insert('error', 'Geçersiz form isteği.'); Redirect::action('phpmyadmin/main'); return; }

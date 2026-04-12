@@ -11,7 +11,7 @@ class InitializeAuth extends Controller
 {
     const include = ['Auth'];
 
-    public function main(): void
+    public function main()
     {
         header_remove('X-Powered-By');
         Masterpage::bodyPage('layouts/auth-body');

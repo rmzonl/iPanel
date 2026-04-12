@@ -21,7 +21,7 @@ class Sites extends Controller
         $this->model = new \Project\Models\SiteModel();
     }
 
-    public function main(): void
+    public function main()
     {
         $user  = Acl::user();
         $sites = ($user['role'] === 'admin')
@@ -36,7 +36,7 @@ class Sites extends Controller
         Session::delete('error');
     }
 
-    public function create(): void
+    public function create()
     {
         $user        = Acl::user();
         $clientModel = new \Project\Models\ClientModel();
@@ -51,7 +51,7 @@ class Sites extends Controller
         View::ips($ipModel->getAllActive());
     }
 
-    public function store(): void
+    public function store()
     {
         if (!Http::isRequestMethod('post')) { Redirect::action('sites/main'); return; }
         if (!CsrfGuard::verify()) { Session::insert('error', 'Geçersiz form isteği.'); Redirect::action('sites/main'); return; }
@@ -88,7 +88,7 @@ class Sites extends Controller
         Redirect::action('sites/main');
     }
 
-    public function edit(int $id): void
+    public function edit(int $id)
     {
         Acl::requireOwnership(Acl::ownsSite($id));
         $site = $this->model->getById($id);
@@ -108,7 +108,7 @@ class Sites extends Controller
         View::ips($ipModel->getAllActive());
     }
 
-    public function update(int $id): void
+    public function update(int $id)
     {
         if (!Http::isRequestMethod('post')) { Redirect::action('sites/main'); return; }
         if (!CsrfGuard::verify()) { Session::insert('error', 'Geçersiz form isteği.'); Redirect::action('sites/main'); return; }
@@ -131,7 +131,7 @@ class Sites extends Controller
         Redirect::action('sites/main');
     }
 
-    public function delete(int $id): void
+    public function delete(int $id)
     {
         Acl::requireOwnership(Acl::ownsSite($id));
         $site = $this->model->getById($id);

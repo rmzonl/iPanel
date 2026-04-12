@@ -38,7 +38,7 @@ class FileManager extends Controller
     // Ana sayfa
     // ────────────────────────────────────────────────────────────
 
-    public function main(): void
+    public function main()
     {
         $path = $this->safePath(Get::path() ?? '/home');
         View::pageTitle('Dosya Yöneticisi');
@@ -52,7 +52,7 @@ class FileManager extends Controller
     // AJAX: Dizin listele — Import::usable ile wizard.php döner
     // ────────────────────────────────────────────────────────────
 
-    public function browse(): void
+    public function browse()
     {
         $path = $this->safePath(Get::path() ?? '/home');
         View::files($this->listDir($path));
@@ -67,7 +67,7 @@ class FileManager extends Controller
     // AJAX: Dosya editörünü yükle — Import::usable
     // ────────────────────────────────────────────────────────────
 
-    public function editor(): void
+    public function editor()
     {
         $path = $this->safePath(Get::path());
         if (!is_file($path)) JsonResponse::error('Dosya bulunamadı.', [], 404);
@@ -92,7 +92,7 @@ class FileManager extends Controller
     // AJAX POST: Dosya yükle (ZN Upload facade)
     // ────────────────────────────────────────────────────────────
 
-    public function upload(): void
+    public function upload()
     {
         if (!Http::isRequestMethod('post')) JsonResponse::error('POST gerekli.', [], 405);
         if (!CsrfGuard::verify())           JsonResponse::error('Geçersiz istek.', [], 403);
@@ -143,7 +143,7 @@ class FileManager extends Controller
     // GET: Dosya indir
     // ────────────────────────────────────────────────────────────
 
-    public function download(): void
+    public function download()
     {
         $path = $this->safePath(Get::path());
         if (!is_file($path)) {
@@ -165,7 +165,7 @@ class FileManager extends Controller
     // AJAX POST: Dosya/dizin sil
     // ────────────────────────────────────────────────────────────
 
-    public function delete(): void
+    public function delete()
     {
         if (!Http::isRequestMethod('post')) JsonResponse::error('POST gerekli.', [], 405);
         if (!CsrfGuard::verify())           JsonResponse::error('Geçersiz istek.', [], 403);
@@ -194,7 +194,7 @@ class FileManager extends Controller
     // AJAX POST: Yeniden adlandır / taşı
     // ────────────────────────────────────────────────────────────
 
-    public function rename(): void
+    public function rename()
     {
         if (!Http::isRequestMethod('post')) JsonResponse::error('POST gerekli.', [], 405);
         if (!CsrfGuard::verify())           JsonResponse::error('Geçersiz istek.', [], 403);
@@ -218,7 +218,7 @@ class FileManager extends Controller
     // AJAX POST: Kopyala
     // ────────────────────────────────────────────────────────────
 
-    public function copy(): void
+    public function copy()
     {
         if (!Http::isRequestMethod('post')) JsonResponse::error('POST gerekli.', [], 405);
         if (!CsrfGuard::verify())           JsonResponse::error('Geçersiz istek.', [], 403);
@@ -243,7 +243,7 @@ class FileManager extends Controller
     // AJAX POST: Dizin oluştur
     // ────────────────────────────────────────────────────────────
 
-    public function mkdir(): void
+    public function mkdir()
     {
         if (!Http::isRequestMethod('post')) JsonResponse::error('POST gerekli.', [], 405);
         if (!CsrfGuard::verify())           JsonResponse::error('Geçersiz istek.', [], 403);
@@ -267,7 +267,7 @@ class FileManager extends Controller
     // AJAX POST: Yeni dosya oluştur
     // ────────────────────────────────────────────────────────────
 
-    public function newfile(): void
+    public function newfile()
     {
         if (!Http::isRequestMethod('post')) JsonResponse::error('POST gerekli.', [], 405);
         if (!CsrfGuard::verify())           JsonResponse::error('Geçersiz istek.', [], 403);
@@ -291,7 +291,7 @@ class FileManager extends Controller
     // AJAX POST: Dosya kaydet (editörden)
     // ────────────────────────────────────────────────────────────
 
-    public function save(): void
+    public function save()
     {
         if (!Http::isRequestMethod('post')) JsonResponse::error('POST gerekli.', [], 405);
         if (!CsrfGuard::verify())           JsonResponse::error('Geçersiz istek.', [], 403);
@@ -318,7 +318,7 @@ class FileManager extends Controller
     // AJAX POST: İzinleri değiştir (chmod)
     // ────────────────────────────────────────────────────────────
 
-    public function chmod(): void
+    public function chmod()
     {
         if (!Http::isRequestMethod('post')) JsonResponse::error('POST gerekli.', [], 405);
         if (!CsrfGuard::verify())           JsonResponse::error('Geçersiz istek.', [], 403);
@@ -344,7 +344,7 @@ class FileManager extends Controller
     // AJAX POST: Zip sıkıştır
     // ────────────────────────────────────────────────────────────
 
-    public function compress(): void
+    public function compress()
     {
         if (!Http::isRequestMethod('post')) JsonResponse::error('POST gerekli.', [], 405);
         if (!CsrfGuard::verify())           JsonResponse::error('Geçersiz istek.', [], 403);
@@ -373,7 +373,7 @@ class FileManager extends Controller
     // AJAX POST: Zip aç
     // ────────────────────────────────────────────────────────────
 
-    public function extract(): void
+    public function extract()
     {
         if (!Http::isRequestMethod('post')) JsonResponse::error('POST gerekli.', [], 405);
         if (!CsrfGuard::verify())           JsonResponse::error('Geçersiz istek.', [], 403);
