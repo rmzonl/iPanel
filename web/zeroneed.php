@@ -48,6 +48,6 @@ ZN\ZN::defines
     'TEMPLATES_DIR'   => 'iApp/Templates/',
     'THEMES_DIR'      => 'iApp/Themes/',
     'PLUGINS_DIR'     => 'iApp/Plugins/',
-    'UPLOADS_DIR'     => 'uploads/'
+    'UPLOADS_DIR'     => 'Uploads/'
 
 ])::run('CE');

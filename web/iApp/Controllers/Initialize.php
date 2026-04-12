@@ -21,9 +21,14 @@ class Initialize extends Controller
 
     private const JSON_CONTROLLERS = ['Stats', 'Jobs'];
 
+    /** Controller/method kombinasyonları — Masterpage olmadan JSON döner */
+    private const JSON_METHODS = [
+        'Logs' => ['data'],
+    ];
+
     private const SETTINGS_RESELLER_ALLOWED = ['twoFactor', 'setup2fa', 'enable2fa', 'disable2fa', 'backupCodes'];
 
-    private const ADMIN_ONLY = ['IpAddresses', 'Firewall', 'Phpmyadmin', 'Phpmanager', 'Nodemanager', 'Filemanager'];
+    private const ADMIN_ONLY = ['IpAddresses', 'Firewall', 'Phpmyadmin', 'Phpmanager', 'Nodemanager', 'Filemanager', 'Logs'];
 
     public function main(): void
     {
@@ -34,12 +39,14 @@ class Initialize extends Controller
         $method     = CURRENT_CFUNCTION  ?? 'main';
 
         // JSON/SSE controller'lar için masterpage kurma — kendi header'larını yönetirler
-        if (!in_array($controller, self::JSON_CONTROLLERS)) {
+        $isJson = in_array($controller, self::JSON_CONTROLLERS)
+               || in_array($method, self::JSON_METHODS[$controller] ?? []);
+        if (!$isJson) {
             Masterpage::headPage('layouts/head')->bodyPage('layouts/body');
         }
 
         if (empty($user)) {
-            if (in_array($controller, self::JSON_CONTROLLERS)) {
+            if ($isJson) {
                 Http::response(401);
                 header('Content-Type: application/json');
                 echo Json::encode(['success' => false, 'message' => 'Oturum açılmamış.']);

@@ -74,7 +74,7 @@
 
     'log' =>
     [
-        'createFile' => false,
+        'createFile' => true,
         'fileTime'   => '30 day'
     ],
 

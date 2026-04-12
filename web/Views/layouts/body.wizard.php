@@ -56,6 +56,7 @@
               ['url'=>'phpmanager/main',  'icon'=>'ti-brand-php',      'label'=>'PHP Yönetimi'],
               ['url'=>'nodemanager/main', 'icon'=>'ti-brand-nodejs',   'label'=>'Node.js'],
               ['url'=>'jobs/main',        'icon'=>'ti-list-check',     'label'=>'İş Kuyruğu'],
+              ['url'=>'logs/main',        'icon'=>'ti-file-text',      'label'=>'Log İzleme'],
               ['url'=>'settings/main',    'icon'=>'ti-settings',       'label'=>'Ayarlar'],
             ];
 

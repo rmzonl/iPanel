@@ -5,7 +5,7 @@
 #
 # Bu betik üç şeyi yapar:
 #   1. /var/run/ipanel için httpd_var_run_t bağlamı (agent socket)
-#   2. web/iApp/Storage ve web/uploads için httpd_sys_rw_content_t bağlamı
+#   2. web/iApp/Storage ve web/Uploads için httpd_sys_rw_content_t bağlamı
 #      (session, cache, uploads yazma izni)
 #   3. httpd_t → httpd_var_run_t:sock_file connectto policy modülü
 #
@@ -48,11 +48,11 @@ semanage fcontext -a -t httpd_sys_rw_content_t "$IPANEL_ROOT/web/iApp/Storage(/.
 restorecon -Rv "$IPANEL_ROOT/web/iApp/Storage/" 2>/dev/null || true
 
 echo ""
-echo "→ [2/3] web/uploads → httpd_sys_rw_content_t"
-semanage fcontext -a -t httpd_sys_rw_content_t "$IPANEL_ROOT/web/uploads(/.*)?" 2>/dev/null \
-    || semanage fcontext -m -t httpd_sys_rw_content_t "$IPANEL_ROOT/web/uploads(/.*)?" 2>/dev/null \
+echo "→ [2/3] web/Uploads → httpd_sys_rw_content_t"
+semanage fcontext -a -t httpd_sys_rw_content_t "$IPANEL_ROOT/web/Uploads(/.*)?" 2>/dev/null \
+    || semanage fcontext -m -t httpd_sys_rw_content_t "$IPANEL_ROOT/web/Uploads(/.*)?" 2>/dev/null \
     || echo "    WARN: semanage başarısız."
-restorecon -Rv "$IPANEL_ROOT/web/uploads/" 2>/dev/null || true
+restorecon -Rv "$IPANEL_ROOT/web/Uploads/" 2>/dev/null || true
 
 echo "    Bağlamlar:"
 ls -laZ "$IPANEL_ROOT/web/iApp/Storage/" 2>/dev/null | head -5

@@ -100,5 +100,9 @@ Route::change('{start}jobs/active{end}')->uri('Jobs/active');
 Route::change('{start}jobs/refreshRows{end}')->uri('Jobs/refreshRows');
 Route::change('{start}jobs/cancel/({number}){end}')->uri('Jobs/cancel/$1');
 
+// Logs
+Route::change('{start}logs{end}')->uri('Logs/main');
+Route::change('{start}logs/data{end}')->uri('Logs/data');
+
 // Errors
 Route::change('{start}errors/notFound{end}')->uri('Errors/notFound');

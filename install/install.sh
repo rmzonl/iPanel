@@ -241,12 +241,12 @@ EOF
         restorecon -Rv "$IPANEL_ROOT/web/iApp/Storage/" 2>/dev/null || true
         ok "SELinux: web/iApp/Storage → httpd_sys_rw_content_t"
 
-        # 3. uploads/ dizini de yazılabilir olmalı
-        semanage fcontext -a -t httpd_sys_rw_content_t "$IPANEL_ROOT/web/uploads(/.*)?" 2>/dev/null \
-            || semanage fcontext -m -t httpd_sys_rw_content_t "$IPANEL_ROOT/web/uploads(/.*)?" 2>/dev/null \
+        # 3. Uploads/ dizini de yazılabilir olmalı
+        semanage fcontext -a -t httpd_sys_rw_content_t "$IPANEL_ROOT/web/Uploads(/.*)?" 2>/dev/null \
+            || semanage fcontext -m -t httpd_sys_rw_content_t "$IPANEL_ROOT/web/Uploads(/.*)?" 2>/dev/null \
             || true
-        restorecon -Rv "$IPANEL_ROOT/web/uploads/" 2>/dev/null || true
-        ok "SELinux: web/uploads → httpd_sys_rw_content_t"
+        restorecon -Rv "$IPANEL_ROOT/web/Uploads/" 2>/dev/null || true
+        ok "SELinux: web/Uploads → httpd_sys_rw_content_t"
 
         # 4. Özel policy modülü: httpd_t → httpd_var_run_t:sock_file connectto
         # Varsayılan RHEL 9 politikası bu izni içermez.
@@ -574,11 +574,11 @@ finalize() {
     chmod 755 "$IPANEL_ROOT/web/iApp/Themes"
     ok "Themes dizini hazırlandı."
 
-    # uploads/ — web erişimli, kullanıcı dosyaları için
-    mkdir -p "$IPANEL_ROOT/web/uploads"
-    chown ${WEB_USER}:${WEB_USER} "$IPANEL_ROOT/web/uploads"
-    chmod 775 "$IPANEL_ROOT/web/uploads"
-    ok "uploads/ dizini hazırlandı (web-accessible)."
+    # Uploads/ — web erişimli, kullanıcı dosyaları için
+    mkdir -p "$IPANEL_ROOT/web/Uploads"
+    chown ${WEB_USER}:${WEB_USER} "$IPANEL_ROOT/web/Uploads"
+    chmod 775 "$IPANEL_ROOT/web/Uploads"
+    ok "Uploads/ dizini hazırlandı (web-accessible)."
 
     # Web dizini sahipliği
     chown -R ${WEB_USER}:${WEB_USER} "$IPANEL_ROOT/web"

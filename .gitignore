@@ -1,0 +1,16 @@
+# ZN Framework — otomatik oluşturulan dosyalar
+web/map.php
+
+# ZN Storage — çalışma zamanı içerikleri
+web/iApp/Storage/Cache/*
+web/iApp/Storage/Logs/*
+web/iApp/Storage/Session/*
+web/iApp/Storage/Crontab/*
+web/iApp/Storage/DatabaseBackup/*
+!web/iApp/Storage/Cache/.gitkeep
+!web/iApp/Storage/Logs/.gitkeep
+!web/iApp/Storage/Session/.gitkeep
+
+# Yüklenen dosyalar
+web/Uploads/*
+!web/Uploads/.gitignore
