@@ -146,7 +146,7 @@ class Settings extends Controller
         $backupCodes = Totp::generateBackupCodes(8);
         $backupHash  = Totp::hashBackupCodes($backupCodes);
 
-        DB::table('users')->where('id', $user['id'])->update([
+        DB::where('id', $user['id'])->update('users', [
             'totp_secret'  => $secret,
             'totp_enabled' => 1,
             'totp_backup'  => $backupHash,
@@ -193,7 +193,7 @@ class Settings extends Controller
             return;
         }
 
-        DB::table('users')->where('id', $user['id'])->update([
+        DB::where('id', $user['id'])->update('users', [
             'totp_secret'  => null,
             'totp_enabled' => 0,
             'totp_backup'  => null,

@@ -59,8 +59,8 @@ class Auth extends Controller
 
         // 4. Kullanıcıyı bul
         $user = DB::table('users')
-            ->where('username', $username)
-            ->whereOr('email', $username)
+            ->whereOr('username', $username)
+            ->where('email', $username)
             ->get()
             ->row();
 
@@ -150,9 +150,8 @@ class Auth extends Controller
                 $valid      = true;
                 $usedBackup = true;
                 // Kullanılan yedek kodu sil
-                DB::table('users')
-                    ->where('id', $pending['user_id'])
-                    ->update(['totp_backup' => $newBackup]);
+                DB::where('id', $pending['user_id'])
+                    ->update('users', ['totp_backup' => $newBackup]);
             }
         }
 
@@ -196,7 +195,7 @@ class Auth extends Controller
             'role'     => $user->role,
         ]);
 
-        DB::table('users')->where('id', $user->id)->update([
+        DB::where('id', $user->id)->update('users', [
             'last_login' => date('Y-m-d H:i:s'),
         ]);
 

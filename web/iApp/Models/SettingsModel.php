@@ -45,15 +45,14 @@ class SettingsModel extends Model
             'setting_value' => $value,
         ];
         if ($existing !== null) {
-            $query = DB::table('settings')
-                ->where('scope', $scope)
+            $query = DB::where('scope', $scope)
                 ->where('setting_key', $key);
             if ($scopeId === null) {
                 $query = $query->whereNull('scope_id');
             } else {
                 $query = $query->where('scope_id', $scopeId);
             }
-            return $query->update(['setting_value' => $value]);
+            return $query->update('settings', ['setting_value' => $value]);
         } else {
             return DB::table('settings')->insert($data);
         }
