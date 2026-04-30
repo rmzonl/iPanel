@@ -169,6 +169,31 @@ fetch_sources() {
 }
 
 ###############################################################################
+# 3b. Tabler Icons webfont indir (git'e dahil değil — kurulumda çekilir)
+###############################################################################
+download_tabler_icons() {
+    local THEMES="$IPANEL_ROOT/web/iApp/Themes/Tabler"
+    local ICONS_VER="3.31.0"
+    local BASE="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@${ICONS_VER}"
+
+    log "Tabler Icons v${ICONS_VER} webfont indiriliyor..."
+
+    mkdir -p "$THEMES/css" "$THEMES/fonts"
+
+    if curl -sf --connect-timeout 15 --max-time 90 \
+            "$BASE/tabler-icons.min.css" -o "$THEMES/css/tabler-icons.min.css" 2>/dev/null \
+        && curl -sf --connect-timeout 15 --max-time 90 \
+            "$BASE/fonts/tabler-icons.woff2" -o "$THEMES/fonts/tabler-icons.woff2" 2>/dev/null \
+        && curl -sf --connect-timeout 15 --max-time 90 \
+            "$BASE/fonts/tabler-icons.woff" -o "$THEMES/fonts/tabler-icons.woff" 2>/dev/null; then
+        ok "Tabler Icons v${ICONS_VER} webfont indirildi."
+    else
+        warn "Tabler Icons indirilemedi — panel menü ikonları görünmeyebilir."
+        warn "Düzeltmek için: bash $IPANEL_ROOT/install/scripts/download-icons.sh"
+    fi
+}
+
+###############################################################################
 # 4. Sistem kullanıcıları / grupları
 ###############################################################################
 
@@ -705,6 +730,7 @@ echo ""
 detect_os
 install_deps
 fetch_sources
+download_tabler_icons
 create_users
 write_config
 setup_database

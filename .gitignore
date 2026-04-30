@@ -13,6 +13,11 @@ web/iApp/Storage/DatabaseBackup/*
 !web/iApp/Storage/Crontab/.gitkeep
 !web/iApp/Storage/DatabaseBackup/.gitkeep
 
+# Tabler Icons webfont — kurulum sırasında indirilir (git'e dahil değil)
+web/iApp/Themes/Tabler/css/tabler-icons.min.css
+web/iApp/Themes/Tabler/fonts/tabler-icons.woff2
+web/iApp/Themes/Tabler/fonts/tabler-icons.woff
+
 # Yüklenen dosyalar
 web/Uploads/*
 !web/Uploads/.gitignore
