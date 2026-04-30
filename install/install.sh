@@ -555,9 +555,8 @@ install_nginx_panel() {
 finalize() {
     log "Dosya izinleri ve son ayarlar yapılıyor..."
 
-    # iApp/Storage — ZN Framework, kapitalize isimler kullanır (Cache, Logs, Session, vs.)
-    # Sadece ZN'nin oluşturmadığı Files/ dizinini oluşturuyoruz; diğerlerini ZN kendisi oluşturur.
-    mkdir -p "$IPANEL_ROOT/web/iApp/Storage/Files"
+    # iApp/Storage — ZN Framework'ün yazma yetkisi gerektirdiği dizinler
+    mkdir -p "$IPANEL_ROOT/web/iApp/Storage/"{Cache,Logs,Session,Crontab,Files,DatabaseBackup}
     ok "Storage/Files dizini hazırlandı."
 
     # Çoklu dil desteği dizinleri
