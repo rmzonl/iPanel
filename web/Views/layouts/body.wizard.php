@@ -1,6 +1,6 @@
 {[
-    $currentController = strtolower(CURRENT_CFUNCTION ?? '');
-    $currentMethod     = strtolower(CURRENT_CMETHOD ?? '');
+    $currentController = strtolower(CURRENT_CONTROLLER ?? '');
+    $currentMethod     = strtolower(CURRENT_CFUNCTION ?? '');
     $currentRoute      = $currentController . '/' . $currentMethod;
     $navUser           = Session::select('admin_user') ?? [];
     $navUsername       = $navUser['username'] ?? 'Admin';
