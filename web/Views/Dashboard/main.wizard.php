@@ -183,9 +183,12 @@
                       <td>{{ $client->first_name }} {{ $client->last_name }}</td>
                       <td class="text-muted">{{ $client->email }}</td>
                       <td>
-                        @if($client->status === 'active')   <span class="badge bg-success">Aktif</span>
-                        @elseif($client->status === 'suspended') <span class="badge bg-warning">Askıda</span>
-                        @else <span class="badge bg-danger">Sonlandı</span> @endif
+                        @if($client->status === 'active')
+                        <span class="badge bg-success">Aktif</span>
+                        @elseif($client->status === 'suspended')
+                        <span class="badge bg-warning">Askıda</span>
+                        @else
+                        <span class="badge bg-danger">Sonlandı</span> @endif
                       </td>
                     </tr>
                   @empty
@@ -212,9 +215,12 @@
                       <td>{{ $site->domain }}</td>
                       <td class="text-muted">{{ $site->php_version }}</td>
                       <td>
-                        @if($site->status === 'active')   <span class="badge bg-success">Aktif</span>
-                        @elseif($site->status === 'suspended') <span class="badge bg-warning">Askıda</span>
-                        @else <span class="badge bg-danger">Silindi</span> @endif
+                        @if($site->status === 'active')
+                        <span class="badge bg-success">Aktif</span>
+                        @elseif($site->status === 'suspended')
+                        <span class="badge bg-warning">Askıda</span>
+                        @else
+                        <span class="badge bg-danger">Silindi</span> @endif
                       </td>
                     </tr>
                   @empty
