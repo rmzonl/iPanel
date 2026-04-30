@@ -244,19 +244,21 @@ EOF
         ok "SELinux: web/ ağacı → httpd_sys_content_t, web/ dizini → httpd_sys_rw_content_t"
 
         # 3. Storage dizini: httpd_sys_rw_content_t (ZN cache/session/log yazar)
+        # -a başarısız olursa (kural zaten var) önce sil, sonra tekrar ekle.
+        # -a/-m zinciri bazen sessizce başarısız olur; delete+add daha güvenilir.
+        semanage fcontext -d "$IPANEL_ROOT/web/iApp/Storage(/.*)?" 2>/dev/null || true
         semanage fcontext -a -t httpd_sys_rw_content_t "$IPANEL_ROOT/web/iApp/Storage(/.*)?" 2>/dev/null \
-            || semanage fcontext -m -t httpd_sys_rw_content_t "$IPANEL_ROOT/web/iApp/Storage(/.*)?" 2>/dev/null \
-            || true
+            || warn "SELinux: Storage httpd_sys_rw_content_t fcontext eklenemedi"
         ok "SELinux: web/iApp/Storage → httpd_sys_rw_content_t"
 
         # 4. Uploads/ dizini: httpd_sys_rw_content_t
+        semanage fcontext -d "$IPANEL_ROOT/web/Uploads(/.*)?" 2>/dev/null || true
         semanage fcontext -a -t httpd_sys_rw_content_t "$IPANEL_ROOT/web/Uploads(/.*)?" 2>/dev/null \
-            || semanage fcontext -m -t httpd_sys_rw_content_t "$IPANEL_ROOT/web/Uploads(/.*)?" 2>/dev/null \
-            || true
+            || warn "SELinux: Uploads httpd_sys_rw_content_t fcontext eklenemedi"
         ok "SELinux: web/Uploads → httpd_sys_rw_content_t"
 
-        # Tüm web ağacını yeniden etiketle
-        restorecon -Rv "$IPANEL_ROOT/web/" 2>/dev/null || true
+        # Tüm web ağacını yeniden etiketle (-F: mevcut bağlamı zorla sıfırla)
+        restorecon -RFv "$IPANEL_ROOT/web/" 2>/dev/null || true
         ok "SELinux: web/ ağacı yeniden etiketlendi"
 
         # 5. Özel policy modülü: httpd_t → httpd_var_run_t:sock_file connectto
@@ -599,7 +601,18 @@ finalize() {
     chmod -R o-rwx "$IPANEL_ROOT/web/iApp/Config"
     # Sahiplik
     chown -R ${WEB_USER}:${WEB_USER} "$IPANEL_ROOT/web"
-    ok "Web dizini izinleri: dosyalar 644, dizinler 755, Storage/Uploads/map.php yazılabilir."
+    ok "Web dizini izinleri: dosyalar 644, dizinler 755, Storage/Uploads yazılabilir."
+
+    # SELinux: chmod/chown sonrası Storage ve Uploads bağlamlarını zorla
+    # write_config()'daki restorecon bu adımdan önce çalışır; buradaki -RF ile
+    # doğru bağlam son kez uygulanır (kurulum tekrarlarında kalıcı çözüm).
+    if command -v restorecon >/dev/null 2>&1 \
+            && command -v getenforce >/dev/null 2>&1 \
+            && [[ "$(getenforce 2>/dev/null)" != "Disabled" ]]; then
+        restorecon -RF "$IPANEL_ROOT/web/iApp/Storage" 2>/dev/null || true
+        restorecon -RF "$IPANEL_ROOT/web/Uploads" 2>/dev/null || true
+        ok "SELinux: Storage ve Uploads bağlamları finalize'da yeniden uygulandı."
+    fi
 
     # CLI aracı symlink
     ln -sf "$IPANEL_ROOT/bin/ipanel" /usr/local/bin/ipanel

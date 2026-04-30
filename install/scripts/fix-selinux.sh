@@ -42,20 +42,21 @@ ls -laZ /run/ipanel/ 2>/dev/null || echo "    (socket henüz yok — agent başl
 echo ""
 echo "→ [2/3] web/iApp/Storage → httpd_sys_rw_content_t"
 echo "         (PHP-FPM session, cache, ZN Framework log yazma izni)"
+# Önce eski kural varsa sil, sonra ekle (delete+add daha güvenilir)
+semanage fcontext -d "$IPANEL_ROOT/web/iApp/Storage(/.*)?" 2>/dev/null || true
 semanage fcontext -a -t httpd_sys_rw_content_t "$IPANEL_ROOT/web/iApp/Storage(/.*)?" 2>/dev/null \
-    || semanage fcontext -m -t httpd_sys_rw_content_t "$IPANEL_ROOT/web/iApp/Storage(/.*)?" 2>/dev/null \
-    || echo "    WARN: semanage başarısız."
-restorecon -Rv "$IPANEL_ROOT/web/iApp/Storage/" 2>/dev/null || true
+    || echo "    WARN: Storage semanage fcontext eklenemedi."
+restorecon -RF "$IPANEL_ROOT/web/iApp/Storage/" 2>/dev/null || true
 
 echo ""
 echo "→ [2/3] web/Uploads → httpd_sys_rw_content_t"
+semanage fcontext -d "$IPANEL_ROOT/web/Uploads(/.*)?" 2>/dev/null || true
 semanage fcontext -a -t httpd_sys_rw_content_t "$IPANEL_ROOT/web/Uploads(/.*)?" 2>/dev/null \
-    || semanage fcontext -m -t httpd_sys_rw_content_t "$IPANEL_ROOT/web/Uploads(/.*)?" 2>/dev/null \
-    || echo "    WARN: semanage başarısız."
-restorecon -Rv "$IPANEL_ROOT/web/Uploads/" 2>/dev/null || true
+    || echo "    WARN: Uploads semanage fcontext eklenemedi."
+restorecon -RF "$IPANEL_ROOT/web/Uploads/" 2>/dev/null || true
 
 echo "    Storage bağlamları:"
-ls -laZ "$IPANEL_ROOT/web/iApp/Storage/" 2>/dev/null | head -5
+ls -laZ "$IPANEL_ROOT/web/iApp/Storage/" 2>/dev/null | head -8
 
 # ─── 3. Policy modülü ───────────────────────────────────────────────────────
 echo ""
