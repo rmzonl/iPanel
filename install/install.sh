@@ -173,19 +173,40 @@ fetch_sources() {
 ###############################################################################
 download_tabler_icons() {
     local THEMES="$IPANEL_ROOT/web/iApp/Themes/Tabler"
-    local ICONS_VER="3.31.0"
-    local BASE="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@${ICONS_VER}"
+    local BASE="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont"
 
-    log "Tabler Icons v${ICONS_VER} webfont indiriliyor..."
-
+    log "Tabler Icons webfont indiriliyor..."
     mkdir -p "$THEMES/css" "$THEMES/fonts"
 
-    if curl -sf --connect-timeout 15 --max-time 90 \
-            "$BASE/tabler-icons.min.css" -o "$THEMES/css/tabler-icons.min.css" 2>/dev/null \
-        && curl -sf --connect-timeout 15 --max-time 90 \
-            "$BASE/fonts/tabler-icons.woff2" -o "$THEMES/fonts/tabler-icons.woff2" 2>/dev/null \
-        && curl -sf --connect-timeout 15 --max-time 90 \
-            "$BASE/fonts/tabler-icons.woff" -o "$THEMES/fonts/tabler-icons.woff" 2>/dev/null; then
+    # Mevcut sürümü öğren, yoksa sabit bir fallback kullan
+    local ICONS_VER
+    ICONS_VER=$(curl -sf --connect-timeout 10 \
+        "https://data.jsdelivr.com/v1/package/npm/@tabler/icons-webfont" \
+        | grep -oP '"tags":\{"latest":"[^"]+' | grep -oP '[0-9]+\.[0-9]+\.[0-9]+' | head -1 2>/dev/null \
+        || echo "3.30.0")
+
+    local VER_BASE="${BASE}@${ICONS_VER}"
+    local ok=true
+
+    # CSS — önce root, yoksa dist/ dene
+    if ! curl -sf --connect-timeout 15 --max-time 90 \
+            "${VER_BASE}/tabler-icons.min.css" -o "$THEMES/css/tabler-icons.min.css" 2>/dev/null; then
+        curl -sf --connect-timeout 15 --max-time 90 \
+            "${VER_BASE}/dist/tabler-icons.min.css" -o "$THEMES/css/tabler-icons.min.css" 2>/dev/null \
+            || ok=false
+    fi
+
+    # Font dosyaları
+    for SUB in "" "dist/"; do
+        curl -sf --connect-timeout 15 --max-time 90 \
+            "${VER_BASE}/${SUB}fonts/tabler-icons.woff2" -o "$THEMES/fonts/tabler-icons.woff2" 2>/dev/null && break || true
+    done
+    for SUB in "" "dist/"; do
+        curl -sf --connect-timeout 15 --max-time 90 \
+            "${VER_BASE}/${SUB}fonts/tabler-icons.woff" -o "$THEMES/fonts/tabler-icons.woff" 2>/dev/null && break || true
+    done
+
+    if $ok; then
         ok "Tabler Icons v${ICONS_VER} webfont indirildi."
     else
         warn "Tabler Icons indirilemedi — panel menü ikonları görünmeyebilir."
