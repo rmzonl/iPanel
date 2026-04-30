@@ -397,9 +397,13 @@ SQL
     chmod 600 /etc/ipanel/db.env
     ok "Admin şifresi oluşturuldu → /etc/ipanel/db.env"
 
-    # Database.php bağlantı bilgilerini güncelle (PHP ile — özel karakter güvenli)
+    # Database.php — git'e dahil değil; yoksa dist şablonundan oluştur
+    local DB_CONF="${IPANEL_ROOT}/web/iApp/Config/Database.php"
+    [[ -f "$DB_CONF" ]] || cp "${DB_CONF}.dist" "$DB_CONF"
+
+    # Bağlantı bilgilerini güncelle (PHP ile — özel karakter güvenli)
     php -r "
-\$file = '${IPANEL_ROOT}/web/iApp/Config/Database.php';
+\$file = '${DB_CONF}';
 \$content = file_get_contents(\$file);
 \$content = preg_replace(\"/('user'\\s*=>\\s*)'[^']*'/\",     \"\\\\1'ipanel'\", \$content);
 \$content = preg_replace(\"/('password'\\s*=>\\s*)'[^']*'/\", \"\\\\1'${DBPASS}'\", \$content);

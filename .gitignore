@@ -1,6 +1,9 @@
 # ZN Framework — otomatik oluşturulan dosyalar
 web/map.php
 
+# Veritabanı bağlantı bilgileri — kurulumda yazılır, git'e dahil değil
+web/iApp/Config/Database.php
+
 # ZN Storage — çalışma zamanı içerikleri (dizinler .gitkeep ile takip edilir)
 web/iApp/Storage/Cache/*
 web/iApp/Storage/Logs/*
