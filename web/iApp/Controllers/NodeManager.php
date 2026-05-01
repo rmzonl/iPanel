@@ -8,21 +8,34 @@ use Session;
 use Redirect;
 use Project\Libraries\CsrfGuard;
 use Project\Libraries\AuditLogger;
+use Project\Libraries\AgentClient;
 
 /**
  * Node.js sürüm yönetimi — sadece admin.
- * nvm (Node Version Manager) veya sistem paketi üzerinden çalışır.
+ * Tüm ayrıcalıklı işlemler agent (root) üzerinden yapılır.
  */
 class NodeManager extends Controller
 {
-    private const NVM_DIR = '/usr/local/nvm';
-
     public function main()
     {
         View::pageTitle('Node.js Yönetimi');
-        View::nodeInfo($this->collectInfo());
+
+        try {
+            $agent = new AgentClient();
+            View::nodeInfo($agent->call('node.status', []));
+        } catch (\Throwable $e) {
+            View::nodeInfo([
+                'node_version'  => null,
+                'npm_version'   => null,
+                'pm2_installed' => false,
+                'nvm_installed' => false,
+                'nvm_versions'  => [],
+            ]);
+            View::error('Agent bağlantı hatası: ' . htmlspecialchars($e->getMessage()));
+        }
+
         View::success(Session::select('success'));
-        View::error(Session::select('error'));
+        View::error(View::error() ?: Session::select('error'));
         Session::delete('success');
         Session::delete('error');
     }
@@ -33,18 +46,13 @@ class NodeManager extends Controller
         if (!Http::isRequestMethod('post')) { Redirect::action('nodemanager/main'); return; }
         if (!CsrfGuard::verify()) { Session::insert('error', 'Geçersiz form isteği.'); Redirect::action('nodemanager/main'); return; }
 
-        $output = [];
-        // nvm'i /usr/local/nvm'e kur (tüm kullanıcılar için)
-        exec(
-            'curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.40.1/install.sh 2>/dev/null | NVM_DIR=' . escapeshellarg(self::NVM_DIR) . ' bash 2>&1',
-            $output, $rc
-        );
-
-        if ($rc === 0) {
+        try {
+            $agent = new AgentClient();
+            $agent->call('node.installNvm', []);
             AuditLogger::log('node.nvm_install', 'system', null, 'nvm kuruldu');
             Session::insert('success', 'nvm başarıyla kuruldu.');
-        } else {
-            Session::insert('error', 'nvm kurulum hatası: ' . htmlspecialchars(implode("\n", array_slice($output, -5))));
+        } catch (\Throwable $e) {
+            Session::insert('error', 'nvm kurulum hatası: ' . htmlspecialchars($e->getMessage()));
         }
 
         Redirect::action('nodemanager/main');
@@ -57,40 +65,25 @@ class NodeManager extends Controller
         if (!CsrfGuard::verify()) { Session::insert('error', 'Geçersiz form isteği.'); Redirect::action('nodemanager/main'); return; }
 
         $version = trim((string) Post::node_version());
-        // Geçerli format: 18, 20, 22, lts, latest veya v18.0.0
         if (!preg_match('/^(lts|latest|v?\d+(\.\d+){0,2})$/', $version)) {
             Session::insert('error', 'Geçersiz Node.js sürümü.');
             Redirect::action('nodemanager/main');
             return;
         }
 
-        $escVer = escapeshellarg($version);
-        $output = [];
-
-        if ($this->nvmInstalled()) {
-            $nvmDir = escapeshellarg(self::NVM_DIR);
-            exec("bash -c 'export NVM_DIR=$nvmDir && source $nvmDir/nvm.sh && nvm install $escVer 2>&1'", $output, $rc);
-        } else {
-            // nvm yoksa sistem paketi (NodeSource)
-            $os = preg_match('/debian|ubuntu/i', php_uname('v')) ? 'debian' : 'rhel';
-            if ($os === 'debian') {
-                exec("curl -fsSL https://deb.nodesource.com/setup_{$escVer}.x | bash - 2>&1 && apt-get install -y nodejs 2>&1", $output, $rc);
-            } else {
-                exec("curl -fsSL https://rpm.nodesource.com/setup_{$escVer}.x | bash - 2>&1 && dnf install -y nodejs 2>&1", $output, $rc);
-            }
-        }
-
-        if ($rc === 0) {
+        try {
+            $agent = new AgentClient();
+            $agent->call('node.installVersion', ['version' => $version]);
             AuditLogger::log('node.install', 'system', null, "Node.js $version kuruldu");
             Session::insert('success', "Node.js $version başarıyla kuruldu.");
-        } else {
-            Session::insert('error', 'Kurulum hatası: ' . htmlspecialchars(implode("\n", array_slice($output, -5))));
+        } catch (\Throwable $e) {
+            Session::insert('error', 'Kurulum hatası: ' . htmlspecialchars($e->getMessage()));
         }
 
         Redirect::action('nodemanager/main');
     }
 
-    /** Varsayılan Node.js sürümünü değiştir (nvm use --default) */
+    /** Varsayılan Node.js sürümünü değiştir */
     public function setDefault()
     {
         if (!Http::isRequestMethod('post')) { Redirect::action('nodemanager/main'); return; }
@@ -103,17 +96,13 @@ class NodeManager extends Controller
             return;
         }
 
-        $escVer = escapeshellarg($version);
-        $nvmDir = escapeshellarg(self::NVM_DIR);
-        $output = [];
-
-        exec("bash -c 'export NVM_DIR=$nvmDir && source $nvmDir/nvm.sh && nvm alias default $escVer 2>&1'", $output, $rc);
-
-        if ($rc === 0) {
+        try {
+            $agent = new AgentClient();
+            $agent->call('node.setDefault', ['version' => $version]);
             AuditLogger::log('node.set_default', 'system', null, "Node.js varsayılan: $version");
             Session::insert('success', "Node.js $version varsayılan olarak ayarlandı.");
-        } else {
-            Session::insert('error', 'Sürüm değiştirme hatası: ' . htmlspecialchars(implode("\n", $output)));
+        } catch (\Throwable $e) {
+            Session::insert('error', 'Sürüm değiştirme hatası: ' . htmlspecialchars($e->getMessage()));
         }
 
         Redirect::action('nodemanager/main');
@@ -132,103 +121,40 @@ class NodeManager extends Controller
             return;
         }
 
-        $escVer = escapeshellarg($version);
-        $nvmDir = escapeshellarg(self::NVM_DIR);
-        $output = [];
-
-        if ($this->nvmInstalled()) {
-            exec("bash -c 'export NVM_DIR=$nvmDir && source $nvmDir/nvm.sh && nvm uninstall $escVer 2>&1'", $output, $rc);
-        } else {
-            $os = preg_match('/debian|ubuntu/i', php_uname('v')) ? 'debian' : 'rhel';
-            $cmd = $os === 'debian' ? 'apt-get remove -y nodejs 2>&1' : 'dnf remove -y nodejs 2>&1';
-            exec($cmd, $output, $rc);
-        }
-
-        if ($rc === 0) {
+        try {
+            $agent = new AgentClient();
+            $agent->call('node.removeVersion', ['version' => $version]);
             AuditLogger::log('node.remove', 'system', null, "Node.js $version kaldırıldı");
             Session::insert('success', "Node.js $version kaldırıldı.");
-        } else {
-            Session::insert('error', 'Kaldırma hatası: ' . htmlspecialchars(implode("\n", $output)));
+        } catch (\Throwable $e) {
+            Session::insert('error', 'Kaldırma hatası: ' . htmlspecialchars($e->getMessage()));
         }
 
         Redirect::action('nodemanager/main');
     }
 
-    /** pm2 aracını yönet (start/stop global) */
+    /** pm2'yi global olarak kur */
     public function pm2()
     {
         if (!Http::isRequestMethod('post')) { Redirect::action('nodemanager/main'); return; }
         if (!CsrfGuard::verify()) { Session::insert('error', 'Geçersiz form isteği.'); Redirect::action('nodemanager/main'); return; }
 
         $action = Post::action();
-        if (!in_array($action, ['install', 'list'], true)) {
+        if ($action !== 'install') {
             Session::insert('error', 'Geçersiz işlem.');
             Redirect::action('nodemanager/main');
             return;
         }
 
-        $output = [];
-        if ($action === 'install') {
-            exec('npm install -g pm2 2>&1', $output, $rc);
-            $msg = $rc === 0 ? 'pm2 başarıyla kuruldu.' : 'pm2 kurulum hatası: ' . implode(' ', array_slice($output, -3));
-        } else {
-            exec('pm2 list 2>&1', $output, $rc);
-            $msg = implode("\n", $output);
-        }
-
-        if ($action === 'install' && $rc === 0) {
+        try {
+            $agent = new AgentClient();
+            $agent->call('node.installPm2', []);
             AuditLogger::log('node.pm2_install', 'system', null, 'pm2 kuruldu');
-            Session::insert('success', $msg);
-        } elseif ($action === 'install') {
-            Session::insert('error', htmlspecialchars($msg));
-        } else {
-            Session::insert('success', '<pre>' . htmlspecialchars($msg) . '</pre>');
+            Session::insert('success', 'pm2 başarıyla kuruldu.');
+        } catch (\Throwable $e) {
+            Session::insert('error', 'pm2 kurulum hatası: ' . htmlspecialchars($e->getMessage()));
         }
 
         Redirect::action('nodemanager/main');
-    }
-
-    private function collectInfo(): array
-    {
-        // Mevcut node versiyonu
-        exec('node --version 2>/dev/null', $nodeOut);
-        $nodeVersion = trim($nodeOut[0] ?? '');
-
-        exec('npm --version 2>/dev/null', $npmOut);
-        $npmVersion = trim($npmOut[0] ?? '');
-
-        exec('which pm2 2>/dev/null', $pm2Out);
-        $pm2Installed = !empty(trim($pm2Out[0] ?? ''));
-
-        $nvmInstalled = $this->nvmInstalled();
-
-        // nvm ile kurulu sürümler
-        $nvmVersions = [];
-        if ($nvmInstalled) {
-            $nvmDir = escapeshellarg(self::NVM_DIR);
-            exec("bash -c 'export NVM_DIR=$nvmDir && source $nvmDir/nvm.sh && nvm list 2>/dev/null'", $nvmList);
-            foreach ($nvmList as $line) {
-                if (preg_match('/(v\d+\.\d+\.\d+)/', $line, $m)) {
-                    $nvmVersions[] = [
-                        'version' => $m[1],
-                        'default' => strpos($line, 'default') !== false,
-                        'current' => strpos($line, '->') !== false || strpos($line, 'current') !== false,
-                    ];
-                }
-            }
-        }
-
-        return [
-            'node_version'  => $nodeVersion ?: null,
-            'npm_version'   => $npmVersion  ?: null,
-            'pm2_installed' => $pm2Installed,
-            'nvm_installed' => $nvmInstalled,
-            'nvm_versions'  => $nvmVersions,
-        ];
-    }
-
-    private function nvmInstalled(): bool
-    {
-        return file_exists(self::NVM_DIR . '/nvm.sh');
     }
 }
