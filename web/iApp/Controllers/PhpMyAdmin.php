@@ -159,6 +159,6 @@ class PhpMyAdmin extends Controller
 
     private function detectOs(): string
     {
-        return file_exists('/etc/debian_version') ? 'debian' : 'rhel';
+        return preg_match('/debian|ubuntu/i', php_uname('v')) ? 'debian' : 'rhel';
     }
 }

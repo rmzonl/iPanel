@@ -72,7 +72,7 @@ class NodeManager extends Controller
             exec("bash -c 'export NVM_DIR=$nvmDir && source $nvmDir/nvm.sh && nvm install $escVer 2>&1'", $output, $rc);
         } else {
             // nvm yoksa sistem paketi (NodeSource)
-            $os = file_exists('/etc/debian_version') ? 'debian' : 'rhel';
+            $os = preg_match('/debian|ubuntu/i', php_uname('v')) ? 'debian' : 'rhel';
             if ($os === 'debian') {
                 exec("curl -fsSL https://deb.nodesource.com/setup_{$escVer}.x | bash - 2>&1 && apt-get install -y nodejs 2>&1", $output, $rc);
             } else {
@@ -139,7 +139,7 @@ class NodeManager extends Controller
         if ($this->nvmInstalled()) {
             exec("bash -c 'export NVM_DIR=$nvmDir && source $nvmDir/nvm.sh && nvm uninstall $escVer 2>&1'", $output, $rc);
         } else {
-            $os = file_exists('/etc/debian_version') ? 'debian' : 'rhel';
+            $os = preg_match('/debian|ubuntu/i', php_uname('v')) ? 'debian' : 'rhel';
             $cmd = $os === 'debian' ? 'apt-get remove -y nodejs 2>&1' : 'dnf remove -y nodejs 2>&1';
             exec($cmd, $output, $rc);
         }

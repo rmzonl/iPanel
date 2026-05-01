@@ -13,8 +13,13 @@
     </thead>
     <tbody id="fm-tbody">
       @forelse($files as $file)
+        {[ $dblclick = $file->is_dir
+            ? "fmBrowse('" . addslashes($file->path) . "')"
+            : ($file->editable
+                ? "fmEdit('" . addslashes($file->path) . "')"
+                : "fmDownload('" . addslashes($file->path) . "')"); ]}
         <tr data-path="{{ $file->path }}" data-isdir="{{ $file->is_dir ? '1' : '0' }}"
-            ondblclick="{{ $file->is_dir ? 'fmBrowse(\''.addslashes($file->path).'\')' : ($file->editable ? 'fmEdit(\''.addslashes($file->path).'\')' : 'fmDownload(\''.addslashes($file->path).'\')') }}">
+            ondblclick="{{ $dblclick }}">
           <td>
             @if(!$file->is_parent)
               <input type="checkbox" class="form-check-input m-0 fm-row-check" value="{{ $file->path }}">

@@ -189,11 +189,12 @@
                             </form>
                           @endif
                           @if(!$v['current'])
+                            {[ $nodeVer = $v['version']; ]}
                             <form method="POST" action="{{ URL::base('nodemanager/remove') }}" class="d-inline">
                               {[ echo $csrfField ?? ""; ]}
-                              <input type="hidden" name="node_version" value="{{ $v['version'] }}">
+                              <input type="hidden" name="node_version" value="{{ $nodeVer }}">
                               <button type="submit" class="btn btn-sm btn-danger"
-                                      onclick="return confirm('{{ $v[\'version\'] }} kaldırılsın mı?')">
+                                      onclick="return confirm('{{ $nodeVer }} kaldırılsın mı?')">
                                 <i class="ti ti-trash"></i>
                               </button>
                             </form>
