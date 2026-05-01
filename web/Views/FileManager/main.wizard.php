@@ -19,8 +19,8 @@
           <!-- Breadcrumb -->
           <nav aria-label="breadcrumb" class="me-auto">
             <ol class="breadcrumb mb-0">
-              @foreach($breadcrumb as $crumb)
-                @if($loop->last)
+              @foreach($breadcrumb as $crumbIndex => $crumb)
+                @if($crumbIndex === count($breadcrumb) - 1)
                   <li class="breadcrumb-item active">{{ $crumb['label'] }}</li>
                 @else
                   <li class="breadcrumb-item">
