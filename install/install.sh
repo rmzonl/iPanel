@@ -490,7 +490,7 @@ pm.max_requests = 500
 chdir = $IPANEL_ROOT/web
 php_admin_value[error_log] = /var/log/ipanel/php-fpm.log
 php_admin_flag[log_errors] = on
-php_admin_value[open_basedir] = $IPANEL_ROOT/web:/tmp:/var/log/ipanel:/etc/ipanel:/etc/nginx:/home:/usr/share/phpmyadmin:/usr/share/phpMyAdmin:/var/www:/usr/local/nvm:/var/backups/ipanel
+php_admin_value[open_basedir] = $IPANEL_ROOT/web:/tmp:/var/log/ipanel:/etc/ipanel:/etc/nginx:/home:/usr/share:/usr/local:/var/www:/var/backups/ipanel
 EOF
 
     systemctl enable --now "$FPM_SVC"
