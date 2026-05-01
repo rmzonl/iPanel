@@ -16,9 +16,14 @@ class SettingsModel extends Model
         return $query->get();
     }
 
-    public function getServerSettings()
+    public function getServerSettings(): array
     {
-        return $this->getByScope('server');
+        $rows = $this->getByScope('server')->result();
+        $out  = [];
+        foreach ($rows as $row) {
+            $out[$row->setting_key] = $row->setting_value;
+        }
+        return $out;
     }
 
     public function getSettingValue($scope, $key, $scopeId = null)
