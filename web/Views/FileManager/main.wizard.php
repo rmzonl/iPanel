@@ -205,4 +205,4 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/mode/sql/sql.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/mode/markdown/markdown.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/addon/edit/matchbrackets.js"></script>
-<script src="{{ URL::base('assets/js/filemanager.js') }}"></script>
+<script src="{{ URL::base('iApp/Themes/Tabler/js/filemanager.js') }}"></script>

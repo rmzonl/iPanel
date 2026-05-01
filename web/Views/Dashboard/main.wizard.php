@@ -238,5 +238,5 @@
 </div>
 
 <!-- Chart.js + canlı stats -->
-<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
-<script src="{{ URL::base('assets/js/stats.js') }}"></script>
+<script src="{{ URL::base('iApp/Themes/Tabler/js/chart.umd.min.js') }}"></script>
+<script src="{{ URL::base('iApp/Themes/Tabler/js/stats.js') }}"></script>
