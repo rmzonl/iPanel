@@ -110,7 +110,12 @@
                   $fpmClr = $fpmSt === 'active' ? 'success' : ($fpmSt === 'inactive' ? 'secondary' : 'danger');
                 ]}
                 <tr>
-                  <td><strong>PHP {{ $v }}</strong> @if(strpos($active, $v) === 0) <span class="badge bg-green-lt ms-1">Aktif</span> @endif</td>
+                  <td>
+                    <strong>PHP {{ $v }}</strong>
+                    @if(strpos($active, $v) === 0)
+                    <span class="badge bg-green-lt ms-1">Aktif</span>
+                    @endif
+                  </td>
                   <td><span class="badge bg-{{ $fpmClr }}-lt text-{{ $fpmClr }}">{{ $fpmSt }}</span></td>
                   <td>
                     <form method="post" action="{{ URL::base('phpmanager/restartfpm') }}" class="d-inline" data-ajax>
