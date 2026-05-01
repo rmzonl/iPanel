@@ -3,11 +3,11 @@
 #
 # Kullanım: sudo bash /usr/local/ipanel/install/scripts/fix-selinux.sh
 #
-# Bu betik üç şeyi yapar:
+# Bu betik dört şeyi yapar:
 #   1. /var/run/ipanel için httpd_var_run_t bağlamı (agent socket)
 #   2. web/iApp/Storage ve web/Uploads için httpd_sys_rw_content_t bağlamı
-#      (session, cache, uploads yazma izni)
-#   3. httpd_t → httpd_var_run_t:sock_file connectto policy modülü
+#   3. httpd_t → unconfined_service_t:unix_stream_socket connectto policy modülü
+#   4. httpd_enable_homedirs boolean (FileManager /home erişimi)
 #
 # AlmaLinux/RHEL 9 kurulumlarında gereklidir.
 
@@ -79,6 +79,13 @@ checkmodule -M -m -o "$MOD_TMP/ipanel_agent.mod" "$TE_FILE"
 semodule_package -o "$MOD_TMP/ipanel_agent.pp" -m "$MOD_TMP/ipanel_agent.mod"
 semodule -i "$MOD_TMP/ipanel_agent.pp"
 echo "    ✓ ipanel_agent policy modülü yüklendi."
+
+# ─── 4. SELinux boolean'ları ────────────────────────────────────────────────
+echo ""
+echo "→ [4/4] SELinux boolean'ları ayarlanıyor..."
+# FileManager'ın /home altındaki kullanıcı dizinlerini listeleyebilmesi için
+setsebool -P httpd_enable_homedirs on
+echo "    ✓ httpd_enable_homedirs=on (FileManager /home erişimi)"
 
 # ─── Servisler ───────────────────────────────────────────────────────────────
 echo ""

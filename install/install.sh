@@ -313,7 +313,7 @@ EOF
         restorecon -RFv "$IPANEL_ROOT/web/" 2>/dev/null || true
         ok "SELinux: web/ ağacı yeniden etiketlendi"
 
-        # 5. Özel policy modülü: httpd_t → httpd_var_run_t:sock_file connectto
+        # 5. Özel policy modülü: httpd_t → unconfined_service_t:unix_stream_socket connectto
         # Varsayılan RHEL 9 politikası bu izni içermez.
         if command -v checkmodule >/dev/null 2>&1 && command -v semodule_package >/dev/null 2>&1; then
             TE_FILE="$IPANEL_ROOT/install/selinux/ipanel_agent.te"
@@ -327,6 +327,12 @@ EOF
         else
             warn "SELinux: checkmodule/semodule_package bulunamadı. 'policycoreutils-devel' paketini kurun."
         fi
+
+        # 6. SELinux boolean'ları
+        # FileManager'ın /home altındaki kullanıcı dizinlerini listeleyebilmesi için
+        setsebool -P httpd_enable_homedirs on 2>/dev/null \
+            && ok "SELinux: httpd_enable_homedirs=on (FileManager /home erişimi)" \
+            || warn "SELinux: httpd_enable_homedirs ayarlanamadı"
     fi
 
     if [[ ! -f /etc/ipanel/agent.conf.php ]]; then
