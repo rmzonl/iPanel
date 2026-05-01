@@ -345,6 +345,8 @@ class PhpManager extends Controller
 
     private function detectOs(): string
     {
-        return file_exists('/etc/debian_version') ? 'debian' : 'rhel';
+        // open_basedir /etc'yi kapsamaz; PHP_OS sabitlerini ve uname çıktısını kullan
+        $uname = strtolower(php_uname('v') . ' ' . php_uname('r'));
+        return preg_match('/debian|ubuntu/i', $uname) ? 'debian' : 'rhel';
     }
 }
