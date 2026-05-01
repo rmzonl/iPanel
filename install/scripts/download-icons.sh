@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# download-icons.sh — Tabler Icons webfont'u manuel indir
+# download-icons.sh — Tabler Icons webfont'u npm registry'den indir
 #
 # Kullanım: sudo bash /usr/local/ipanel/install/scripts/download-icons.sh
 
@@ -7,44 +7,41 @@ set -euo pipefail
 
 IPANEL_ROOT="${IPANEL_ROOT:-/usr/local/ipanel}"
 THEMES="$IPANEL_ROOT/web/iApp/Themes/Tabler"
-BASE="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@latest"
+NPM_META="https://registry.npmjs.org/@tabler/icons-webfont/latest"
 
 mkdir -p "$THEMES/css" "$THEMES/fonts"
+TMP=$(mktemp -d)
+trap 'rm -rf "$TMP"' EXIT
 
-dl() {
-    local url="$1" dest="$2"
-    if curl -fsSL --connect-timeout 15 --max-time 120 "$url" -o "$dest"; then
-        echo "  ✓  $(basename "$dest")"
-        return 0
-    fi
-    return 1
-}
+echo "→ Tabler Icons sürümü kontrol ediliyor..."
+PKG_JSON=$(curl -fsSL --connect-timeout 15 --max-time 30 "$NPM_META")
+VERSION=$(echo "$PKG_JSON" | python3 -c "import sys,json; print(json.load(sys.stdin)['version'])")
+TARBALL=$(echo "$PKG_JSON" | python3 -c "import sys,json; print(json.load(sys.stdin)['dist']['tarball'])")
+echo "  Sürüm: ${VERSION}"
 
 echo "→ Tabler Icons indiriliyor..."
+curl -fsSL --connect-timeout 15 --max-time 180 "$TARBALL" -o "$TMP/pkg.tgz"
+echo "  ✓  tarball indirildi"
 
-# CSS — önce root, yoksa dist/ dene
-if ! dl "${BASE}/tabler-icons.min.css" "$THEMES/css/tabler-icons.min.css"; then
-    dl "${BASE}/dist/tabler-icons.min.css" "$THEMES/css/tabler-icons.min.css" \
-        || { echo "HATA: tabler-icons.min.css indirilemedi." >&2; exit 1; }
-fi
+# CSS ve fontları tarball'dan çıkar
+tar -xzf "$TMP/pkg.tgz" -C "$TMP" \
+    "package/dist/tabler-icons.min.css" \
+    "package/dist/fonts/tabler-icons.woff2" \
+    "package/dist/fonts/tabler-icons.woff"
 
-# CSS'deki font yolları css/ altından ../fonts/ olarak düzelt
+cp "$TMP/package/dist/tabler-icons.min.css"          "$THEMES/css/tabler-icons.min.css"
+cp "$TMP/package/dist/fonts/tabler-icons.woff2"       "$THEMES/fonts/tabler-icons.woff2"
+cp "$TMP/package/dist/fonts/tabler-icons.woff"        "$THEMES/fonts/tabler-icons.woff"
+echo "  ✓  dosyalar kopyalandı"
+
+# CSS'deki ./fonts/ yolunu ../fonts/ olarak düzelt
+# (CSS css/ altında, fontlar fonts/ altında — dist/ içindeki ./fonts/ göreceli yol artık yanlış)
 sed -i \
-    -e "s|url('fonts/|url('../fonts/|g" \
-    -e 's|url("fonts/|url("../fonts/|g' \
-    -e "s|url(fonts/|url(../fonts/|g" \
+    -e 's|url("\.\/fonts/|url("../fonts/|g' \
+    -e "s|url('\./fonts/|url('../fonts/|g" \
+    -e 's|url(\./fonts/|url(../fonts/|g' \
     "$THEMES/css/tabler-icons.min.css"
-echo "  ✓  font yolları düzeltildi"
-
-# Font dosyaları
-if ! dl "${BASE}/fonts/tabler-icons.woff2" "$THEMES/fonts/tabler-icons.woff2"; then
-    dl "${BASE}/dist/fonts/tabler-icons.woff2" "$THEMES/fonts/tabler-icons.woff2" \
-        || echo "  !  tabler-icons.woff2 indirilemedi (opsiyonel)"
-fi
-if ! dl "${BASE}/fonts/tabler-icons.woff" "$THEMES/fonts/tabler-icons.woff"; then
-    dl "${BASE}/dist/fonts/tabler-icons.woff" "$THEMES/fonts/tabler-icons.woff" \
-        || echo "  !  tabler-icons.woff indirilemedi (opsiyonel)"
-fi
+echo "  ✓  font yolları düzeltildi (./fonts/ → ../fonts/)"
 
 # İzinler
 chown nginx:nginx \
@@ -64,4 +61,4 @@ if command -v restorecon >/dev/null 2>&1; then
 fi
 
 echo ""
-echo "Tabler Icons başarıyla indirildi."
+echo "Tabler Icons başarıyla indirildi (v${VERSION})."
