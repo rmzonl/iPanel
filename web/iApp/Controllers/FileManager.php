@@ -409,9 +409,14 @@ class FileManager extends Controller
         // Null byte temizle
         $path = str_replace("\0", '', $path);
 
-        // Gerçek mutlak yol
-        $real = realpath($path);
-        if (!$real) return $default;
+        // realpath() open_basedir dışına çıkan yollarda exception fırlatır;
+        // '..' segmentlerini manuel çöz
+        $parts = [];
+        foreach (explode('/', $path) as $part) {
+            if ($part === '' || $part === '.') continue;
+            if ($part === '..') { array_pop($parts); } else { $parts[] = $part; }
+        }
+        $real = '/' . implode('/', $parts);
 
         foreach (self::ALLOWED_ROOTS as $root) {
             if (str_starts_with($real, $root)) {
