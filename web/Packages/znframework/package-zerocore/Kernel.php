@@ -159,6 +159,10 @@ class Kernel
      */
     protected static function methodNotExists($page, $function)
     {
+        if( $function === null || $function === '' )
+        {
+            return true;
+        }
         return ! method_exists($page, $function) || ! (new ReflectionMethod($page, $function))->isPublic();
     }
 
