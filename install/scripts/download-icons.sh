@@ -7,22 +7,13 @@ set -euo pipefail
 
 IPANEL_ROOT="${IPANEL_ROOT:-/usr/local/ipanel}"
 THEMES="$IPANEL_ROOT/web/iApp/Themes/Tabler"
-BASE="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont"
+BASE="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@latest"
 
 mkdir -p "$THEMES/css" "$THEMES/fonts"
 
-# Mevcut en son sürümü bul
-echo "→ Tabler Icons sürümü kontrol ediliyor..."
-ICONS_VER=$(curl -sf --connect-timeout 10 "https://data.jsdelivr.com/v1/package/npm/@tabler/icons-webfont" \
-    | grep -oP '"tags":\{"latest":"[^"]+' | grep -oP '[0-9]+\.[0-9]+\.[0-9]+' | head -1 2>/dev/null \
-    || echo "3.30.0")
-echo "  Sürüm: ${ICONS_VER}"
-
-VER_BASE="${BASE}@${ICONS_VER}"
-
 dl() {
     local url="$1" dest="$2"
-    if curl -sf --connect-timeout 15 --max-time 90 "$url" -o "$dest" 2>/dev/null; then
+    if curl -fsSL --connect-timeout 15 --max-time 120 "$url" -o "$dest"; then
         echo "  ✓  $(basename "$dest")"
         return 0
     fi
@@ -32,26 +23,27 @@ dl() {
 echo "→ Tabler Icons indiriliyor..."
 
 # CSS — önce root, yoksa dist/ dene
-if ! dl "${VER_BASE}/tabler-icons.min.css" "$THEMES/css/tabler-icons.min.css"; then
-    dl "${VER_BASE}/dist/tabler-icons.min.css" "$THEMES/css/tabler-icons.min.css" \
+if ! dl "${BASE}/tabler-icons.min.css" "$THEMES/css/tabler-icons.min.css"; then
+    dl "${BASE}/dist/tabler-icons.min.css" "$THEMES/css/tabler-icons.min.css" \
         || { echo "HATA: tabler-icons.min.css indirilemedi." >&2; exit 1; }
 fi
 
-# CSS'deki font referansları css/ altından ../fonts/ şeklinde düzelt
-# (paket root'undan gelince "fonts/..." yazar, ama CSS css/ altında duruyor)
+# CSS'deki font yolları css/ altından ../fonts/ olarak düzelt
 sed -i \
     -e "s|url('fonts/|url('../fonts/|g" \
     -e 's|url("fonts/|url("../fonts/|g' \
     -e "s|url(fonts/|url(../fonts/|g" \
     "$THEMES/css/tabler-icons.min.css"
-echo "  ✓  font yolları düzeltildi (../fonts/)"
+echo "  ✓  font yolları düzeltildi"
 
-# Font dosyaları — önce root/fonts, yoksa dist/fonts
-if ! dl "${VER_BASE}/fonts/tabler-icons.woff2" "$THEMES/fonts/tabler-icons.woff2"; then
-    dl "${VER_BASE}/dist/fonts/tabler-icons.woff2" "$THEMES/fonts/tabler-icons.woff2" || true
+# Font dosyaları
+if ! dl "${BASE}/fonts/tabler-icons.woff2" "$THEMES/fonts/tabler-icons.woff2"; then
+    dl "${BASE}/dist/fonts/tabler-icons.woff2" "$THEMES/fonts/tabler-icons.woff2" \
+        || echo "  !  tabler-icons.woff2 indirilemedi (opsiyonel)"
 fi
-if ! dl "${VER_BASE}/fonts/tabler-icons.woff" "$THEMES/fonts/tabler-icons.woff"; then
-    dl "${VER_BASE}/dist/fonts/tabler-icons.woff" "$THEMES/fonts/tabler-icons.woff" || true
+if ! dl "${BASE}/fonts/tabler-icons.woff" "$THEMES/fonts/tabler-icons.woff"; then
+    dl "${BASE}/dist/fonts/tabler-icons.woff" "$THEMES/fonts/tabler-icons.woff" \
+        || echo "  !  tabler-icons.woff indirilemedi (opsiyonel)"
 fi
 
 # İzinler
@@ -65,10 +57,11 @@ chmod 644 \
     "$THEMES/fonts/tabler-icons.woff" 2>/dev/null || true
 
 if command -v restorecon >/dev/null 2>&1; then
-    restorecon -RF "$THEMES/css/tabler-icons.min.css" \
+    restorecon -RF \
+        "$THEMES/css/tabler-icons.min.css" \
         "$THEMES/fonts/tabler-icons.woff2" \
         "$THEMES/fonts/tabler-icons.woff" 2>/dev/null || true
 fi
 
 echo ""
-echo "Tabler Icons başarıyla indirildi (v${ICONS_VER})."
+echo "Tabler Icons başarıyla indirildi."
