@@ -435,8 +435,9 @@ class FileManager extends Controller
             if ($name === '.') continue;
 
             $full  = $path . '/' . $name;
-            $isDir = is_dir($full);
-            $stat  = @stat($full);
+            // '..' için is_dir()/stat() çağırma — /home/.. = / olur, open_basedir dışına çıkar
+            $isDir = ($name === '..') ? true : is_dir($full);
+            $stat  = ($name === '..') ? false : @stat($full);
             $mode  = $stat['mode'] ?? 0;
             $ext   = $isDir ? '' : strtolower(pathinfo($name, PATHINFO_EXTENSION));
             $size  = $isDir ? null : ($stat['size'] ?? 0);
