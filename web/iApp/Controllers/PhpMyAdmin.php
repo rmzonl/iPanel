@@ -8,6 +8,7 @@ use Session;
 use Redirect;
 use Project\Libraries\CsrfGuard;
 use Project\Libraries\AuditLogger;
+use Project\Libraries\AgentClient;
 
 /**
  * PHPMyAdmin yönetim sayfası — sadece admin erişebilir.
@@ -38,21 +39,15 @@ class PhpMyAdmin extends Controller
         if (!Http::isRequestMethod('post')) { Redirect::action('phpmyadmin/main'); return; }
         if (!CsrfGuard::verify()) { Session::insert('error', 'Geçersiz form isteği.'); Redirect::action('phpmyadmin/main'); return; }
 
-        $output = [];
-        $os     = $this->detectOs();
+        $pkg = $this->detectOs() === 'debian' ? 'phpmyadmin' : 'phpMyAdmin';
 
-        if ($os === 'debian') {
-            exec('DEBIAN_FRONTEND=noninteractive apt-get install -y phpmyadmin 2>&1', $output, $rc);
-        } else {
-            // RHEL/AlmaLinux: phpMyAdmin EPEL'den gelir
-            exec('dnf install -y phpMyAdmin 2>&1', $output, $rc);
-        }
-
-        if ($rc === 0) {
+        try {
+            $agent = new AgentClient();
+            $agent->call('package.install', ['package' => $pkg]);
             AuditLogger::log('phpmyadmin.install', 'system', null, 'PHPMyAdmin kuruldu');
             Session::insert('success', 'PHPMyAdmin başarıyla kuruldu.');
-        } else {
-            Session::insert('error', 'Kurulum hatası: ' . htmlspecialchars(implode("\n", array_slice($output, -5))));
+        } catch (\Throwable $e) {
+            Session::insert('error', 'Kurulum hatası: ' . htmlspecialchars($e->getMessage()));
         }
 
         Redirect::action('phpmyadmin/main');
@@ -64,20 +59,15 @@ class PhpMyAdmin extends Controller
         if (!Http::isRequestMethod('post')) { Redirect::action('phpmyadmin/main'); return; }
         if (!CsrfGuard::verify()) { Session::insert('error', 'Geçersiz form isteği.'); Redirect::action('phpmyadmin/main'); return; }
 
-        $output = [];
-        $os     = $this->detectOs();
+        $pkg = $this->detectOs() === 'debian' ? 'phpmyadmin' : 'phpMyAdmin';
 
-        if ($os === 'debian') {
-            exec('DEBIAN_FRONTEND=noninteractive apt-get remove -y phpmyadmin 2>&1', $output, $rc);
-        } else {
-            exec('dnf remove -y phpMyAdmin 2>&1', $output, $rc);
-        }
-
-        if ($rc === 0) {
+        try {
+            $agent = new AgentClient();
+            $agent->call('package.remove', ['package' => $pkg]);
             AuditLogger::log('phpmyadmin.remove', 'system', null, 'PHPMyAdmin kaldırıldı');
             Session::insert('success', 'PHPMyAdmin kaldırıldı.');
-        } else {
-            Session::insert('error', 'Kaldırma hatası: ' . htmlspecialchars(implode("\n", array_slice($output, -5))));
+        } catch (\Throwable $e) {
+            Session::insert('error', 'Kaldırma hatası: ' . htmlspecialchars($e->getMessage()));
         }
 
         Redirect::action('phpmyadmin/main');
