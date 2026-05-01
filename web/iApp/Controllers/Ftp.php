@@ -93,7 +93,7 @@ class Ftp extends Controller
         Acl::requireOwnership(Acl::ownsSiteResource('ftp_accounts', $id));
         $account = $this->model->getById($id);
         $this->model->delete($id);
-        AuditLogger::log('ftp.delete', 'ftp_account', $id, 'FTP hesabı silindi: ' . ($account->username ?? $id));
+        AuditLogger::log('ftp.delete', 'ftp_account', $id, 'FTP hesabı silindi: ' . ($account?->username ?? $id));
         Session::insert('success', 'FTP hesabı başarıyla silindi.');
         Redirect::action('ftp/main');
     }

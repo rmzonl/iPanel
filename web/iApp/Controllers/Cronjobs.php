@@ -87,7 +87,7 @@ class Cronjobs extends Controller
         Acl::requireOwnership(Acl::ownsSiteResource('cron_jobs', $id));
         $job = $this->model->getById($id);
         $this->model->delete($id);
-        AuditLogger::log('cronjobs.delete', 'cron_job', $id, 'Cron işi silindi: ' . ($job->title ?? $id));
+        AuditLogger::log('cronjobs.delete', 'cron_job', $id, 'Cron işi silindi: ' . ($job?->title ?? $id));
         Session::insert('success', 'Cron işi başarıyla silindi.');
         Redirect::action('cronjobs/main');
     }

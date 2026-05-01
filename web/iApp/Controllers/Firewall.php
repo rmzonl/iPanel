@@ -81,7 +81,7 @@ class Firewall extends Controller
     {
         $rule = $this->model->getById($id);
         $this->model->delete($id);
-        AuditLogger::log('firewall.delete', 'firewall_rule', $id, 'Güvenlik duvarı kuralı silindi: ' . ($rule->name ?? $id));
+        AuditLogger::log('firewall.delete', 'firewall_rule', $id, 'Güvenlik duvarı kuralı silindi: ' . ($rule?->name ?? $id));
         Session::insert('success', 'Kural başarıyla silindi.');
         Redirect::action('firewall/main');
     }

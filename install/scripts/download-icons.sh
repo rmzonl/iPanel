@@ -35,8 +35,16 @@ echo "→ Tabler Icons indiriliyor..."
 if ! dl "${VER_BASE}/tabler-icons.min.css" "$THEMES/css/tabler-icons.min.css"; then
     dl "${VER_BASE}/dist/tabler-icons.min.css" "$THEMES/css/tabler-icons.min.css" \
         || { echo "HATA: tabler-icons.min.css indirilemedi." >&2; exit 1; }
-    # dist/ içinden geldi; font yolları ../fonts/ → CSS doğru olur
 fi
+
+# CSS'deki font referansları css/ altından ../fonts/ şeklinde düzelt
+# (paket root'undan gelince "fonts/..." yazar, ama CSS css/ altında duruyor)
+sed -i \
+    -e "s|url('fonts/|url('../fonts/|g" \
+    -e 's|url("fonts/|url("../fonts/|g' \
+    -e "s|url(fonts/|url(../fonts/|g" \
+    "$THEMES/css/tabler-icons.min.css"
+echo "  ✓  font yolları düzeltildi (../fonts/)"
 
 # Font dosyaları — önce root/fonts, yoksa dist/fonts
 if ! dl "${VER_BASE}/fonts/tabler-icons.woff2" "$THEMES/fonts/tabler-icons.woff2"; then

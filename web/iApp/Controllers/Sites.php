@@ -136,7 +136,7 @@ class Sites extends Controller
         Acl::requireOwnership(Acl::ownsSite($id));
         $site = $this->model->getById($id);
         $this->model->delete($id);
-        AuditLogger::log('sites.delete', 'site', $id, "Site silindi: " . ($site->domain ?? $id));
+        AuditLogger::log('sites.delete', 'site', $id, "Site silindi: " . ($site?->domain ?? $id));
         Session::insert('success', 'Site başarıyla silindi.');
         Redirect::action('sites/main');
     }

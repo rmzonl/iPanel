@@ -134,7 +134,7 @@ class Clients extends Controller
         Acl::requireOwnership(Acl::ownsClient($id));
         $client = $this->model->getById($id);
         $this->model->delete($id);
-        AuditLogger::log('clients.delete', 'client', $id, "Müşteri silindi: " . ($client->email ?? $id));
+        AuditLogger::log('clients.delete', 'client', $id, "Müşteri silindi: " . ($client?->email ?? $id));
         Session::insert('success', 'Müşteri başarıyla silindi.');
         Redirect::action('clients/main');
     }

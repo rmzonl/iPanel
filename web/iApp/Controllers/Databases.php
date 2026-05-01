@@ -97,7 +97,7 @@ class Databases extends Controller
         Acl::requireOwnership(Acl::ownsSiteResource('site_databases', $id));
         $db = $this->model->getById($id);
         $this->model->delete($id);
-        AuditLogger::log('databases.delete', 'database', $id, 'Veritabanı silindi: ' . ($db->db_name ?? $id));
+        AuditLogger::log('databases.delete', 'database', $id, 'Veritabanı silindi: ' . ($db?->db_name ?? $id));
         Session::insert('success', 'Veritabanı başarıyla silindi.');
         Redirect::action('databases/main');
     }

@@ -91,7 +91,7 @@ class Domains extends Controller
         Acl::requireOwnership(Acl::ownsDomain($id));
         $domain = $this->model->getById($id);
         $this->model->delete($id);
-        AuditLogger::log('domains.delete', 'domain', $id, 'Domain silindi: ' . ($domain->name ?? $id));
+        AuditLogger::log('domains.delete', 'domain', $id, 'Domain silindi: ' . ($domain?->name ?? $id));
         Session::insert('success', 'Domain başarıyla silindi.');
         Redirect::action('domains/main');
     }
