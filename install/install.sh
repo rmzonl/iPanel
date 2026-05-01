@@ -239,6 +239,12 @@ create_users() {
 
     usermod -aG ipanel "$WEB_USER" 2>/dev/null || true
     ok "$WEB_USER → ipanel grubuna eklendi"
+
+    # RHEL/AlmaLinux: PHP-FPM default pool'u apache kullanıcısıyla çalışır
+    if [[ "$OS_ID" != "ubuntu" && "$OS_ID" != "debian" ]] && getent passwd apache >/dev/null 2>&1; then
+        usermod -aG ipanel apache 2>/dev/null || true
+        ok "apache → ipanel grubuna eklendi (PHP-FPM pool erişimi)"
+    fi
 }
 
 ###############################################################################

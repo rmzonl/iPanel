@@ -1,19 +1,27 @@
-module ipanel_agent 1.0;
+module ipanel_agent 1.1;
 
 ########################################
 # iPanel Agent Unix Socket — SELinux Policy
 #
-# PHP-FPM (httpd_t) iPanel agent Unix socket'e
-# (/run/ipanel/agent.sock, tip: httpd_var_run_t) bağlanabilsin.
+# PHP-FPM (httpd_t) → agent Unix socket bağlantısı için iki izin gerekir:
 #
-# Not: connectto sock_file sınıfında geçerli değil; unix_stream_socket
-# bağlantısı için write izni yeterlidir RHEL 9'da.
+# 1. sock_file { read write open }  — socket dosyasına erişim
+#    (socket dosyası httpd_var_run_t konteksinde: /run/ipanel/agent.sock)
+#
+# 2. unix_stream_socket { connectto } — agent sürecine bağlanma
+#    (agent.php root'ta çalışır, unconfined_service_t konteksine sahip)
+#
+# AVC: denied { connectto } scontext=httpd_t tcontext=unconfined_service_t
+#      tclass=unix_stream_socket
 ########################################
 
 require {
     type httpd_t;
     type httpd_var_run_t;
+    type unconfined_service_t;
     class sock_file { read write open };
+    class unix_stream_socket { connectto };
 }
 
 allow httpd_t httpd_var_run_t:sock_file { read write open };
+allow httpd_t unconfined_service_t:unix_stream_socket connectto;
