@@ -42,6 +42,11 @@ class Initialize extends Controller
         $isJson = in_array($controller, self::JSON_CONTROLLERS)
                || in_array($method, self::JSON_METHODS[$controller] ?? []);
         if (!$isJson) {
+            Masterpage::attributes([
+                'html' => [
+                    'data-bs-theme' => 'dark'
+                ]
+            ]);
             Masterpage::headPage('layouts/head')->bodyPage('layouts/body');
         }
 
