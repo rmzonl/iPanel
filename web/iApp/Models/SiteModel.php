@@ -51,7 +51,7 @@ class SiteModel extends Model
 
     public function create($data): int
     {
-        DB::table('sites')->insert($data);
+        DB::insert('sites', $data);
         return (int) DB::pdo()->lastInsertId();
     }
 

@@ -59,7 +59,7 @@ class SettingsModel extends Model
             }
             return $query->update('settings', ['setting_value' => $value]);
         } else {
-            return DB::table('settings')->insert($data);
+            return DB::insert('settings', $data);
         }
     }
 

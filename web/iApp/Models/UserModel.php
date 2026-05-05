@@ -25,7 +25,7 @@ class UserModel extends Model
 
     public function create($data)
     {
-        return DB::table('users')->insert($data);
+        return DB::insert('users', $data);
     }
 
     public function update($id, $data)
