@@ -5,9 +5,9 @@ use DB;
 
 class FirewallModel extends Model
 {
-    public function getAll()
+    public function getAll(): array
     {
-        return DB::table('firewall_rules')->orderBy('priority', 'asc')->get();
+        return DB::table('firewall_rules')->orderBy('priority', 'asc')->get()->result() ?: [];
     }
 
     public function getById($id)

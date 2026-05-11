@@ -16,6 +16,7 @@ class Acl
         'dashboard' => ['*' => 'dashboard.view'],
         'clients'   => [
             'main'   => 'clients.view',
+            'rows'   => 'clients.view',
             'create' => 'clients.create',
             'store'  => 'clients.create',
             'edit'   => 'clients.edit',
@@ -24,6 +25,7 @@ class Acl
         ],
         'sites' => [
             'main'   => 'sites.view',
+            'rows'   => 'sites.view',
             'create' => 'sites.create',
             'store'  => 'sites.create',
             'edit'   => 'sites.edit',
@@ -32,35 +34,41 @@ class Acl
         ],
         'domains' => [
             'main'   => 'domains.view',
+            'rows'   => 'domains.view',
             'create' => 'domains.create',
             'store'  => 'domains.create',
             'delete' => 'domains.delete',
         ],
         'databases' => [
             'main'   => 'databases.view',
+            'rows'   => 'databases.view',
             'create' => 'databases.create',
             'store'  => 'databases.create',
             'delete' => 'databases.delete',
         ],
         'email' => [
             'main'   => 'email.view',
+            'rows'   => 'email.view',
             'create' => 'email.create',
             'store'  => 'email.create',
             'delete' => 'email.delete',
         ],
         'ftp' => [
             'main'   => 'ftp.view',
+            'rows'   => 'ftp.view',
             'create' => 'ftp.create',
             'store'  => 'ftp.create',
             'delete' => 'ftp.delete',
         ],
         'ssl' => [
             'main'   => 'ssl.view',
+            'rows'   => 'ssl.view',
             'create' => 'ssl.create',
             'store'  => 'ssl.create',
         ],
         'dns' => [
             'main'         => 'dns.view',
+            'rows'         => 'dns.view',
             'records'      => 'dns.view',
             'createRecord' => 'dns.create',
             'storeRecord'  => 'dns.create',
@@ -69,22 +77,26 @@ class Acl
         ],
         'cronjobs' => [
             'main'   => 'cronjobs.view',
+            'rows'   => 'cronjobs.view',
             'create' => 'cronjobs.create',
             'store'  => 'cronjobs.create',
             'delete' => 'cronjobs.delete',
         ],
         'backups' => [
             'main'   => 'backups.view',
+            'rows'   => 'backups.view',
             'create' => 'backups.create',
         ],
         'ipaddresses' => [
             'main'   => 'ipaddresses.view',
+            'rows'   => 'ipaddresses.view',
             'create' => 'ipaddresses.create',
             'store'  => 'ipaddresses.create',
             'delete' => 'ipaddresses.delete',
         ],
         'firewall' => [
             'main'   => 'firewall.view',
+            'rows'   => 'firewall.view',
             'create' => 'firewall.create',
             'store'  => 'firewall.create',
             'delete' => 'firewall.delete',
@@ -100,6 +112,7 @@ class Acl
         ],
         'apitokens' => [
             'main'   => 'apitokens.view',
+            'rows'   => 'apitokens.view',
             'create' => 'apitokens.manage',
             'revoke' => 'apitokens.manage',
         ],

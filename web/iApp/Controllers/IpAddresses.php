@@ -25,11 +25,18 @@ class IpAddresses extends Controller
     public function main(): void
     {
         View::pageTitle('IP Adresleri');
-        View::ips($this->model->getAll());
         View::success(Session::select('success'));
         View::error(Session::select('error'));
         Session::delete('success');
         Session::delete('error');
+    }
+
+    public function rows(): void
+    {
+        $data = $this->model->getAll();
+        header('Content-Type: application/json; charset=utf-8');
+        echo json_encode(['data' => $data]);
+        exit;
     }
 
     public function create(): void

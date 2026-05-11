@@ -23,17 +23,22 @@ class Clients extends Controller
 
     public function main(): void
     {
-        $user    = Acl::user();
-        $clients = ($user['role'] === 'admin')
-            ? $this->model->getAll()
-            : $this->model->getByReseller($user['id']);
-
         View::pageTitle('Müşteriler');
-        View::clients($clients);
         View::success(Session::select('success'));
         View::error(Session::select('error'));
         Session::delete('success');
         Session::delete('error');
+    }
+
+    public function rows(): void
+    {
+        $user = Acl::user();
+        $data = ($user['role'] === 'admin')
+            ? $this->model->getAll()
+            : $this->model->getByReseller($user['id']);
+        header('Content-Type: application/json; charset=utf-8');
+        echo json_encode(['data' => $data]);
+        exit;
     }
 
     public function create(): void

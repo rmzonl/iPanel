@@ -37,60 +37,13 @@
                 <th class="w-1"></th>
               </tr>
             </thead>
-            <tbody id="clientTable">
-              @forelse($clients as $client)
-                <tr>
-                  <td class="text-muted">{{ $client->id }}</td>
-                  <td>
-                    <div class="d-flex align-items-center gap-2">
-                      <span class="avatar avatar-sm bg-primary text-white">
-                        {[ echo strtoupper(substr($client->first_name, 0, 1) . substr($client->last_name, 0, 1)); ]}
-                      </span>
-                      {{ $client->first_name }} {{ $client->last_name }}
-                    </div>
-                  </td>
-                  <td class="text-muted">{{ $client->company_name ?: '—' }}</td>
-                  <td>{{ $client->email }}</td>
-                  <td class="text-muted">{{ $client->phone ?: '—' }}</td>
-                  <td>
-                    @if($client->status === 'active')
-                      <span class="badge bg-success-lt">Aktif</span>
-                    @elseif($client->status === 'suspended')
-                      <span class="badge bg-warning-lt">Askıya Alındı</span>
-                    @else
-                      <span class="badge bg-danger-lt">Sonlandırıldı</span>
-                    @endif
-                  </td>
-                  <td class="text-muted">{[ echo date('d.m.Y', strtotime($client->created_at)); ]}</td>
-                  <td>
-                    <div class="btn-group btn-group-sm">
-                      <a href="{{ URL::base('sites/main?client_id=' . $client->id) }}" class="btn btn-outline-secondary" title="Siteler">
-                        <i class="ti ti-world"></i>
-                      </a>
-                      <a href="{{ URL::base('clients/edit/' . $client->id) }}" class="btn btn-outline-primary" title="Düzenle">
-                        <i class="ti ti-edit"></i>
-                      </a>
-                      <a href="{{ URL::base('clients/delete/' . $client->id) }}" class="btn btn-outline-danger" title="Sil"
-                         onclick="return confirm('Bu müşteriyi silmek istediğinizden emin misiniz?')">
-                        <i class="ti ti-trash"></i>
-                      </a>
-                    </div>
-                  </td>
-                </tr>
-              @empty
-                <tr>
-                  <td colspan="8" class="text-center py-5">
-                    <div class="empty">
-                      <div class="empty-icon"><i class="ti ti-users" style="font-size:3rem;color:var(--tblr-muted)"></i></div>
-                      <p class="empty-title">Henüz müşteri yok</p>
-                      <p class="empty-subtitle text-muted">İlk müşterinizi oluşturmak için butona tıklayın.</p>
-                      <a href="{{ URL::base('clients/create') }}" class="btn btn-primary mt-3">
-                        <i class="ti ti-plus me-1"></i> Yeni Müşteri Ekle
-                      </a>
-                    </div>
-                  </td>
-                </tr>
-              @endforelse
+            <tbody id="tableBody">
+              <tr>
+                <td colspan="8" class="text-center py-4">
+                  <div class="spinner-border text-primary spinner-border-sm" role="status"></div>
+                  <span class="ms-2 text-muted">Yükleniyor...</span>
+                </td>
+              </tr>
             </tbody>
           </table>
         </div>
@@ -100,10 +53,73 @@
 </div>
 
 <script>
-document.getElementById('searchInput').addEventListener('keyup', function() {
-  var val = this.value.toLowerCase();
-  document.querySelectorAll('#clientTable tr').forEach(function(row) {
-    row.style.display = row.textContent.toLowerCase().includes(val) ? '' : 'none';
-  });
-});
+(function() {
+  var base = '{{ URL::base("") }}';
+  var tbody = document.getElementById('tableBody');
+
+  fetch(base + 'clients/rows', {headers:{'X-Requested-With':'XMLHttpRequest'}})
+    .then(function(r){ return r.json(); })
+    .then(function(json){
+      var rows = json.data || [];
+      if (!rows.length) { tbody.innerHTML = emptyHtml(); return; }
+      tbody.innerHTML = rows.map(renderRow).join('');
+      initSearch();
+    })
+    .catch(function(){ tbody.innerHTML = errorHtml(); });
+
+  function renderRow(r) {
+    var initials = (r.first_name||'').charAt(0).toUpperCase() + (r.last_name||'').charAt(0).toUpperCase();
+    var statusBadge = r.status === 'active'
+      ? '<span class="badge bg-success-lt">Aktif</span>'
+      : (r.status === 'suspended'
+        ? '<span class="badge bg-warning-lt">Askıya Alındı</span>'
+        : '<span class="badge bg-danger-lt">Sonlandırıldı</span>');
+    var date = r.created_at ? r.created_at.substring(0,10).split('-').reverse().join('.') : '—';
+    var search = [r.id, r.first_name, r.last_name, r.company_name, r.email, r.phone].join(' ').toLowerCase();
+    return '<tr data-search="' + esc(search) + '">'
+      + '<td class="text-muted">' + esc(r.id) + '</td>'
+      + '<td><div class="d-flex align-items-center gap-2">'
+      + '<span class="avatar avatar-sm bg-primary text-white">' + esc(initials) + '</span>'
+      + esc((r.first_name||'') + ' ' + (r.last_name||''))
+      + '</div></td>'
+      + '<td class="text-muted">' + esc(r.company_name || '—') + '</td>'
+      + '<td>' + esc(r.email||'—') + '</td>'
+      + '<td class="text-muted">' + esc(r.phone || '—') + '</td>'
+      + '<td>' + statusBadge + '</td>'
+      + '<td class="text-muted">' + esc(date) + '</td>'
+      + '<td><div class="btn-group btn-group-sm">'
+      + '<a href="' + base + 'sites/main?client_id=' + r.id + '" class="btn btn-outline-secondary" title="Siteler"><i class="ti ti-world"></i></a>'
+      + '<a href="' + base + 'clients/edit/' + r.id + '" class="btn btn-outline-primary" title="Düzenle"><i class="ti ti-edit"></i></a>'
+      + '<a href="' + base + 'clients/delete/' + r.id + '" class="btn btn-outline-danger" title="Sil"'
+      + ' onclick="return confirm(\'Bu müşteriyi silmek istediğinizden emin misiniz?\')"><i class="ti ti-trash"></i></a>'
+      + '</div></td></tr>';
+  }
+
+  function emptyHtml() {
+    return '<tr><td colspan="8" class="text-center py-5">'
+      + '<div class="empty"><div class="empty-icon"><i class="ti ti-users" style="font-size:3rem;color:var(--tblr-muted)"></i></div>'
+      + '<p class="empty-title">Henüz müşteri yok</p>'
+      + '<p class="empty-subtitle text-muted">İlk müşterinizi oluşturmak için butona tıklayın.</p>'
+      + '<a href="' + base + 'clients/create" class="btn btn-primary mt-3"><i class="ti ti-plus me-1"></i> Yeni Müşteri Ekle</a>'
+      + '</div></td></tr>';
+  }
+
+  function errorHtml() {
+    return '<tr><td colspan="8" class="text-center text-danger py-4"><i class="ti ti-alert-circle me-2"></i>Liste yüklenemedi</td></tr>';
+  }
+
+  function esc(v) {
+    return String(v == null ? '' : v)
+      .replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+  }
+
+  function initSearch() {
+    document.getElementById('searchInput').addEventListener('keyup', function() {
+      var val = this.value.toLowerCase();
+      tbody.querySelectorAll('tr[data-search]').forEach(function(row) {
+        row.style.display = row.dataset.search.includes(val) ? '' : 'none';
+      });
+    });
+  }
+})();
 </script>

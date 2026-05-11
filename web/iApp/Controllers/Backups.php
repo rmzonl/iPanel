@@ -23,11 +23,7 @@ class Backups extends Controller
 
     public function main(): void
     {
-        $user    = Acl::user();
-        $backups = ($user['role'] === 'admin')
-            ? $this->model->getAll()
-            : $this->model->getByReseller($user['id']);
-
+        $user        = Acl::user();
         $siteModel   = new \Project\Models\SiteModel();
         $clientModel = new \Project\Models\ClientModel();
 
@@ -35,13 +31,23 @@ class Backups extends Controller
         $clients = ($user['role'] === 'admin') ? $clientModel->getAll() : $clientModel->getByReseller($user['id']);
 
         View::pageTitle('Yedeklemeler');
-        View::backups($backups);
         View::sites($sites);
         View::clients($clients);
         View::success(Session::select('success'));
         View::error(Session::select('error'));
         Session::delete('success');
         Session::delete('error');
+    }
+
+    public function rows(): void
+    {
+        $user = Acl::user();
+        $data = ($user['role'] === 'admin')
+            ? $this->model->getAll()
+            : $this->model->getByReseller($user['id']);
+        header('Content-Type: application/json; charset=utf-8');
+        echo json_encode(['data' => $data]);
+        exit;
     }
 
     public function create(): void

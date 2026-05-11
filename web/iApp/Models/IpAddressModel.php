@@ -5,13 +5,13 @@ use DB;
 
 class IpAddressModel extends Model
 {
-    public function getAll()
+    public function getAll(): array
     {
         return DB::table('ip_addresses ip')
-            ->select('ip.*, c.first_name, c.last_name, c.company_name')
+            ->select("ip.*, COALESCE(c.company_name, CONCAT(c.first_name, ' ', c.last_name)) AS client_name")
             ->join('clients c', 'ip.client_id = c.id', 'LEFT')
             ->orderBy('ip.id', 'desc')
-            ->get();
+            ->get()->result() ?: [];
     }
 
     public function getById($id)
@@ -19,17 +19,17 @@ class IpAddressModel extends Model
         return DB::table('ip_addresses')->where('id', $id)->get()->row();
     }
 
-    public function getAvailable()
+    public function getAvailable(): array
     {
         return DB::table('ip_addresses')
             ->where('status', 'active')
             ->where('client_id', NULL)
-            ->get();
+            ->get()->result() ?: [];
     }
 
-    public function getAllActive()
+    public function getAllActive(): array
     {
-        return DB::table('ip_addresses')->where('status', 'active')->get();
+        return DB::table('ip_addresses')->where('status', 'active')->get()->result() ?: [];
     }
 
     public function create($data)

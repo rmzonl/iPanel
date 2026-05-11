@@ -5,9 +5,9 @@ use DB;
 
 class ClientModel extends Model
 {
-    public function getAll()
+    public function getAll(): array
     {
-        return DB::table('clients')->orderBy('id', 'desc')->get();
+        return DB::table('clients')->orderBy('id', 'desc')->get()->result() ?: [];
     }
 
     public function getById($id)
@@ -15,22 +15,22 @@ class ClientModel extends Model
         return DB::table('clients')->where('id', $id)->get()->row();
     }
 
-    public function count()
+    public function count(): int
     {
         return DB::table('clients')->get()->totalRows();
     }
 
-    public function getRecent($limit = 5)
+    public function getRecent($limit = 5): array
     {
-        return DB::table('clients')->orderBy('id', 'desc')->limit(0, $limit)->get();
+        return DB::table('clients')->orderBy('id', 'desc')->limit(0, $limit)->get()->result() ?: [];
     }
 
-    public function getByReseller(int $resellerId)
+    public function getByReseller(int $resellerId): array
     {
         return DB::table('clients')
             ->where('reseller_id', $resellerId)
             ->orderBy('id', 'desc')
-            ->get();
+            ->get()->result() ?: [];
     }
 
     public function create($data): int

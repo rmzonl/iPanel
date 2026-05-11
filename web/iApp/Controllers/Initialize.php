@@ -19,6 +19,7 @@ class Initialize extends Controller
     const exclude = ['Auth', 'Errors', 'Api'];
 
     private const JSON_CONTROLLERS = ['Stats', 'Jobs'];
+    private const JSON_METHODS     = ['rows'];
 
     private const SETTINGS_RESELLER_ALLOWED = ['twoFactor', 'setup2fa', 'enable2fa', 'disable2fa', 'backupCodes'];
 
@@ -33,7 +34,7 @@ class Initialize extends Controller
         $method     = CURRENT_CFUNCTION  ?? 'main';
 
         if (empty($user)) {
-            if (in_array($controller, self::JSON_CONTROLLERS)) {
+            if (in_array($controller, self::JSON_CONTROLLERS) || in_array($method, self::JSON_METHODS)) {
                 Http::response(401);
                 header('Content-Type: application/json');
                 echo Json::encode(['success' => false, 'message' => 'Oturum açılmamış.']);

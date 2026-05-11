@@ -23,15 +23,20 @@ class ApiTokens extends Controller
 
     public function main(): void
     {
-        $user   = Acl::user();
-        $tokens = $this->model->getByUser($user['id']);
-
         View::pageTitle('API Token\'ları');
-        View::tokens($tokens ? $tokens->result() : []);
         View::success(Session::select('success'));
         View::error(Session::select('error'));
         Session::delete('success');
         Session::delete('error');
+    }
+
+    public function rows(): void
+    {
+        $user = Acl::user();
+        $data = $this->model->getByUser($user['id']);
+        header('Content-Type: application/json; charset=utf-8');
+        echo json_encode(['data' => $data]);
+        exit;
     }
 
     public function create(): void

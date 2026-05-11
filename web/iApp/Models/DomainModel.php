@@ -5,14 +5,14 @@ use DB;
 
 class DomainModel extends Model
 {
-    public function getAll()
+    public function getAll(): array
     {
         return DB::table('domains d')
             ->select('d.*, s.domain as site_domain, c.first_name, c.last_name')
             ->join('sites s', 'd.site_id = s.id')
             ->join('clients c', 'd.client_id = c.id')
             ->orderBy('d.id', 'desc')
-            ->get();
+            ->get()->result() ?: [];
     }
 
     public function getById($id)
@@ -20,17 +20,17 @@ class DomainModel extends Model
         return DB::table('domains')->where('id', $id)->get()->row();
     }
 
-    public function getBySiteId($siteId)
+    public function getBySiteId($siteId): array
     {
-        return DB::table('domains')->where('site_id', $siteId)->get();
+        return DB::table('domains')->where('site_id', $siteId)->get()->result() ?: [];
     }
 
-    public function count()
+    public function count(): int
     {
         return DB::table('domains')->get()->totalRows();
     }
 
-    public function getByReseller(int $resellerId)
+    public function getByReseller(int $resellerId): array
     {
         return DB::table('domains d')
             ->select('d.*, s.domain as site_domain, c.first_name, c.last_name')
@@ -38,7 +38,7 @@ class DomainModel extends Model
             ->join('clients c', 'd.client_id = c.id')
             ->where('c.reseller_id', $resellerId)
             ->orderBy('d.id', 'desc')
-            ->get();
+            ->get()->result() ?: [];
     }
 
     public function create($data): int

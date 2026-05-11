@@ -26,7 +26,6 @@
       @endif
 
       {[
-        // Yeni oluşturulan token'ı session'dan al
         $newToken = Session::select('new_token');
         if ($newToken) { Session::delete('new_token'); }
       ]}
@@ -67,39 +66,13 @@
                 <th></th>
               </tr>
             </thead>
-            <tbody>
-              @forelse($tokens as $token)
-                <tr>
-                  <td><strong>{{ $token->name }}</strong></td>
-                  <td class="text-muted">{{ $token->created_at }}</td>
-                  <td class="text-muted">{{ $token->last_used ?? 'Henüz kullanılmadı' }}</td>
-                  <td class="text-muted">{{ $token->expires_at ?? 'Süresiz' }}</td>
-                  <td>
-                    @if($token->status === 'active')
-                      <span class="badge bg-success">Aktif</span>
-                    @else
-                      <span class="badge bg-danger">İptal Edildi</span>
-                    @endif
-                  </td>
-                  <td>
-                    @if($token->status === 'active')
-                      <form method="POST" action="{{ URL::base('apitokens/revoke') }}" class="d-inline">
-                        {[ echo $csrfField ?? ""; ]}
-                        <input type="hidden" name="token_id" value="{{ $token->id }}">
-                        <button type="submit" class="btn btn-sm btn-danger" onclick="return confirm('Bu token iptal edilsin mi?')">
-                          <i class="ti ti-ban"></i> İptal
-                        </button>
-                      </form>
-                    @endif
-                  </td>
-                </tr>
-              @empty
-                <tr>
-                  <td colspan="6" class="text-center text-muted py-4">
-                    <i class="ti ti-api me-2"></i>Henüz API token yok.
-                  </td>
-                </tr>
-              @endforelse
+            <tbody id="tableBody">
+              <tr>
+                <td colspan="6" class="text-center py-4">
+                  <div class="spinner-border text-primary spinner-border-sm" role="status"></div>
+                  <span class="ms-2 text-muted">Yükleniyor...</span>
+                </td>
+              </tr>
             </tbody>
           </table>
         </div>
@@ -141,8 +114,59 @@
 </div>
 
 <script>
+(function() {
+  var base = '{{ URL::base("") }}';
+  var csrf = '{{ $csrfToken ?? "" }}';
+  var tbody = document.getElementById('tableBody');
+
+  fetch(base + 'apitokens/rows', {headers:{'X-Requested-With':'XMLHttpRequest'}})
+    .then(function(r){ return r.json(); })
+    .then(function(json){
+      var rows = json.data || [];
+      if (!rows.length) { tbody.innerHTML = emptyHtml(); return; }
+      tbody.innerHTML = rows.map(renderRow).join('');
+    })
+    .catch(function(){ tbody.innerHTML = errorHtml(); });
+
+  function renderRow(r) {
+    var status = r.status === 'active'
+      ? '<span class="badge bg-success">Aktif</span>'
+      : '<span class="badge bg-danger">İptal Edildi</span>';
+    var revokeBtn = r.status === 'active'
+      ? '<form method="POST" action="' + base + 'apitokens/revoke" class="d-inline">'
+        + '<input type="hidden" name="_csrf" value="' + esc(csrf) + '">'
+        + '<input type="hidden" name="token_id" value="' + r.id + '">'
+        + '<button type="submit" class="btn btn-sm btn-danger" onclick="return confirm(\'Bu token iptal edilsin mi?\')">'
+        + '<i class="ti ti-ban"></i> İptal</button></form>'
+      : '';
+    return '<tr>'
+      + '<td><strong>' + esc(r.name) + '</strong></td>'
+      + '<td class="text-muted">' + esc(r.created_at || '—') + '</td>'
+      + '<td class="text-muted">' + esc(r.last_used || 'Henüz kullanılmadı') + '</td>'
+      + '<td class="text-muted">' + esc(r.expires_at || 'Süresiz') + '</td>'
+      + '<td>' + status + '</td>'
+      + '<td>' + revokeBtn + '</td>'
+      + '</tr>';
+  }
+
+  function emptyHtml() {
+    return '<tr><td colspan="6" class="text-center text-muted py-4">'
+      + '<i class="ti ti-api me-2"></i>Henüz API token yok.</td></tr>';
+  }
+
+  function errorHtml() {
+    return '<tr><td colspan="6" class="text-center text-danger py-4"><i class="ti ti-alert-circle me-2"></i>Liste yüklenemedi</td></tr>';
+  }
+
+  function esc(v) {
+    return String(v == null ? '' : v)
+      .replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+  }
+})();
+
 function copyToken() {
   var input = document.getElementById('newTokenInput');
+  if (!input) return;
   input.select();
   navigator.clipboard.writeText(input.value).then(function() {
     alert('Token kopyalandı!');

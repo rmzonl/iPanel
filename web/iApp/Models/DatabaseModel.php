@@ -5,13 +5,13 @@ use DB;
 
 class DatabaseModel extends Model
 {
-    public function getAll()
+    public function getAll(): array
     {
         return DB::table('site_databases sd')
             ->select('sd.*, s.domain as site_domain')
-            ->join('sites s', 'sd.site_id = s.id')
+            ->join('sites s', 'sd.site_id = s.id', 'LEFT')
             ->orderBy('sd.id', 'desc')
-            ->get();
+            ->get()->result() ?: [];
     }
 
     public function getById($id)
@@ -19,20 +19,20 @@ class DatabaseModel extends Model
         return DB::table('site_databases')->where('id', $id)->get()->row();
     }
 
-    public function getBySiteId($siteId)
+    public function getBySiteId($siteId): array
     {
-        return DB::table('site_databases')->where('site_id', $siteId)->get();
+        return DB::table('site_databases')->where('site_id', $siteId)->get()->result() ?: [];
     }
 
-    public function getByReseller(int $resellerId)
+    public function getByReseller(int $resellerId): array
     {
         return DB::table('site_databases sd')
             ->select('sd.*, s.domain as site_domain')
-            ->join('sites s',   'sd.site_id = s.id')
+            ->join('sites s',   'sd.site_id = s.id', 'LEFT')
             ->join('clients c', 's.client_id = c.id')
             ->where('c.reseller_id', $resellerId)
             ->orderBy('sd.id', 'desc')
-            ->get();
+            ->get()->result() ?: [];
     }
 
     public function create($data): int
