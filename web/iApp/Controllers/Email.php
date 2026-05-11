@@ -21,22 +21,27 @@ class Email extends Controller
         $this->model = new \Project\Models\EmailModel();
     }
 
-    public function main()
+    public function main(): void
     {
-        $user   = Acl::user();
-        $emails = ($user['role'] === 'admin')
-            ? $this->model->getAll()
-            : $this->model->getByReseller($user['id']);
-
         View::pageTitle('E-posta Hesapları');
-        View::emails($emails);
         View::success(Session::select('success'));
         View::error(Session::select('error'));
         Session::delete('success');
         Session::delete('error');
     }
 
-    public function create()
+    public function rows(): void
+    {
+        $user = Acl::user();
+        $data = ($user['role'] === 'admin')
+            ? $this->model->getAll()
+            : $this->model->getByReseller($user['id']);
+        header('Content-Type: application/json; charset=utf-8');
+        echo json_encode(['data' => $data]);
+        exit;
+    }
+
+    public function create(): void
     {
         $user      = Acl::user();
         $siteModel = new \Project\Models\SiteModel();
@@ -46,17 +51,17 @@ class Email extends Controller
         View::sites($sites);
     }
 
-    public function store()
+    public function store(): void
     {
         if (!Http::isRequestMethod('post')) { Redirect::action('email/main'); return; }
         if (!CsrfGuard::verify()) { Session::insert('error', 'Geçersiz form isteği.'); Redirect::action('email/main'); return; }
 
-        $siteId = (int) Post::site_id();
+        $siteId = (int) Post::get('site_id');
         Acl::requireOwnership(Acl::ownsSite($siteId));
 
-        $username    = trim((string) Post::username());
-        $domain      = trim((string) Post::domain());
-        $rawPassword = (string) Post::password();
+        $username    = trim((string) Post::get('username'));
+        $domain      = trim((string) Post::get('domain'));
+        $rawPassword = (string) Post::get('password');
 
         $v = InputValidator::from(['username' => $username, 'domain' => $domain, 'site_id' => $siteId])
             ->required('site_id', 'Site')
@@ -82,8 +87,8 @@ class Email extends Controller
             'username' => htmlspecialchars($username, ENT_QUOTES, 'UTF-8'),
             'email'    => $emailAddress,
             'password' => password_hash($rawPassword, PASSWORD_BCRYPT),
-            'quota'    => (int) (Post::quota() ?: 1024),
-            'status'   => Post::status() === 'suspended' ? 'suspended' : 'active',
+            'quota'    => (int) (Post::get('quota') ?: 1024),
+            'status'   => Post::get('status') === 'suspended' ? 'suspended' : 'active',
         ]);
 
         AuditLogger::log('email.create', 'email_account', $id, "E-posta hesabı oluşturuldu: $emailAddress");
@@ -91,7 +96,7 @@ class Email extends Controller
         Redirect::action('email/main');
     }
 
-    public function delete(int $id)
+    public function delete(int $id): void
     {
         Acl::requireOwnership(Acl::ownsSiteResource('email_accounts', $id));
         $account = $this->model->getById($id);

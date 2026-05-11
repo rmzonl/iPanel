@@ -21,42 +21,47 @@ class Clients extends Controller
         $this->model = new \Project\Models\ClientModel();
     }
 
-    public function main()
+    public function main(): void
     {
-        $user    = Acl::user();
-        $clients = ($user['role'] === 'admin')
-            ? $this->model->getAll()
-            : $this->model->getByReseller($user['id']);
-
         View::pageTitle('Müşteriler');
-        View::clients($clients);
         View::success(Session::select('success'));
         View::error(Session::select('error'));
         Session::delete('success');
         Session::delete('error');
     }
 
-    public function create()
+    public function rows(): void
+    {
+        $user = Acl::user();
+        $data = ($user['role'] === 'admin')
+            ? $this->model->getAll()
+            : $this->model->getByReseller($user['id']);
+        header('Content-Type: application/json; charset=utf-8');
+        echo json_encode(['data' => $data]);
+        exit;
+    }
+
+    public function create(): void
     {
         View::pageTitle('Yeni Müşteri Ekle');
     }
 
-    public function store()
+    public function store(): void
     {
         if (!Http::isRequestMethod('post')) { Redirect::action('clients/main'); return; }
         if (!CsrfGuard::verify()) { Session::insert('error', 'Geçersiz form isteği.'); Redirect::action('clients/main'); return; }
 
         $raw = InputValidator::sanitize([
-            'company_name' => Post::company_name(),
-            'first_name'   => Post::first_name(),
-            'last_name'    => Post::last_name(),
-            'email'        => Post::email(),
-            'phone'        => Post::phone(),
-            'address'      => Post::address(),
-            'city'         => Post::city(),
-            'country'      => Post::country() ?: 'TR',
-            'status'       => Post::status() ?: 'active',
-            'notes'        => Post::notes(),
+            'company_name' => Post::get('company_name'),
+            'first_name'   => Post::get('first_name'),
+            'last_name'    => Post::get('last_name'),
+            'email'        => Post::get('email'),
+            'phone'        => Post::get('phone'),
+            'address'      => Post::get('address'),
+            'city'         => Post::get('city'),
+            'country'      => Post::get('country') ?: 'TR',
+            'status'       => Post::get('status') ?: 'active',
+            'notes'        => Post::get('notes'),
         ]);
 
         $v = InputValidator::from($raw)
@@ -82,7 +87,7 @@ class Clients extends Controller
         Redirect::action('clients/main');
     }
 
-    public function edit(int $id)
+    public function edit(int $id): void
     {
         Acl::requireOwnership(Acl::ownsClient($id));
         View::pageTitle('Müşteri Düzenle');
@@ -91,23 +96,23 @@ class Clients extends Controller
         View::client($client);
     }
 
-    public function update(int $id)
+    public function update(int $id): void
     {
         if (!Http::isRequestMethod('post')) { Redirect::action('clients/main'); return; }
         if (!CsrfGuard::verify()) { Session::insert('error', 'Geçersiz form isteği.'); Redirect::action('clients/main'); return; }
         Acl::requireOwnership(Acl::ownsClient($id));
 
         $raw = InputValidator::sanitize([
-            'company_name' => Post::company_name(),
-            'first_name'   => Post::first_name(),
-            'last_name'    => Post::last_name(),
-            'email'        => Post::email(),
-            'phone'        => Post::phone(),
-            'address'      => Post::address(),
-            'city'         => Post::city(),
-            'country'      => Post::country() ?: 'TR',
-            'status'       => Post::status() ?: 'active',
-            'notes'        => Post::notes(),
+            'company_name' => Post::get('company_name'),
+            'first_name'   => Post::get('first_name'),
+            'last_name'    => Post::get('last_name'),
+            'email'        => Post::get('email'),
+            'phone'        => Post::get('phone'),
+            'address'      => Post::get('address'),
+            'city'         => Post::get('city'),
+            'country'      => Post::get('country') ?: 'TR',
+            'status'       => Post::get('status') ?: 'active',
+            'notes'        => Post::get('notes'),
         ]);
 
         $v = InputValidator::from($raw)
@@ -129,12 +134,12 @@ class Clients extends Controller
         Redirect::action('clients/main');
     }
 
-    public function delete(int $id)
+    public function delete(int $id): void
     {
         Acl::requireOwnership(Acl::ownsClient($id));
         $client = $this->model->getById($id);
         $this->model->delete($id);
-        AuditLogger::log('clients.delete', 'client', $id, "Müşteri silindi: " . ($client?->email ?? $id));
+        AuditLogger::log('clients.delete', 'client', $id, "Müşteri silindi: " . ($client->email ?? $id));
         Session::insert('success', 'Müşteri başarıyla silindi.');
         Redirect::action('clients/main');
     }

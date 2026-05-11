@@ -21,22 +21,27 @@ class Ftp extends Controller
         $this->model = new \Project\Models\FtpModel();
     }
 
-    public function main()
+    public function main(): void
     {
-        $user        = Acl::user();
-        $ftpAccounts = ($user['role'] === 'admin')
-            ? $this->model->getAll()
-            : $this->model->getByReseller($user['id']);
-
         View::pageTitle('FTP Hesapları');
-        View::ftpAccounts($ftpAccounts);
         View::success(Session::select('success'));
         View::error(Session::select('error'));
         Session::delete('success');
         Session::delete('error');
     }
 
-    public function create()
+    public function rows(): void
+    {
+        $user = Acl::user();
+        $data = ($user['role'] === 'admin')
+            ? $this->model->getAll()
+            : $this->model->getByReseller($user['id']);
+        header('Content-Type: application/json; charset=utf-8');
+        echo json_encode(['data' => $data]);
+        exit;
+    }
+
+    public function create(): void
     {
         $user      = Acl::user();
         $siteModel = new \Project\Models\SiteModel();
@@ -46,16 +51,16 @@ class Ftp extends Controller
         View::sites($sites);
     }
 
-    public function store()
+    public function store(): void
     {
         if (!Http::isRequestMethod('post')) { Redirect::action('ftp/main'); return; }
         if (!CsrfGuard::verify()) { Session::insert('error', 'Geçersiz form isteği.'); Redirect::action('ftp/main'); return; }
 
-        $siteId = (int) Post::site_id();
+        $siteId = (int) Post::get('site_id');
         Acl::requireOwnership(Acl::ownsSite($siteId));
 
-        $username    = trim((string) Post::username());
-        $rawPassword = (string) Post::password();
+        $username    = trim((string) Post::get('username'));
+        $rawPassword = (string) Post::get('password');
 
         $v = InputValidator::from(['site_id' => $siteId, 'username' => $username])
             ->required('site_id', 'Site')
@@ -78,9 +83,9 @@ class Ftp extends Controller
             'site_id'  => $siteId,
             'username' => htmlspecialchars($username, ENT_QUOTES, 'UTF-8'),
             'password' => password_hash($rawPassword, PASSWORD_BCRYPT),
-            'home_dir' => htmlspecialchars(trim((string) Post::home_dir()), ENT_QUOTES, 'UTF-8'),
-            'quota'    => (int) (Post::quota() ?: 0),
-            'status'   => Post::status() === 'suspended' ? 'suspended' : 'active',
+            'home_dir' => htmlspecialchars(trim((string) Post::get('home_dir')), ENT_QUOTES, 'UTF-8'),
+            'quota'    => (int) (Post::get('quota') ?: 0),
+            'status'   => Post::get('status') === 'suspended' ? 'suspended' : 'active',
         ]);
 
         AuditLogger::log('ftp.create', 'ftp_account', $id, "FTP hesabı oluşturuldu: $username");
@@ -88,7 +93,7 @@ class Ftp extends Controller
         Redirect::action('ftp/main');
     }
 
-    public function delete(int $id)
+    public function delete(int $id): void
     {
         Acl::requireOwnership(Acl::ownsSiteResource('ftp_accounts', $id));
         $account = $this->model->getById($id);

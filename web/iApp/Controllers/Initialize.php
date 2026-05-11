@@ -2,7 +2,6 @@
 
 use ZN\Controller;
 use ZN\Request\Http;
-use ZN\Inclusion\Project\Masterpage;
 use ZN\Inclusion\Project\View;
 use Session;
 use Redirect;
@@ -20,17 +19,13 @@ class Initialize extends Controller
     const exclude = ['Auth', 'Errors', 'Api'];
 
     private const JSON_CONTROLLERS = ['Stats', 'Jobs'];
-
-    /** Controller/method kombinasyonları — Masterpage olmadan JSON döner */
-    private const JSON_METHODS = [
-        'Logs' => ['data'],
-    ];
+    private const JSON_METHODS     = ['rows'];
 
     private const SETTINGS_RESELLER_ALLOWED = ['twoFactor', 'setup2fa', 'enable2fa', 'disable2fa', 'backupCodes'];
 
-    private const ADMIN_ONLY = ['IpAddresses', 'Firewall', 'Phpmyadmin', 'Phpmanager', 'Nodemanager', 'Filemanager', 'Logs'];
+    private const ADMIN_ONLY = ['IpAddresses', 'Firewall', 'Phpmyadmin', 'Phpmanager', 'Nodemanager', 'Filemanager'];
 
-    public function main()
+    public function main(): void
     {
         header_remove('X-Powered-By');
 
@@ -38,20 +33,8 @@ class Initialize extends Controller
         $controller = CURRENT_CONTROLLER ?? '';
         $method     = CURRENT_CFUNCTION  ?? 'main';
 
-        // JSON/SSE controller'lar için masterpage kurma — kendi header'larını yönetirler
-        $isJson = in_array($controller, self::JSON_CONTROLLERS)
-               || in_array($method, self::JSON_METHODS[$controller] ?? []);
-        if (!$isJson) {
-            Masterpage::attributes([
-                'html' => [
-                    'data-bs-theme' => 'dark'
-                ]
-            ]);
-            Masterpage::headPage('layouts/head')->bodyPage('layouts/body');
-        }
-
         if (empty($user)) {
-            if ($isJson) {
+            if (in_array($controller, self::JSON_CONTROLLERS) || in_array($method, self::JSON_METHODS)) {
                 Http::response(401);
                 header('Content-Type: application/json');
                 echo Json::encode(['success' => false, 'message' => 'Oturum açılmamış.']);
