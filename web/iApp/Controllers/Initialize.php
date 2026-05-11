@@ -3,6 +3,7 @@
 use ZN\Controller;
 use ZN\Request\Http;
 use ZN\Inclusion\Project\View;
+use ZN\Inclusion\Project\Masterpage;
 use Session;
 use Redirect;
 use Json;
@@ -33,8 +34,16 @@ class Initialize extends Controller
         $controller = CURRENT_CONTROLLER ?? '';
         $method     = CURRENT_CFUNCTION  ?? 'main';
 
+        $isJson = in_array($controller, self::JSON_CONTROLLERS)
+               || in_array($method, self::JSON_METHODS);
+
+        if (!$isJson) {
+            Masterpage::attributes(['html' => ['data-bs-theme' => 'dark']]);
+            Masterpage::headPage('layouts/head')->bodyPage('layouts/body');
+        }
+
         if (empty($user)) {
-            if (in_array($controller, self::JSON_CONTROLLERS) || in_array($method, self::JSON_METHODS)) {
+            if ($isJson) {
                 Http::response(401);
                 header('Content-Type: application/json');
                 echo Json::encode(['success' => false, 'message' => 'Oturum açılmamış.']);
