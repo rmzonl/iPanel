@@ -22,36 +22,43 @@ class IpAddresses extends Controller
         $this->model = new \Project\Models\IpAddressModel();
     }
 
-    public function main()
+    public function main(): void
     {
         View::pageTitle('IP Adresleri');
-        View::ips($this->model->getAll());
         View::success(Session::select('success'));
         View::error(Session::select('error'));
         Session::delete('success');
         Session::delete('error');
     }
 
-    public function create()
+    public function rows(): void
+    {
+        $data = $this->model->getAll();
+        header('Content-Type: application/json; charset=utf-8');
+        echo json_encode(['data' => $data]);
+        exit;
+    }
+
+    public function create(): void
     {
         $clientModel = new \Project\Models\ClientModel();
         View::pageTitle('Yeni IP Adresi');
         View::clients($clientModel->getAll());
     }
 
-    public function store()
+    public function store(): void
     {
         if (!Http::isRequestMethod('post')) { Redirect::action('ipaddresses/main'); return; }
         if (!CsrfGuard::verify()) { Session::insert('error', 'Geçersiz form isteği.'); Redirect::action('ipaddresses/main'); return; }
 
         $raw = InputValidator::sanitize([
-            'ip'        => Post::ip(),
-            'netmask'   => Post::netmask(),
-            'gateway'   => Post::gateway(),
-            'type'      => Post::type() ?: 'shared',
-            'client_id' => Post::client_id() ? (int) Post::client_id() : null,
-            'status'    => Post::status() ?: 'active',
-            'notes'     => Post::notes(),
+            'ip'        => Post::get('ip'),
+            'netmask'   => Post::get('netmask'),
+            'gateway'   => Post::get('gateway'),
+            'type'      => Post::get('type') ?: 'shared',
+            'client_id' => Post::get('client_id') ? (int) Post::get('client_id') : null,
+            'status'    => Post::get('status') ?: 'active',
+            'notes'     => Post::get('notes'),
         ]);
 
         $v = InputValidator::from($raw)
@@ -75,11 +82,11 @@ class IpAddresses extends Controller
         Redirect::action('ipaddresses/main');
     }
 
-    public function delete(int $id)
+    public function delete(int $id): void
     {
         $ip = $this->model->getById($id);
         $this->model->delete($id);
-        AuditLogger::log('ipaddresses.delete', 'ip_address', $id, 'IP silindi: ' . ($ip?->ip ?? $id));
+        AuditLogger::log('ipaddresses.delete', 'ip_address', $id, 'IP silindi: ' . ($ip->ip ?? $id));
         Session::insert('success', 'IP adresi başarıyla silindi.');
         Redirect::action('ipaddresses/main');
     }

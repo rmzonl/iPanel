@@ -5,20 +5,22 @@ use DB;
 
 class DnsModel extends Model
 {
-    public function getAllZones()
+    public function getAllZones(): array
     {
         return DB::table('dns_zones dz')
-            ->select('dz.*, d.name as domain_name')
+            ->select('dz.*, d.name as domain_name, s.domain as site_domain')
             ->join('domains d', 'dz.domain_id = d.id')
+            ->join('sites s',   'd.site_id = s.id', 'LEFT')
             ->orderBy('dz.id', 'desc')
-            ->get();
+            ->get()->result() ?: [];
     }
 
     public function getZoneById($id)
     {
         return DB::table('dns_zones dz')
-            ->select('dz.*, d.name as domain_name')
+            ->select('dz.*, d.name as domain_name, s.domain as site_domain')
             ->join('domains d', 'dz.domain_id = d.id')
+            ->join('sites s',   'd.site_id = s.id', 'LEFT')
             ->where('dz.id', $id)
             ->get()->row();
     }
@@ -28,15 +30,16 @@ class DnsModel extends Model
         return DB::table('dns_zones')->where('domain_id', $domainId)->get()->row();
     }
 
-    public function getZonesByReseller(int $resellerId)
+    public function getZonesByReseller(int $resellerId): array
     {
         return DB::table('dns_zones dz')
-            ->select('dz.*, d.name as domain_name')
+            ->select('dz.*, d.name as domain_name, s.domain as site_domain')
             ->join('domains d',  'dz.domain_id = d.id')
+            ->join('sites s',    'd.site_id = s.id', 'LEFT')
             ->join('clients c',  'd.client_id  = c.id')
             ->where('c.reseller_id', $resellerId)
             ->orderBy('dz.id', 'desc')
-            ->get();
+            ->get()->result() ?: [];
     }
 
     public function createZone($data): int
@@ -50,9 +53,9 @@ class DnsModel extends Model
         return DB::table('dns_zones')->where('id', $id)->delete();
     }
 
-    public function getRecordsByZoneId($zoneId)
+    public function getRecordsByZoneId($zoneId): array
     {
-        return DB::table('dns_records')->where('zone_id', $zoneId)->orderBy('type')->get();
+        return DB::table('dns_records')->where('zone_id', $zoneId)->orderBy('type')->get()->result() ?: [];
     }
 
     public function getRecordById($id)

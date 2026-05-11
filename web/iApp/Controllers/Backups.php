@@ -21,13 +21,9 @@ class Backups extends Controller
         $this->model = new \Project\Models\BackupModel();
     }
 
-    public function main()
+    public function main(): void
     {
-        $user    = Acl::user();
-        $backups = ($user['role'] === 'admin')
-            ? $this->model->getAll()
-            : $this->model->getByReseller($user['id']);
-
+        $user        = Acl::user();
         $siteModel   = new \Project\Models\SiteModel();
         $clientModel = new \Project\Models\ClientModel();
 
@@ -35,7 +31,6 @@ class Backups extends Controller
         $clients = ($user['role'] === 'admin') ? $clientModel->getAll() : $clientModel->getByReseller($user['id']);
 
         View::pageTitle('Yedeklemeler');
-        View::backups($backups);
         View::sites($sites);
         View::clients($clients);
         View::success(Session::select('success'));
@@ -44,19 +39,29 @@ class Backups extends Controller
         Session::delete('error');
     }
 
-    public function create()
+    public function rows(): void
+    {
+        $user = Acl::user();
+        $data = ($user['role'] === 'admin')
+            ? $this->model->getAll()
+            : $this->model->getByReseller($user['id']);
+        header('Content-Type: application/json; charset=utf-8');
+        echo json_encode(['data' => $data]);
+        exit;
+    }
+
+    public function create(): void
     {
         if (!Http::isRequestMethod('post')) { Redirect::action('backups/main'); return; }
         if (!CsrfGuard::verify()) { Session::insert('error', 'Geçersiz form isteği.'); Redirect::action('backups/main'); return; }
 
-        $siteId   = Post::site_id()   ? (int) Post::site_id()   : null;
-        $clientId = Post::client_id() ? (int) Post::client_id() : null;
+        $siteId   = Post::get('site_id')   ? (int) Post::get('site_id')   : null;
+        $clientId = Post::get('client_id') ? (int) Post::get('client_id') : null;
 
-        // Sahiplik kontrolü
         if ($siteId)   Acl::requireOwnership(Acl::ownsSite($siteId));
         if ($clientId) Acl::requireOwnership(Acl::ownsClient($clientId));
 
-        $type = InputValidator::sanitize(['type' => Post::type() ?: 'full'])['type'];
+        $type = InputValidator::sanitize(['type' => Post::get('type') ?: 'full'])['type'];
 
         $v = InputValidator::from(['type' => $type])
             ->in('type', ['full', 'database', 'files', 'email'], 'Yedek türü');
@@ -82,7 +87,7 @@ class Backups extends Controller
         Redirect::action('backups/main');
     }
 
-    public function delete(int $id)
+    public function delete(int $id): void
     {
         Acl::requireOwnership(Acl::ownsBackup($id));
         $this->model->delete($id);

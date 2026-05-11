@@ -21,22 +21,27 @@ class Cronjobs extends Controller
         $this->model = new \Project\Models\CronjobModel();
     }
 
-    public function main()
+    public function main(): void
     {
-        $user     = Acl::user();
-        $cronjobs = ($user['role'] === 'admin')
-            ? $this->model->getAll()
-            : $this->model->getByReseller($user['id']);
-
         View::pageTitle('Cron İşleri');
-        View::cronjobs($cronjobs);
         View::success(Session::select('success'));
         View::error(Session::select('error'));
         Session::delete('success');
         Session::delete('error');
     }
 
-    public function create()
+    public function rows(): void
+    {
+        $user = Acl::user();
+        $data = ($user['role'] === 'admin')
+            ? $this->model->getAll()
+            : $this->model->getByReseller($user['id']);
+        header('Content-Type: application/json; charset=utf-8');
+        echo json_encode(['data' => $data]);
+        exit;
+    }
+
+    public function create(): void
     {
         $user      = Acl::user();
         $siteModel = new \Project\Models\SiteModel();
@@ -46,20 +51,20 @@ class Cronjobs extends Controller
         View::sites($sites);
     }
 
-    public function store()
+    public function store(): void
     {
         if (!Http::isRequestMethod('post')) { Redirect::action('cronjobs/main'); return; }
         if (!CsrfGuard::verify()) { Session::insert('error', 'Geçersiz form isteği.'); Redirect::action('cronjobs/main'); return; }
 
-        $siteId = (int) Post::site_id();
+        $siteId = (int) Post::get('site_id');
         Acl::requireOwnership(Acl::ownsSite($siteId));
 
         $raw = InputValidator::sanitize([
             'site_id'  => $siteId,
-            'title'    => Post::title(),
-            'command'  => Post::command(),
-            'schedule' => Post::schedule(),
-            'status'   => Post::status() ?: 'active',
+            'title'    => Post::get('title'),
+            'command'  => Post::get('command'),
+            'schedule' => Post::get('schedule'),
+            'status'   => Post::get('status') ?: 'active',
         ]);
 
         $v = InputValidator::from($raw)
@@ -82,12 +87,12 @@ class Cronjobs extends Controller
         Redirect::action('cronjobs/main');
     }
 
-    public function delete(int $id)
+    public function delete(int $id): void
     {
         Acl::requireOwnership(Acl::ownsSiteResource('cron_jobs', $id));
         $job = $this->model->getById($id);
         $this->model->delete($id);
-        AuditLogger::log('cronjobs.delete', 'cron_job', $id, 'Cron işi silindi: ' . ($job?->title ?? $id));
+        AuditLogger::log('cronjobs.delete', 'cron_job', $id, 'Cron işi silindi: ' . ($job->title ?? $id));
         Session::insert('success', 'Cron işi başarıyla silindi.');
         Redirect::action('cronjobs/main');
     }

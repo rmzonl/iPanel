@@ -22,35 +22,42 @@ class Firewall extends Controller
         $this->model = new \Project\Models\FirewallModel();
     }
 
-    public function main()
+    public function main(): void
     {
         View::pageTitle('Güvenlik Duvarı');
-        View::rules($this->model->getAll());
         View::success(Session::select('success'));
         View::error(Session::select('error'));
         Session::delete('success');
         Session::delete('error');
     }
 
-    public function create()
+    public function rows(): void
+    {
+        $data = $this->model->getAll();
+        header('Content-Type: application/json; charset=utf-8');
+        echo json_encode(['data' => $data]);
+        exit;
+    }
+
+    public function create(): void
     {
         View::pageTitle('Yeni Kural Ekle');
     }
 
-    public function store()
+    public function store(): void
     {
         if (!Http::isRequestMethod('post')) { Redirect::action('firewall/main'); return; }
         if (!CsrfGuard::verify()) { Session::insert('error', 'Geçersiz form isteği.'); Redirect::action('firewall/main'); return; }
 
         $raw = InputValidator::sanitize([
-            'name'      => Post::name(),
-            'action'    => Post::action() ?: 'allow',
-            'protocol'  => Post::protocol() ?: 'tcp',
-            'direction' => Post::direction() ?: 'in',
-            'source_ip' => Post::source_ip(),
-            'dest_port' => Post::dest_port(),
-            'priority'  => (int) (Post::priority() ?: 0),
-            'status'    => Post::status() ?: 'active',
+            'name'      => Post::get('name'),
+            'action'    => Post::get('action') ?: 'allow',
+            'protocol'  => Post::get('protocol') ?: 'tcp',
+            'direction' => Post::get('direction') ?: 'in',
+            'source_ip' => Post::get('source_ip'),
+            'dest_port' => Post::get('dest_port'),
+            'priority'  => (int) (Post::get('priority') ?: 0),
+            'status'    => Post::get('status') ?: 'active',
         ]);
 
         $v = InputValidator::from($raw)
@@ -77,11 +84,11 @@ class Firewall extends Controller
         Redirect::action('firewall/main');
     }
 
-    public function delete(int $id)
+    public function delete(int $id): void
     {
         $rule = $this->model->getById($id);
         $this->model->delete($id);
-        AuditLogger::log('firewall.delete', 'firewall_rule', $id, 'Güvenlik duvarı kuralı silindi: ' . ($rule?->name ?? $id));
+        AuditLogger::log('firewall.delete', 'firewall_rule', $id, 'Güvenlik duvarı kuralı silindi: ' . ($rule->name ?? $id));
         Session::insert('success', 'Kural başarıyla silindi.');
         Redirect::action('firewall/main');
     }

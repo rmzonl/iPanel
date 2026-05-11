@@ -5,48 +5,48 @@ use DB;
 
 class SiteModel extends Model
 {
-    public function getAll()
+    public function getAll(): array
     {
         return DB::table('sites s')
-            ->select('s.*, c.first_name, c.last_name, c.company_name, i.ip')
+            ->select("s.*, CONCAT(c.first_name, ' ', c.last_name) AS client_name, c.company_name, i.ip")
             ->join('clients c', 's.client_id = c.id')
             ->join('ip_addresses i', 's.ip_id = i.id', 'LEFT')
             ->orderBy('s.id', 'desc')
-            ->get();
+            ->get()->result() ?: [];
     }
 
     public function getById($id)
     {
         return DB::table('sites s')
-            ->select('s.*, c.first_name, c.last_name, c.company_name, i.ip')
+            ->select("s.*, CONCAT(c.first_name, ' ', c.last_name) AS client_name, c.company_name, i.ip")
             ->join('clients c', 's.client_id = c.id')
             ->join('ip_addresses i', 's.ip_id = i.id', 'LEFT')
             ->where('s.id', $id)
             ->get()->row();
     }
 
-    public function getByClientId($clientId)
+    public function getByClientId($clientId): array
     {
         return DB::table('sites')
             ->where('client_id', $clientId)
             ->orderBy('id', 'desc')
-            ->get();
+            ->get()->result() ?: [];
     }
 
-    public function count()
+    public function count(): int
     {
         return DB::table('sites')->get()->totalRows();
     }
 
-    public function getByReseller(int $resellerId)
+    public function getByReseller(int $resellerId): array
     {
         return DB::table('sites s')
-            ->select('s.*, c.first_name, c.last_name, c.company_name, i.ip')
+            ->select("s.*, CONCAT(c.first_name, ' ', c.last_name) AS client_name, c.company_name, i.ip")
             ->join('clients c',      's.client_id = c.id')
             ->join('ip_addresses i', 's.ip_id = i.id', 'LEFT')
             ->where('c.reseller_id', $resellerId)
             ->orderBy('s.id', 'desc')
-            ->get();
+            ->get()->result() ?: [];
     }
 
     public function create($data): int
