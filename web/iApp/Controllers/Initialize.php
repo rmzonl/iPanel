@@ -40,6 +40,8 @@ class Initialize extends Controller
         if (!$isJson) {
             Masterpage::attributes(['html' => ['data-bs-theme' => 'dark']]);
             Masterpage::headPage('layouts/head')->bodyPage('layouts/body');
+        }else{
+            output('isJson true dönüyor');
         }
 
         if (empty($user)) {
