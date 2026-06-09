@@ -4,7 +4,7 @@
 @endif
 <meta http-equiv="X-UA-Compatible" content="ie=edge"/>
 <link rel="stylesheet" href="{{ URL::base('iApp/Themes/Tabler/css/tabler.min.css') }}"/>
-<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@2.47.0/tabler-icons.min.css"/>
+<link rel="stylesheet" href="{{ URL::base('iApp/Themes/Tabler/css/tabler-icons.min.css') }}"/>
 <style>
   @font-face {
     font-family: 'Geist';

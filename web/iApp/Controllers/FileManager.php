@@ -419,7 +419,8 @@ class FileManager extends Controller
         $real = '/' . implode('/', $parts);
 
         foreach (self::ALLOWED_ROOTS as $root) {
-            if (str_starts_with($real, $root)) {
+            // '/home' kökü '/homeevil' gibi yolları geçirmesin
+            if ($real === $root || str_starts_with($real, rtrim($root, '/') . '/')) {
                 return $real;
             }
         }

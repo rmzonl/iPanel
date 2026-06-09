@@ -23,6 +23,8 @@ class ApiTokens extends Controller
 
     public function main(): void
     {
+        $this->model->purgeExpired();
+
         View::pageTitle('API Token\'ları');
         View::success(Session::select('success'));
         View::error(Session::select('error'));

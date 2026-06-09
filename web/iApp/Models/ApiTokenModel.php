@@ -52,8 +52,9 @@ class ApiTokenModel
 
     public function purgeExpired(): void
     {
-        DB::where('expires_at IS NOT NULL', null, false)
-            ->where('expires_at <', date('Y-m-d H:i:s'))
+        // NULL < tarih SQL'de false döner; süresiz tokenlar doğal olarak hariç kalır
+        DB::where('expires_at <', date('Y-m-d H:i:s'))
+            ->where('status', 'active')
             ->update(self::TABLE, ['status' => 'revoked']);
     }
 }

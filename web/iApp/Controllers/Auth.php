@@ -26,6 +26,13 @@ class Auth extends Controller
             return;
         }
 
+        // Yönlendirmeyle gelen hata mesajı (örn. 2FA oturumu süresi doldu)
+        $sessionError = Session::select('error');
+        if (!empty($sessionError)) {
+            Session::delete('error');
+            View::error($sessionError);
+        }
+
         View::csrfField(CsrfGuard::field());
     }
 
