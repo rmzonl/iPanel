@@ -29,7 +29,7 @@ class Ssl extends Controller
             : $this->model->getByReseller($user['id']);
 
         View::pageTitle('SSL Sertifikaları');
-        View::certs($certs);
+        View::certificates($certs);
         View::success(Session::select('success'));
         View::error(Session::select('error'));
         Session::delete('success');
@@ -80,6 +80,30 @@ class Ssl extends Controller
         $id = $this->model->create($raw);
         AuditLogger::log('ssl.create', 'ssl_certificate', $id, "SSL sertifikası eklendi: domain #$domainId");
         Session::insert('success', 'SSL sertifikası başarıyla eklendi.');
+        Redirect::action('ssl/main');
+    }
+
+    /** Sertifika yenileme — agent'a ssl.renew işi kuyruğa eklenir */
+    public function renew(int $id)
+    {
+        Acl::requireOwnership(Acl::ownsSslCert($id));
+
+        $cert = $this->model->getById($id);
+        if (!$cert) { Redirect::action('ssl/main'); return; }
+
+        DB::where('id', $id)->update('ssl_certificates', ['status' => 'pending']);
+
+        $user = Acl::user();
+        $uuid = \Project\Libraries\JobQueue::push(
+            'ssl.renew',
+            ['cert_id' => $id, 'domain_id' => (int) $cert->domain_id],
+            3,
+            (int) $user['id'],
+            $user['username'] ?? 'system'
+        );
+
+        AuditLogger::log('ssl.renew', 'ssl_certificate', $id, "SSL yenileme kuyruğa eklendi (iş: $uuid)");
+        Session::insert('success', 'SSL yenileme işi kuyruğa eklendi. Durumu İş Kuyruğu sayfasından izleyebilirsiniz.');
         Redirect::action('ssl/main');
     }
 

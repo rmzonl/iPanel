@@ -108,7 +108,7 @@ function showResult(raw) {
 
   async function refresh() {
     const filter = document.getElementById('status-filter').value;
-    const url    = '/jobs/refreshrows' + (filter ? '?status=' + encodeURIComponent(filter) : '');
+    const url    = '/jobs/refreshRows' + (filter ? '?status=' + encodeURIComponent(filter) : '');
     try {
       const res  = await fetch(url, { headers: {'X-Requested-With':'XMLHttpRequest'} });
       const json = await res.json();

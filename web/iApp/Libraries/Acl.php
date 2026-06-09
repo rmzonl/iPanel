@@ -65,6 +65,7 @@ class Acl
             'rows'   => 'ssl.view',
             'create' => 'ssl.create',
             'store'  => 'ssl.create',
+            'renew'  => 'ssl.create',
         ],
         'dns' => [
             'main'         => 'dns.view',
@@ -102,8 +103,11 @@ class Acl
             'delete' => 'firewall.delete',
         ],
         'settings' => [
-            'main'        => 'settings.view',
-            'save'        => 'settings.edit',
+            'main'              => 'settings.view',
+            'save'              => 'settings.edit',
+            'saveScopeSettings' => 'settings.edit',
+            'getClientSettings' => 'settings.view',
+            'getSiteSettings'   => 'settings.view',
             'twoFactor'   => 'profile.2fa',
             'setup2fa'    => 'profile.2fa',
             'enable2fa'   => 'profile.2fa',
@@ -185,7 +189,10 @@ class Acl
         $m = strtolower($method);
 
         if (!isset(static::$map[$c])) return null;
-        return static::$map[$c][$m] ?? static::$map[$c]['*'] ?? null;
+
+        // Harita anahtarları camelCase olabilir (createRecord, twoFactor...) — küçük harfe normalize et
+        $methods = array_change_key_case(static::$map[$c], CASE_LOWER);
+        return $methods[$m] ?? $methods['*'] ?? null;
     }
 
     /**

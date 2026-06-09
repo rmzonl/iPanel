@@ -35,7 +35,7 @@
 
         <!-- Server Settings Tab -->
         <div class="tab-pane fade show active" id="serverTab">
-          <form method="POST" action="{{ URL::base('settings/saveServer') }}">
+          <form method="POST" action="{{ URL::base('settings/save') }}">
         {[ echo $csrfField ?? ""; ]}
             <div class="card">
               <div class="card-header"><h3 class="card-title">Sunucu Genel Ayarları</h3></div>
@@ -125,7 +125,7 @@ function loadClientSettings(clientId) {
   if (!clientId) return;
   var container = document.getElementById('clientSettingsForm');
   container.innerHTML = '<div class="text-center py-3"><div class="spinner-border spinner-border-sm"></div></div>';
-  fetch('{{ URL::base("settings/getClientSettings/") }}' + clientId)
+  fetch('{{ URL::base("settings/getClientSettings/") }}' + clientId, {headers:{'X-Requested-With':'XMLHttpRequest'}})
     .then(r => r.json())
     .then(data => {
       container.innerHTML = buildSettingsForm(data, clientId, 'client');
@@ -136,7 +136,7 @@ function loadSiteSettings(siteId) {
   if (!siteId) return;
   var container = document.getElementById('siteSettingsForm');
   container.innerHTML = '<div class="text-center py-3"><div class="spinner-border spinner-border-sm"></div></div>';
-  fetch('{{ URL::base("settings/getSiteSettings/") }}' + siteId)
+  fetch('{{ URL::base("settings/getSiteSettings/") }}' + siteId, {headers:{'X-Requested-With':'XMLHttpRequest'}})
     .then(r => r.json())
     .then(data => {
       container.innerHTML = buildSettingsForm(data, siteId, 'site');
@@ -153,7 +153,9 @@ function buildSettingsForm(data, scopeId, scope) {
     'max_databases': 'Max Veritabanı',
     'ssl_auto_renew': 'SSL Otomatik Yenile (1/0)',
   };
+  var csrf = (document.querySelector('meta[name="csrf-token"]') || {}).content || '';
   var html = '<form method="POST" action="{{ URL::base("settings/saveScopeSettings") }}">';
+  html += '<input type="hidden" name="_csrf" value="' + csrf + '">';
   html += '<input type="hidden" name="scope" value="' + scope + '">';
   html += '<input type="hidden" name="scope_id" value="' + scopeId + '">';
   html += '<div class="row g-3">';

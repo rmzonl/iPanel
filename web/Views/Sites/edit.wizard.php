@@ -24,8 +24,8 @@
             <div class="alert alert-danger mb-3"><i class="ti ti-alert-circle me-2"></i>{{ $error }}</div>
           @endif
 
-          <form method="POST" action="{{ URL::base('sites/update/' . $site->
-        {[ echo $csrfField ?? ""; ]}id) }}">
+          <form method="POST" action="{{ URL::base('sites/update/' . $site->id) }}">
+        {[ echo $csrfField ?? ""; ]}
             <div class="card">
               <div class="card-header"><h3 class="card-title">Site Bilgileri</h3></div>
               <div class="card-body">

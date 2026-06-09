@@ -34,6 +34,7 @@ Route::change('{start}ssl{end}')->uri('Ssl/main');
 Route::change('{start}ssl/create{end}')->uri('Ssl/create');
 Route::change('{start}ssl/store{end}')->uri('Ssl/store');
 Route::change('{start}ssl/delete/({number}){end}')->uri('Ssl/delete/$1');
+Route::change('{start}ssl/renew/({number}){end}')->uri('Ssl/renew/$1');
 
 // Email
 Route::change('{start}email{end}')->uri('Email/main');
@@ -87,6 +88,9 @@ Route::change('{start}firewall/delete/({number}){end}')->uri('Firewall/delete/$1
 // Settings
 Route::change('{start}settings{end}')->uri('Settings/main');
 Route::change('{start}settings/save{end}')->uri('Settings/save');
+Route::change('{start}settings/saveScopeSettings{end}')->uri('Settings/saveScopeSettings');
+Route::change('{start}settings/getClientSettings/({number}){end}')->uri('Settings/getClientSettings/$1');
+Route::change('{start}settings/getSiteSettings/({number}){end}')->uri('Settings/getSiteSettings/$1');
 
 // Stats (SSE + JSON endpoints)
 Route::change('{start}stats/stream{end}')->uri('Stats/stream');

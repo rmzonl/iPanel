@@ -23,10 +23,23 @@ class Settings extends Controller
         $this->model = new \Project\Models\SettingsModel();
     }
 
+    private const SERVER_KEYS = [
+        'panel_name', 'server_ip', 'php_versions', 'max_sites_per_client',
+        'max_disk_per_client', 'max_bandwidth_per_client', 'default_php_version',
+        'ssl_email', 'backup_path', 'webroot_base',
+    ];
+
+    private const SCOPE_KEYS = [
+        'php_version', 'disk_quota', 'bandwidth_quota', 'max_email_accounts',
+        'max_ftp_accounts', 'max_databases', 'ssl_auto_renew',
+    ];
+
     public function main()
     {
         View::pageTitle('Ayarlar');
         View::serverSettings($this->model->getServerSettings());
+        View::clients(DB::table('clients')->orderBy('first_name')->get()->result() ?: []);
+        View::sites(DB::table('sites')->orderBy('domain')->get()->result() ?: []);
         View::success(Session::select('success'));
         View::error(Session::select('error'));
         Session::delete('success');
@@ -38,38 +51,88 @@ class Settings extends Controller
         if (!Http::isRequestMethod('post')) { Redirect::action('settings/main'); return; }
         if (!CsrfGuard::verify()) { Session::insert('error', 'Geçersiz form isteği.'); Redirect::action('settings/main'); return; }
 
-        $allowedKeys = [
-            'panel_name', 'server_ip', 'php_versions', 'max_sites_per_client',
-            'max_disk_per_client', 'max_bandwidth_per_client', 'default_php_version',
-            'ssl_email', 'backup_path', 'webroot_base',
-        ];
+        $settings = (array) Post::settings();
 
         $changes = [];
-        foreach ($allowedKeys as $key) {
-            $value = Post::$key();
-            if ($value === null) continue;
+        foreach (self::SERVER_KEYS as $key) {
+            if (!array_key_exists($key, $settings)) continue;
+            $value = trim((string) $settings[$key]);
 
-            if ($key === 'server_ip') {
-                if (!filter_var($value, FILTER_VALIDATE_IP)) {
-                    Session::insert('error', 'Sunucu IP adresi geçersiz.');
-                    Redirect::action('settings/main');
-                    return;
-                }
+            if ($key === 'server_ip' && $value !== '' && !filter_var($value, FILTER_VALIDATE_IP)) {
+                Session::insert('error', 'Sunucu IP adresi geçersiz.');
+                Redirect::action('settings/main');
+                return;
             }
-            if ($key === 'ssl_email') {
-                if (!filter_var($value, FILTER_VALIDATE_EMAIL)) {
-                    Session::insert('error', 'SSL e-posta adresi geçersiz.');
-                    Redirect::action('settings/main');
-                    return;
-                }
+            if ($key === 'ssl_email' && $value !== '' && !filter_var($value, FILTER_VALIDATE_EMAIL)) {
+                Session::insert('error', 'SSL e-posta adresi geçersiz.');
+                Redirect::action('settings/main');
+                return;
             }
 
-            $sanitized = htmlspecialchars(trim($value), ENT_QUOTES, 'UTF-8');
-            $this->model->set('server', $key, $sanitized);
+            $this->model->set('server', $key, htmlspecialchars($value, ENT_QUOTES, 'UTF-8'));
             $changes[] = $key;
         }
 
         AuditLogger::log('settings.save', 'settings', null, 'Ayarlar güncellendi: ' . implode(', ', $changes));
+        Session::insert('success', 'Ayarlar başarıyla kaydedildi.');
+        Redirect::action('settings/main');
+    }
+
+    /** AJAX: müşteri bazlı ayarları JSON döndür */
+    public function getClientSettings($clientId = 0)
+    {
+        $this->scopeSettingsJson('client', (int) $clientId);
+    }
+
+    /** AJAX: site bazlı ayarları JSON döndür */
+    public function getSiteSettings($siteId = 0)
+    {
+        $this->scopeSettingsJson('site', (int) $siteId);
+    }
+
+    private function scopeSettingsJson(string $scope, int $scopeId): void
+    {
+        header('Content-Type: application/json; charset=utf-8');
+        $rows = $this->model->getByScope($scope, $scopeId)->result() ?: [];
+        $out  = [];
+        foreach ($rows as $row) {
+            $out[$row->setting_key] = $row->setting_value;
+        }
+        echo json_encode($out ?: new \stdClass());
+        exit;
+    }
+
+    /** Müşteri / site bazlı ayarları kaydet */
+    public function saveScopeSettings()
+    {
+        if (!Http::isRequestMethod('post')) { Redirect::action('settings/main'); return; }
+        if (!CsrfGuard::verify()) { Session::insert('error', 'Geçersiz form isteği.'); Redirect::action('settings/main'); return; }
+
+        $scope   = (string) Post::scope();
+        $scopeId = (int) Post::scope_id();
+
+        if (!in_array($scope, ['client', 'site'], true) || $scopeId < 1) {
+            Session::insert('error', 'Geçersiz ayar kapsamı.');
+            Redirect::action('settings/main');
+            return;
+        }
+
+        $settings = (array) Post::settings();
+        $changes  = [];
+        foreach (self::SCOPE_KEYS as $key) {
+            if (!array_key_exists($key, $settings)) continue;
+            $value = trim((string) $settings[$key]);
+            if ($value === '') {
+                // boş = override'ı kaldır, üst seviyenin ayarı geçerli olur
+                $this->model->remove($scope, $key, $scopeId);
+                continue;
+            }
+
+            $this->model->set($scope, $key, htmlspecialchars($value, ENT_QUOTES, 'UTF-8'), $scopeId);
+            $changes[] = $key;
+        }
+
+        AuditLogger::log('settings.save_scope', 'settings', $scopeId, "{$scope} ayarları güncellendi: " . implode(', ', $changes));
         Session::insert('success', 'Ayarlar başarıyla kaydedildi.');
         Redirect::action('settings/main');
     }

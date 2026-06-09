@@ -38,6 +38,11 @@ class SiteModel extends Model
         return DB::table('sites')->get()->totalRows();
     }
 
+    public function getRecent($limit = 5): array
+    {
+        return DB::table('sites')->orderBy('id', 'desc')->limit(0, $limit)->get()->result() ?: [];
+    }
+
     public function getByReseller(int $resellerId): array
     {
         return DB::table('sites s')

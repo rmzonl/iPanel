@@ -16,29 +16,33 @@ class Dashboard extends Controller
         $sslModel    = new \Project\Models\SslModel();
 
         if ($user['role'] === 'admin') {
-            $totalClients = $clientModel->count();
-            $totalSites   = $siteModel->count();
-            $totalDomains = $domainModel->count();
-            $activeSSL    = $sslModel->countActive();
-            $recent       = $clientModel->getRecent(5);
+            $stats = [
+                'clients' => $clientModel->count(),
+                'sites'   => $siteModel->count(),
+                'domains' => $domainModel->count(),
+                'ssl'     => $sslModel->countActive(),
+            ];
+            $recentClients = $clientModel->getRecent(5);
+            $recentSites   = $siteModel->getRecent(5);
         } else {
             // Reseller: yalnızca kendi müşterileri ve siteleri
-            $myClients    = $clientModel->getByReseller((int) $user['id']);
-            $mySites      = $siteModel->getByReseller((int) $user['id']);
-            $clientRows   = $myClients ? $myClients->result() : [];
-            $siteRows     = $mySites   ? $mySites->result()   : [];
-            $totalClients = count($clientRows);
-            $totalSites   = count($siteRows);
-            $totalDomains = 0;
-            $activeSSL    = 0;
-            $recent       = $myClients;
+            $myClients = $clientModel->getByReseller((int) $user['id']);
+            $mySites   = $siteModel->getByReseller((int) $user['id']);
+            $myDomains = $domainModel->getByReseller((int) $user['id']);
+
+            $stats = [
+                'clients' => count($myClients),
+                'sites'   => count($mySites),
+                'domains' => count($myDomains),
+                'ssl'     => count($sslModel->getByReseller((int) $user['id'])),
+            ];
+            $recentClients = array_slice($myClients, 0, 5);
+            $recentSites   = array_slice($mySites, 0, 5);
         }
 
         View::pageTitle('Dashboard');
-        View::totalClients($totalClients);
-        View::totalSites($totalSites);
-        View::totalDomains($totalDomains);
-        View::activeSSL($activeSSL);
-        View::recentClients($recent);
+        View::stats($stats);
+        View::recentClients($recentClients);
+        View::recentSites($recentSites);
     }
 }

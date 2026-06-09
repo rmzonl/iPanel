@@ -129,33 +129,33 @@ function executeJob(object $job): array
 
     $payload = json_decode($job->payload, true) ?? [];
 
-    // job type → agent module.method mapping
+    // job type → agent action ('modul.metod' — agent modüllerindeki gerçek metod adları)
     $map = [
-        'sites.create'    => ['Nginx',    'createVhost'],
-        'sites.delete'    => ['Nginx',    'deleteVhost'],
-        'ssl.issue'       => ['Ssl',      'issueCert'],
-        'ssl.renew'       => ['Ssl',      'renewCert'],
-        'database.create' => ['Database', 'createDatabase'],
-        'database.delete' => ['Database', 'dropDatabase'],
-        'dns.create'      => ['Dns',      'createZone'],
-        'dns.delete'      => ['Dns',      'deleteZone'],
-        'backup.create'   => ['Backup',   'create'],
-        'backup.restore'  => ['Backup',   'restore'],
-        'php.install'     => ['Php',      'installVersion'],
-        'php.remove'      => ['Php',      'removeVersion'],
-        'mail.create'     => ['Mail',     'createAccount'],
-        'mail.delete'     => ['Mail',     'deleteAccount'],
-        'ftp.create'      => ['Ftp',      'createAccount'],
-        'ftp.delete'      => ['Ftp',      'deleteAccount'],
-        'cron.create'     => ['Cron',     'create'],
-        'cron.delete'     => ['Cron',     'delete'],
+        'sites.create'    => 'nginx.createVhost',
+        'sites.delete'    => 'nginx.deleteVhost',
+        'ssl.issue'       => 'ssl.issueLetsEncrypt',
+        'ssl.renew'       => 'ssl.renewAll',
+        'database.create' => 'database.createDatabase',
+        'database.delete' => 'database.dropDatabase',
+        'dns.create'      => 'dns.createZone',
+        'dns.delete'      => 'dns.deleteZone',
+        'backup.create'   => 'backup.runFull',
+        'backup.restore'  => 'backup.restore',
+        'php.install'     => 'package.install',
+        'php.remove'      => 'package.remove',
+        'mail.create'     => 'mail.addAccount',
+        'mail.delete'     => 'mail.removeAccount',
+        'ftp.create'      => 'ftp.addUser',
+        'ftp.delete'      => 'ftp.removeUser',
+        'cron.create'     => 'cron.add',
+        'cron.delete'     => 'cron.remove',
     ];
 
     if (!isset($map[$job->type])) {
         return ['error' => "Bilinmeyen iş türü: {$job->type}"];
     }
 
-    [$module, $method] = $map[$job->type];
+    $action = $map[$job->type];
 
     $config = require '/etc/ipanel/agent.conf.php';
     $client = new \Project\Libraries\AgentClient(
@@ -164,7 +164,7 @@ function executeJob(object $job): array
     );
 
     try {
-        return $client->call($module, $method, $payload);
+        return $client->call($action, $payload);
     } catch (\Throwable $e) {
         return ['error' => $e->getMessage()];
     }

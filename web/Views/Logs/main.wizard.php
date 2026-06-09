@@ -7,7 +7,7 @@
           <div class="text-muted mt-1">ZN Framework ve sistem logları</div>
         </div>
         <div class="col-auto">
-          <button class="btn btn-outline-secondary btn-sm" id="btn-refresh-list" onclick="loadLogList()">
+          <button class="btn btn-outline-secondary btn-sm" id="btn-refresh-list" onclick="location.reload()">
             <i class="ti ti-refresh me-1"></i>Listeyi Yenile
           </button>
         </div>

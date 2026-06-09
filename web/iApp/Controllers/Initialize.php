@@ -19,12 +19,14 @@ class Initialize extends Controller
 {
     const exclude = ['Auth', 'Errors', 'Api'];
 
-    private const JSON_CONTROLLERS = ['Stats', 'Jobs'];
-    private const JSON_METHODS     = ['rows'];
+    // Stats'ın tüm uçları JSON/SSE (EventSource özel başlık gönderemez).
+    // Diğer AJAX uçları X-Requested-With başlığı ile tespit edilir.
+    private const JSON_CONTROLLERS = ['Stats'];
+    private const JSON_METHODS     = ['rows', 'refreshrows'];
 
     private const SETTINGS_RESELLER_ALLOWED = ['twoFactor', 'setup2fa', 'enable2fa', 'disable2fa', 'backupCodes'];
 
-    private const ADMIN_ONLY = ['IpAddresses', 'Firewall', 'Phpmyadmin', 'Phpmanager', 'Nodemanager', 'Filemanager'];
+    private const ADMIN_ONLY = ['IpAddresses', 'Firewall', 'PhpMyAdmin', 'PhpManager', 'NodeManager', 'FileManager', 'Logs'];
 
     public function main(): void
     {
@@ -34,8 +36,9 @@ class Initialize extends Controller
         $controller = CURRENT_CONTROLLER ?? '';
         $method     = CURRENT_CFUNCTION  ?? 'main';
 
-        $isJson = in_array($controller, self::JSON_CONTROLLERS)
-               || in_array($method, self::JSON_METHODS);
+        $isJson = (($_SERVER['HTTP_X_REQUESTED_WITH'] ?? '') === 'XMLHttpRequest')
+               || in_array($controller, self::JSON_CONTROLLERS, true)
+               || in_array(strtolower($method), self::JSON_METHODS, true);
 
         if (!$isJson) {
             Masterpage::attributes(['html' => ['data-bs-theme' => 'dark']]);

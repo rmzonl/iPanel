@@ -14,16 +14,15 @@
     'xml'=>'xml','json'=>'application/json','sh'=>'shell','bash'=>'shell',
     'sql'=>'text/x-sql','md'=>'markdown','yaml'=>'yaml','yml'=>'yaml'];
   $cmMode = $modeMap[$fileExt] ?? 'text/plain';
-  $cmPath  = htmlspecialchars($filePath, ENT_QUOTES);
 ]}
 
-{[ echo Script::tag()->compress(function() use ($cmMode, $cmPath) { ?>
+<script>
 (function() {
   var src = document.getElementById('fm-codemirror-src');
   var wrap = document.getElementById('fm-editor-wrap');
   var editor = CodeMirror(wrap, {
     value: src.value,
-    mode: '<?= addslashes($cmMode) ?>',
+    mode: {{ json_encode($cmMode) }},
     theme: 'dracula',
     lineNumbers: true,
     matchBrackets: true,
@@ -35,7 +34,7 @@
   });
   editor.setSize('100%', '500px');
   window._fmEditor = editor;
-  window._fmEditorPath = '<?= addslashes($cmPath) ?>';
-  document.getElementById('editor-title').textContent = '<?= addslashes(basename($cmPath)) ?>';
+  window._fmEditorPath = {{ json_encode($filePath) }};
+  document.getElementById('editor-title').textContent = {{ json_encode(basename($filePath)) }};
 })();
-<?php }); ]}
+</script>

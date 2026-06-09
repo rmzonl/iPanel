@@ -63,6 +63,17 @@ class SettingsModel extends Model
         }
     }
 
+    public function remove($scope, $key, $scopeId = null)
+    {
+        $query = DB::where('scope', $scope)->where('setting_key', $key);
+        if ($scopeId === null) {
+            $query = $query->whereNull('scope_id');
+        } else {
+            $query = $query->where('scope_id', $scopeId);
+        }
+        return $query->delete('settings');
+    }
+
     public function getAll()
     {
         return DB::table('settings')->orderBy('scope')->orderBy('setting_key')->get();

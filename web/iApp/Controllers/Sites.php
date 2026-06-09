@@ -53,7 +53,8 @@ class Sites extends Controller
 
         View::pageTitle('Yeni Site Ekle');
         View::clients($clients);
-        View::ips($ipModel->getAllActive());
+        View::ipAddresses($ipModel->getAllActive());
+        View::phpVersionsSetting((new \Project\Models\SettingsModel())->getSettingValue('server', 'php_versions'));
     }
 
     public function store(): void
@@ -110,7 +111,8 @@ class Sites extends Controller
         View::pageTitle('Site Düzenle');
         View::site($site);
         View::clients($clients);
-        View::ips($ipModel->getAllActive());
+        View::ipAddresses($ipModel->getAllActive());
+        View::phpVersionsSetting((new \Project\Models\SettingsModel())->getSettingValue('server', 'php_versions'));
     }
 
     public function update(int $id): void
