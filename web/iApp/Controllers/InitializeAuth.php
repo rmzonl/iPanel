@@ -14,6 +14,7 @@ class InitializeAuth extends Controller
     public function main()
     {
         header_remove('X-Powered-By');
+        Masterpage::attributes(['html' => ['data-bs-theme' => 'dark']]);
         Masterpage::bodyPage('layouts/auth-body');
     }
 }

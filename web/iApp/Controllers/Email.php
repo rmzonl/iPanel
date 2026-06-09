@@ -60,8 +60,14 @@ class Email extends Controller
         Acl::requireOwnership(Acl::ownsSite($siteId));
 
         $username    = trim((string) Post::get('username'));
-        $domain      = trim((string) Post::get('domain'));
         $rawPassword = (string) Post::get('password');
+
+        // Domain seçilen siteden türetilir (form ayrıca göndermez)
+        $domain = trim((string) Post::get('domain'));
+        if ($domain === '') {
+            $site   = (new \Project\Models\SiteModel())->getById($siteId);
+            $domain = $site->domain ?? '';
+        }
 
         $v = InputValidator::from(['username' => $username, 'domain' => $domain, 'site_id' => $siteId])
             ->required('site_id', 'Site')

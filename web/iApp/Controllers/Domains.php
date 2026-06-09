@@ -63,9 +63,13 @@ class Domains extends Controller
         $siteId = (int) Post::get('site_id');
         Acl::requireOwnership(Acl::ownsSite($siteId));
 
+        // client_id seçilen siteden türetilir (form göndermez)
+        $site     = (new \Project\Models\SiteModel())->getById($siteId);
+        $clientId = (int) ($site->client_id ?? 0);
+
         $raw = InputValidator::sanitize([
             'site_id'     => $siteId,
-            'client_id'   => (int) Post::get('client_id'),
+            'client_id'   => $clientId,
             'name'        => Post::get('name'),
             'type'        => Post::get('type') ?: 'addon',
             'redirect_to' => Post::get('redirect_to'),

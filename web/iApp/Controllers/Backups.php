@@ -72,18 +72,39 @@ class Backups extends Controller
             return;
         }
 
+        $settings   = new \Project\Models\SettingsModel();
+        $backupPath = $settings->getSettingValue('server', 'backup_path') ?: '/var/backups/ipanel';
+
         $id = $this->model->create([
             'site_id'      => $siteId,
             'client_id'    => $clientId,
             'type'         => $type,
             'filename'     => 'backup_' . date('Ymd_His') . '.tar.gz',
             'status'       => 'pending',
-            'storage_path' => '/var/backups/ipanel',
+            'storage_path' => $backupPath,
             'started_at'   => date('Y-m-d H:i:s'),
         ]);
 
-        AuditLogger::log('backups.create', 'backup', $id, "Yedekleme başlatıldı: $type");
-        Session::insert('success', 'Yedekleme işlemi başlatıldı.');
+        // Agent'ın işlemesi için kuyruğa ekle (sonuç İş Kuyruğu sayfasında izlenir)
+        $payload = [
+            'backup_id'  => $id,
+            'type'       => $type,
+            'target_dir' => $backupPath,
+        ];
+        if ($siteId) {
+            $site = (new \Project\Models\SiteModel())->getById($siteId);
+            $payload['site_id'] = $siteId;
+            $payload['domain']  = $site->domain ?? null;
+            // /home/{user}/... düzenindeki document_root'tan unix kullanıcısını türet
+            if (!empty($site->document_root) && preg_match('#^/home/([^/]+)/#', $site->document_root, $m)) {
+                $payload['site_username'] = $m[1];
+            }
+        }
+        $user = Acl::user();
+        $uuid = \Project\Libraries\JobQueue::push('backup.create', $payload, 5, (int) $user['id'], $user['username'] ?? 'system');
+
+        AuditLogger::log('backups.create', 'backup', $id, "Yedekleme kuyruğa eklendi: $type (iş: $uuid)");
+        Session::insert('success', 'Yedekleme işi kuyruğa eklendi. Durumu İş Kuyruğu sayfasından izleyebilirsiniz.');
         Redirect::action('backups/main');
     }
 
