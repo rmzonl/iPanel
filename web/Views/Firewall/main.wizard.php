@@ -53,7 +53,7 @@
   var tbody = document.getElementById('tableBody');
   var dirMap = {in:'Gelen', out:'Giden', both:'İkisi'};
 
-  fetch(base + 'firewall/rows', {headers:{'X-Requested-With':'XMLHttpRequest'}})
+  fetch(base + 'firewall/rows', { headers: { 'X-Requested-With':'XMLHttpRequest' } })
     .then(function(r){ return r.json(); })
     .then(function(json){
       var rows = json.data || [];

@@ -99,7 +99,7 @@
     failed:    ['bg-danger-lt',    'Başarısız']
   };
 
-  fetch(base + 'backups/rows', {headers:{'X-Requested-With':'XMLHttpRequest'}})
+  fetch(base + 'backups/rows', { headers: { 'X-Requested-With':'XMLHttpRequest' } })
     .then(function(r){ return r.json(); })
     .then(function(json){
       var rows = json.data || [];

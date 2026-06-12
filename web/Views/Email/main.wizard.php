@@ -55,7 +55,7 @@
   var base = '{{ URL::base("") }}';
   var tbody = document.getElementById('tableBody');
 
-  fetch(base + 'email/rows', {headers:{'X-Requested-With':'XMLHttpRequest'}})
+  fetch(base + 'email/rows', { headers: { 'X-Requested-With':'XMLHttpRequest' } })
     .then(function(r){ return r.json(); })
     .then(function(json){
       var rows = json.data || [];

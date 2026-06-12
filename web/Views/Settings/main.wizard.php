@@ -125,7 +125,7 @@ function loadClientSettings(clientId) {
   if (!clientId) return;
   var container = document.getElementById('clientSettingsForm');
   container.innerHTML = '<div class="text-center py-3"><div class="spinner-border spinner-border-sm"></div></div>';
-  fetch('{{ URL::base("settings/getClientSettings/") }}' + clientId, {headers:{'X-Requested-With':'XMLHttpRequest'}})
+  fetch('{{ URL::base("settings/getClientSettings/") }}' + clientId, { headers: { 'X-Requested-With':'XMLHttpRequest' } })
     .then(r => r.json())
     .then(data => {
       container.innerHTML = buildSettingsForm(data, clientId, 'client');
@@ -136,7 +136,7 @@ function loadSiteSettings(siteId) {
   if (!siteId) return;
   var container = document.getElementById('siteSettingsForm');
   container.innerHTML = '<div class="text-center py-3"><div class="spinner-border spinner-border-sm"></div></div>';
-  fetch('{{ URL::base("settings/getSiteSettings/") }}' + siteId, {headers:{'X-Requested-With':'XMLHttpRequest'}})
+  fetch('{{ URL::base("settings/getSiteSettings/") }}' + siteId, { headers: { 'X-Requested-With':'XMLHttpRequest' } })
     .then(r => r.json())
     .then(data => {
       container.innerHTML = buildSettingsForm(data, siteId, 'site');

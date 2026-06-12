@@ -119,7 +119,7 @@
   var csrf = '{{ $csrfToken ?? "" }}';
   var tbody = document.getElementById('tableBody');
 
-  fetch(base + 'apitokens/rows', {headers:{'X-Requested-With':'XMLHttpRequest'}})
+  fetch(base + 'apitokens/rows', { headers: { 'X-Requested-With':'XMLHttpRequest' } })
     .then(function(r){ return r.json(); })
     .then(function(json){
       var rows = json.data || [];

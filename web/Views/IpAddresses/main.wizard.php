@@ -63,7 +63,7 @@
     dedicated: ['bg-green-lt', 'Özel']
   };
 
-  fetch(base + 'ipaddresses/rows', {headers:{'X-Requested-With':'XMLHttpRequest'}})
+  fetch(base + 'ipaddresses/rows', { headers: { 'X-Requested-With':'XMLHttpRequest' } })
     .then(function(r){ return r.json(); })
     .then(function(json){
       var rows = json.data || [];

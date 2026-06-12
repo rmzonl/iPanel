@@ -58,7 +58,7 @@
   var typeLabels = {main:'Ana',addon:'Ek',subdomain:'Subdomain',alias:'Alias'};
   var typeColors = {main:'primary',addon:'blue',subdomain:'cyan',alias:'indigo'};
 
-  fetch(base + 'domains/rows', {headers:{'X-Requested-With':'XMLHttpRequest'}})
+  fetch(base + 'domains/rows', { headers: { 'X-Requested-With':'XMLHttpRequest' } })
     .then(function(r){ return r.json(); })
     .then(function(json){
       var rows = json.data || [];
