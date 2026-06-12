@@ -62,18 +62,18 @@ class Sites extends Controller
         if (!Http::isRequestMethod('post')) { Redirect::action('sites/main'); return; }
         if (!CsrfGuard::verify()) { Session::insert('error', 'Geçersiz form isteği.'); Redirect::action('sites/main'); return; }
 
-        $clientId = (int) Post::get('client_id');
+        $clientId = (int) Post::client_id();
         Acl::requireOwnership(Acl::ownsClient($clientId));
 
         $raw = InputValidator::sanitize([
             'client_id'       => $clientId,
-            'domain'          => Post::get('domain'),
-            'ip_id'           => Post::get('ip_id') ?: null,
-            'document_root'   => Post::get('document_root'),
-            'php_version'     => Post::get('php_version') ?: '8.2',
-            'status'          => Post::get('status') ?: 'active',
-            'disk_quota'      => Post::get('disk_quota') ?: 0,
-            'bandwidth_quota' => Post::get('bandwidth_quota') ?: 0,
+            'domain'          => Post::domain(),
+            'ip_id'           => Post::ip_id() ?: null,
+            'document_root'   => Post::document_root(),
+            'php_version'     => Post::php_version() ?: '8.2',
+            'status'          => Post::status() ?: 'active',
+            'disk_quota'      => Post::disk_quota() ?: 0,
+            'bandwidth_quota' => Post::bandwidth_quota() ?: 0,
         ]);
 
         $v = InputValidator::from($raw)
@@ -122,14 +122,14 @@ class Sites extends Controller
         Acl::requireOwnership(Acl::ownsSite($id));
 
         $raw = InputValidator::sanitize([
-            'client_id'       => (int) Post::get('client_id'),
-            'domain'          => Post::get('domain'),
-            'ip_id'           => Post::get('ip_id') ?: null,
-            'document_root'   => Post::get('document_root'),
-            'php_version'     => Post::get('php_version') ?: '8.2',
-            'status'          => Post::get('status') ?: 'active',
-            'disk_quota'      => Post::get('disk_quota') ?: 0,
-            'bandwidth_quota' => Post::get('bandwidth_quota') ?: 0,
+            'client_id'       => (int) Post::client_id(),
+            'domain'          => Post::domain(),
+            'ip_id'           => Post::ip_id() ?: null,
+            'document_root'   => Post::document_root(),
+            'php_version'     => Post::php_version() ?: '8.2',
+            'status'          => Post::status() ?: 'active',
+            'disk_quota'      => Post::disk_quota() ?: 0,
+            'bandwidth_quota' => Post::bandwidth_quota() ?: 0,
         ]);
 
         $this->model->update($id, $raw);

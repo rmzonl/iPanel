@@ -56,11 +56,11 @@ class Ftp extends Controller
         if (!Http::isRequestMethod('post')) { Redirect::action('ftp/main'); return; }
         if (!CsrfGuard::verify()) { Session::insert('error', 'Geçersiz form isteği.'); Redirect::action('ftp/main'); return; }
 
-        $siteId = (int) Post::get('site_id');
+        $siteId = (int) Post::site_id();
         Acl::requireOwnership(Acl::ownsSite($siteId));
 
-        $username    = trim((string) Post::get('username'));
-        $rawPassword = (string) Post::get('password');
+        $username    = trim((string) Post::username());
+        $rawPassword = (string) Post::password();
 
         $v = InputValidator::from(['site_id' => $siteId, 'username' => $username])
             ->required('site_id', 'Site')
@@ -83,9 +83,9 @@ class Ftp extends Controller
             'site_id'  => $siteId,
             'username' => htmlspecialchars($username, ENT_QUOTES, 'UTF-8'),
             'password' => password_hash($rawPassword, PASSWORD_BCRYPT),
-            'home_dir' => htmlspecialchars(trim((string) Post::get('home_dir')), ENT_QUOTES, 'UTF-8'),
-            'quota'    => (int) (Post::get('quota') ?: 0),
-            'status'   => Post::get('status') === 'suspended' ? 'suspended' : 'active',
+            'home_dir' => htmlspecialchars(trim((string) Post::home_dir()), ENT_QUOTES, 'UTF-8'),
+            'quota'    => (int) (Post::quota() ?: 0),
+            'status'   => Post::status() === 'suspended' ? 'suspended' : 'active',
         ]);
 
         AuditLogger::log('ftp.create', 'ftp_account', $id, "FTP hesabı oluşturuldu: $username");

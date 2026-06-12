@@ -56,14 +56,14 @@ class Email extends Controller
         if (!Http::isRequestMethod('post')) { Redirect::action('email/main'); return; }
         if (!CsrfGuard::verify()) { Session::insert('error', 'Geçersiz form isteği.'); Redirect::action('email/main'); return; }
 
-        $siteId = (int) Post::get('site_id');
+        $siteId = (int) Post::site_id();
         Acl::requireOwnership(Acl::ownsSite($siteId));
 
-        $username    = trim((string) Post::get('username'));
-        $rawPassword = (string) Post::get('password');
+        $username    = trim((string) Post::username());
+        $rawPassword = (string) Post::password();
 
         // Domain seçilen siteden türetilir (form ayrıca göndermez)
-        $domain = trim((string) Post::get('domain'));
+        $domain = trim((string) Post::domain());
         if ($domain === '') {
             $site   = (new \Project\Models\SiteModel())->getById($siteId);
             $domain = $site->domain ?? '';
@@ -93,8 +93,8 @@ class Email extends Controller
             'username' => htmlspecialchars($username, ENT_QUOTES, 'UTF-8'),
             'email'    => $emailAddress,
             'password' => password_hash($rawPassword, PASSWORD_BCRYPT),
-            'quota'    => (int) (Post::get('quota') ?: 1024),
-            'status'   => Post::get('status') === 'suspended' ? 'suspended' : 'active',
+            'quota'    => (int) (Post::quota() ?: 1024),
+            'status'   => Post::status() === 'suspended' ? 'suspended' : 'active',
         ]);
 
         AuditLogger::log('email.create', 'email_account', $id, "E-posta hesabı oluşturuldu: $emailAddress");

@@ -52,13 +52,13 @@ class IpAddresses extends Controller
         if (!CsrfGuard::verify()) { Session::insert('error', 'Geçersiz form isteği.'); Redirect::action('ipaddresses/main'); return; }
 
         $raw = InputValidator::sanitize([
-            'ip'        => Post::get('ip'),
-            'netmask'   => Post::get('netmask'),
-            'gateway'   => Post::get('gateway'),
-            'type'      => Post::get('type') ?: 'shared',
-            'client_id' => Post::get('client_id') ? (int) Post::get('client_id') : null,
-            'status'    => Post::get('status') ?: 'active',
-            'notes'     => Post::get('notes'),
+            'ip'        => Post::ip(),
+            'netmask'   => Post::netmask(),
+            'gateway'   => Post::gateway(),
+            'type'      => Post::type() ?: 'shared',
+            'client_id' => Post::client_id() ? (int) Post::client_id() : null,
+            'status'    => Post::status() ?: 'active',
+            'notes'     => Post::notes(),
         ]);
 
         $v = InputValidator::from($raw)

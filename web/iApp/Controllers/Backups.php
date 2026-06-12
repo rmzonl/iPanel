@@ -55,13 +55,13 @@ class Backups extends Controller
         if (!Http::isRequestMethod('post')) { Redirect::action('backups/main'); return; }
         if (!CsrfGuard::verify()) { Session::insert('error', 'Geçersiz form isteği.'); Redirect::action('backups/main'); return; }
 
-        $siteId   = Post::get('site_id')   ? (int) Post::get('site_id')   : null;
-        $clientId = Post::get('client_id') ? (int) Post::get('client_id') : null;
+        $siteId   = Post::site_id()   ? (int) Post::site_id()   : null;
+        $clientId = Post::client_id() ? (int) Post::client_id() : null;
 
         if ($siteId)   Acl::requireOwnership(Acl::ownsSite($siteId));
         if ($clientId) Acl::requireOwnership(Acl::ownsClient($clientId));
 
-        $type = InputValidator::sanitize(['type' => Post::get('type') ?: 'full'])['type'];
+        $type = InputValidator::sanitize(['type' => Post::type() ?: 'full'])['type'];
 
         $v = InputValidator::from(['type' => $type])
             ->in('type', ['full', 'database', 'files', 'email'], 'Yedek türü');

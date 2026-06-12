@@ -50,14 +50,14 @@ class Firewall extends Controller
         if (!CsrfGuard::verify()) { Session::insert('error', 'Geçersiz form isteği.'); Redirect::action('firewall/main'); return; }
 
         $raw = InputValidator::sanitize([
-            'name'      => Post::get('name'),
-            'action'    => Post::get('action') ?: 'allow',
-            'protocol'  => Post::get('protocol') ?: 'tcp',
-            'direction' => Post::get('direction') ?: 'in',
-            'source_ip' => Post::get('source_ip'),
-            'dest_port' => Post::get('dest_port'),
-            'priority'  => (int) (Post::get('priority') ?: 0),
-            'status'    => Post::get('status') ?: 'active',
+            'name'      => Post::name(),
+            'action'    => Post::action() ?: 'allow',
+            'protocol'  => Post::protocol() ?: 'tcp',
+            'direction' => Post::direction() ?: 'in',
+            'source_ip' => Post::source_ip(),
+            'dest_port' => Post::dest_port(),
+            'priority'  => (int) (Post::priority() ?: 0),
+            'status'    => Post::status() ?: 'active',
         ]);
 
         $v = InputValidator::from($raw)

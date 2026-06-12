@@ -70,16 +70,16 @@ class Clients extends Controller
         }
 
         $raw = InputValidator::sanitize([
-            'company_name' => Post::get('company_name'),
-            'first_name'   => Post::get('first_name'),
-            'last_name'    => Post::get('last_name'),
-            'email'        => Post::get('email'),
-            'phone'        => Post::get('phone'),
-            'address'      => Post::get('address'),
-            'city'         => Post::get('city'),
-            'country'      => Post::get('country') ?: 'TR',
-            'status'       => Post::get('status') ?: 'active',
-            'notes'        => Post::get('notes'),
+            'company_name' => Post::company_name(),
+            'first_name'   => Post::first_name(),
+            'last_name'    => Post::last_name(),
+            'email'        => Post::email(),
+            'phone'        => Post::phone(),
+            'address'      => Post::address(),
+            'city'         => Post::city(),
+            'country'      => Post::country() ?: 'TR',
+            'status'       => Post::status() ?: 'active',
+            'notes'        => Post::notes(),
         ]);
 
         $v = InputValidator::from($raw)
@@ -145,16 +145,16 @@ class Clients extends Controller
         Acl::requireOwnership(Acl::ownsClient($id));
 
         $raw = InputValidator::sanitize([
-            'company_name' => Post::get('company_name'),
-            'first_name'   => Post::get('first_name'),
-            'last_name'    => Post::get('last_name'),
-            'email'        => Post::get('email'),
-            'phone'        => Post::get('phone'),
-            'address'      => Post::get('address'),
-            'city'         => Post::get('city'),
-            'country'      => Post::get('country') ?: 'TR',
-            'status'       => Post::get('status') ?: 'active',
-            'notes'        => Post::get('notes'),
+            'company_name' => Post::company_name(),
+            'first_name'   => Post::first_name(),
+            'last_name'    => Post::last_name(),
+            'email'        => Post::email(),
+            'phone'        => Post::phone(),
+            'address'      => Post::address(),
+            'city'         => Post::city(),
+            'country'      => Post::country() ?: 'TR',
+            'status'       => Post::status() ?: 'active',
+            'notes'        => Post::notes(),
         ]);
 
         $v = InputValidator::from($raw)

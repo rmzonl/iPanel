@@ -60,7 +60,7 @@ class Domains extends Controller
         if (!Http::isRequestMethod('post')) { Redirect::action('domains/main'); return; }
         if (!CsrfGuard::verify()) { Session::insert('error', 'Geçersiz form isteği.'); Redirect::action('domains/main'); return; }
 
-        $siteId = (int) Post::get('site_id');
+        $siteId = (int) Post::site_id();
         Acl::requireOwnership(Acl::ownsSite($siteId));
 
         // client_id seçilen siteden türetilir (form göndermez)
@@ -70,10 +70,10 @@ class Domains extends Controller
         $raw = InputValidator::sanitize([
             'site_id'     => $siteId,
             'client_id'   => $clientId,
-            'name'        => Post::get('name'),
-            'type'        => Post::get('type') ?: 'addon',
-            'redirect_to' => Post::get('redirect_to'),
-            'status'      => Post::get('status') ?: 'active',
+            'name'        => Post::name(),
+            'type'        => Post::type() ?: 'addon',
+            'redirect_to' => Post::redirect_to(),
+            'status'      => Post::status() ?: 'active',
         ]);
 
         $v = InputValidator::from($raw)

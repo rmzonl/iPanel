@@ -56,15 +56,15 @@ class Cronjobs extends Controller
         if (!Http::isRequestMethod('post')) { Redirect::action('cronjobs/main'); return; }
         if (!CsrfGuard::verify()) { Session::insert('error', 'Geçersiz form isteği.'); Redirect::action('cronjobs/main'); return; }
 
-        $siteId = (int) Post::get('site_id');
+        $siteId = (int) Post::site_id();
         Acl::requireOwnership(Acl::ownsSite($siteId));
 
         $raw = InputValidator::sanitize([
             'site_id'  => $siteId,
-            'title'    => Post::get('title'),
-            'command'  => Post::get('command'),
-            'schedule' => Post::get('schedule'),
-            'status'   => Post::get('status') ?: 'active',
+            'title'    => Post::title(),
+            'command'  => Post::command(),
+            'schedule' => Post::schedule(),
+            'status'   => Post::status() ?: 'active',
         ]);
 
         $v = InputValidator::from($raw)
