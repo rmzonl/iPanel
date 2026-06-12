@@ -3,19 +3,12 @@
 <meta name="csrf-token" content="{{ $csrfToken }}">
 @endif
 <meta http-equiv="X-UA-Compatible" content="ie=edge"/>
-<!-- Preload: tarayıcı fontları HTML parse edilirken indirir, CSS beklemez -->
-<link rel="preload" href="{{ URL::base('iApp/Themes/Tabler/css/fonts/tabler-icons.woff2') }}" as="font" type="font/woff2" crossorigin="anonymous"/>
-<link rel="preload" href="{{ URL::base('iApp/Themes/Tabler/fonts/geist-sans/Geist-Variable.woff2') }}" as="font" type="font/woff2" crossorigin="anonymous"/>
 <link rel="stylesheet" href="{{ URL::base('iApp/Themes/Tabler/css/tabler.min.css') }}"/>
-<link rel="stylesheet" href="{{ URL::base('iApp/Themes/Tabler/css/tabler-icons.min.css') }}"/>
+<!-- İkon CSS — asenkron: load event'ini ve render'ı bloklamaz -->
+<link rel="preload" href="{{ URL::base('iApp/Themes/Tabler/css/tabler-icons.min.css') }}" as="style"/>
+<link rel="stylesheet" href="{{ URL::base('iApp/Themes/Tabler/css/tabler-icons.min.css') }}" media="print" onload="this.media='all'"/>
+<noscript><link rel="stylesheet" href="{{ URL::base('iApp/Themes/Tabler/css/tabler-icons.min.css') }}"/></noscript>
 <style>
-  /* font-display: swap → tarayıcı fontu beklemeden sayfayı render eder */
-  @font-face {
-    font-family: 'tabler-icons';
-    src: url('{{ URL::base("iApp/Themes/Tabler/css/fonts/tabler-icons.woff2") }}') format('woff2'),
-         url('{{ URL::base("iApp/Themes/Tabler/css/fonts/tabler-icons.woff") }}') format('woff');
-    font-display: swap;
-  }
   @font-face {
     font-family: 'Geist';
     src: url('{{ URL::base("iApp/Themes/Tabler/fonts/geist-sans/Geist-Variable.woff2") }}') format('woff2');

@@ -169,53 +169,76 @@ fetch_sources() {
 }
 
 ###############################################################################
-# 3b. Tabler Icons webfont indir (git'e dahil değil — kurulumda çekilir)
+# 3b. Tabler Icons — yalnızca kullanılan ikonların SVG subset'i (webfont değil)
+#
+# Tam webfont (500 KB+) yerine views'larda kullanılan ~68 ikonu SVG olarak indirir
+# ve mask-image tabanlı CSS (~15 KB) üretir. Font dosyası indirilmez.
 ###############################################################################
 download_tabler_icons() {
     local THEMES="$IPANEL_ROOT/web/iApp/Themes/Tabler"
-    local BASE="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont"
+    local OUT_CSS="$THEMES/css/tabler-icons.min.css"
 
-    log "Tabler Icons webfont indiriliyor..."
-    mkdir -p "$THEMES/css" "$THEMES/fonts"
+    mkdir -p "$THEMES/css"
 
-    # Mevcut sürümü öğren, yoksa sabit bir fallback kullan
+    # Views'larda kullanılan ikonlar (ti-XXX sınıfları — grep ile tespit edildi)
+    local -a ICONS=(
+        activity alert-circle alert-triangle api archive arrow-left arrow-up
+        ban brand-nodejs brand-php brand-zend check circle-check clock copy cpu
+        cursor-text dashboard database database-import device-floppy dots-vertical
+        download edit eye file-code file-export file-plus file-zip files folder
+        folder-off folder-plus home info-circle key link list list-check lock
+        login logout mail network pencil plus power printer puzzle queue refresh
+        search server settings shield shield-check shield-lock shield-off shield-plus
+        trash upload user-circle user-plus users world world-plus x
+    )
+
+    log "Tabler Icons SVG subset indiriliyor (${#ICONS[@]} ikon)..."
+
+    # Sürüm belirle
     local ICONS_VER
     ICONS_VER=$(curl -sf --connect-timeout 10 \
-        "https://data.jsdelivr.com/v1/package/npm/@tabler/icons-webfont" \
-        | grep -oP '"tags":\{"latest":"[^"]+' | grep -oP '[0-9]+\.[0-9]+\.[0-9]+' | head -1 2>/dev/null \
+        "https://data.jsdelivr.com/v1/package/npm/@tabler/icons" \
+        | python3 -c "import sys,json; d=json.load(sys.stdin); print(d['tags']['latest'])" 2>/dev/null \
         || echo "3.30.0")
 
-    local VER_BASE="${BASE}@${ICONS_VER}"
-    local ok=true
+    local ICONS_BASE="https://cdn.jsdelivr.net/npm/@tabler/icons@${ICONS_VER}"
 
-    # CSS — önce root, yoksa dist/ dene
-    if ! curl -sf --connect-timeout 15 --max-time 90 \
-            "${VER_BASE}/tabler-icons.min.css" -o "$THEMES/css/tabler-icons.min.css" 2>/dev/null; then
-        curl -sf --connect-timeout 15 --max-time 90 \
-            "${VER_BASE}/dist/tabler-icons.min.css" -o "$THEMES/css/tabler-icons.min.css" 2>/dev/null \
-            || ok=false
-    fi
+    # CSS başlığı — font tabanlı render'ı sıfırla, mask-image kullan
+    cat > "$OUT_CSS" << 'HEADER'
+.ti{display:inline-block;width:1em;height:1em;vertical-align:-.125em;font-style:normal;-webkit-mask-size:contain;mask-size:contain;-webkit-mask-repeat:no-repeat;mask-repeat:no-repeat;-webkit-mask-position:center;mask-position:center;background-color:currentColor}
+.ti::before{content:none!important}
+HEADER
 
-    # Font dosyaları — CSS hem css/fonts/ hem de ../fonts/ konumuna bakabilir, ikisine de koy
-    mkdir -p "$THEMES/fonts" "$THEMES/css/fonts"
-    for SUB in "" "dist/"; do
-        curl -sf --connect-timeout 15 --max-time 90 \
-            "${VER_BASE}/${SUB}fonts/tabler-icons.woff2" -o "$THEMES/fonts/tabler-icons.woff2" 2>/dev/null && break || true
+    local ok_count=0
+
+    for ICON in "${ICONS[@]}"; do
+        local SVG
+        # v3+: outline/ altında; v2: doğrudan icons/ altında
+        SVG=$(curl -sf --connect-timeout 10 --max-time 15 \
+            "${ICONS_BASE}/icons/outline/${ICON}.svg" 2>/dev/null)
+        [[ -z "$SVG" ]] && SVG=$(curl -sf --connect-timeout 10 --max-time 15 \
+            "${ICONS_BASE}/icons/${ICON}.svg" 2>/dev/null)
+
+        if [[ -n "$SVG" ]]; then
+            local ENCODED
+            ENCODED=$(echo "$SVG" | python3 -c "
+import sys, urllib.parse, re
+svg = sys.stdin.read()
+svg = svg.replace(' stroke=\"currentColor\"', ' stroke=\"black\"')
+svg = re.sub(r'\s+', ' ', svg).strip()
+print(urllib.parse.quote(svg, safe=\"'/<>=;:,.#-_!\"))
+")
+            printf '.ti-%s{-webkit-mask-image:url("data:image/svg+xml,%s");mask-image:url("data:image/svg+xml,%s")}\n' \
+                "$ICON" "$ENCODED" "$ENCODED" >> "$OUT_CSS"
+            (( ok_count++ )) || true
+        else
+            warn "  İkon SVG alınamadı: ${ICON}"
+        fi
     done
-    for SUB in "" "dist/"; do
-        curl -sf --connect-timeout 15 --max-time 90 \
-            "${VER_BASE}/${SUB}fonts/tabler-icons.woff" -o "$THEMES/fonts/tabler-icons.woff" 2>/dev/null && break || true
-    done
-    # css/ içinden bakıldığında ../fonts/ çalışmayabilir; css/fonts/ altına da kopyala
-    cp -f "$THEMES/fonts/tabler-icons.woff2" "$THEMES/css/fonts/" 2>/dev/null || true
-    cp -f "$THEMES/fonts/tabler-icons.woff"  "$THEMES/css/fonts/" 2>/dev/null || true
 
-    if $ok; then
-        ok "Tabler Icons v${ICONS_VER} webfont indirildi."
-    else
-        warn "Tabler Icons indirilemedi — panel menü ikonları görünmeyebilir."
-        warn "Düzeltmek için: bash $IPANEL_ROOT/install/scripts/download-icons.sh"
-    fi
+    local css_size
+    css_size=$(wc -c < "$OUT_CSS")
+    ok "Tabler Icons v${ICONS_VER} — ${ok_count}/${#ICONS[@]} ikon, CSS: ${css_size} B (webfont yerine)"
 }
 
 ###############################################################################
