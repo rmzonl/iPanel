@@ -561,7 +561,7 @@ class FileManager extends Controller
     }
 
     /** Zip'e dosya/dizin ekle */
-    private function addToZip(\ZipArchive $zip, string $path, string $localName): void
+    private function addToZip(\ZipArchive $zip, string $path, string $localName)
     {
         if (is_dir($path)) {
             $zip->addEmptyDir($localName);

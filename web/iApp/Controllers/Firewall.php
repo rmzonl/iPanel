@@ -22,7 +22,7 @@ class Firewall extends Controller
         $this->model = new \Project\Models\FirewallModel();
     }
 
-    public function main(): void
+    public function main()
     {
         View::pageTitle('Güvenlik Duvarı');
         View::success(Session::select('success'));
@@ -31,7 +31,7 @@ class Firewall extends Controller
         Session::delete('error');
     }
 
-    public function rows(): void
+    public function rows()
     {
         $data = $this->model->getAll();
         header('Content-Type: application/json; charset=utf-8');
@@ -39,12 +39,12 @@ class Firewall extends Controller
         exit;
     }
 
-    public function create(): void
+    public function create()
     {
         View::pageTitle('Yeni Kural Ekle');
     }
 
-    public function store(): void
+    public function store()
     {
         if (!Http::isRequestMethod('post')) { Redirect::action('firewall/main'); return; }
         if (!CsrfGuard::verify()) { Session::insert('error', 'Geçersiz form isteği.'); Redirect::action('firewall/main'); return; }
@@ -84,7 +84,7 @@ class Firewall extends Controller
         Redirect::action('firewall/main');
     }
 
-    public function delete(int $id): void
+    public function delete(int $id)
     {
         $rule = $this->model->getById($id);
         $this->model->delete($id);

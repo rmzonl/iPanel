@@ -28,7 +28,7 @@ class Initialize extends Controller
 
     private const ADMIN_ONLY = ['IpAddresses', 'Firewall', 'PhpMyAdmin', 'PhpManager', 'NodeManager', 'FileManager', 'Logs'];
 
-    public function main(): void
+    public function main()
     {
         header_remove('X-Powered-By');
 

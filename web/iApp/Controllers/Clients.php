@@ -21,7 +21,7 @@ class Clients extends Controller
         $this->model = new \Project\Models\ClientModel();
     }
 
-    public function main(): void
+    public function main()
     {
         View::pageTitle('Müşteriler');
         View::success(Session::select('success'));
@@ -30,7 +30,7 @@ class Clients extends Controller
         Session::delete('error');
     }
 
-    public function rows(): void
+    public function rows()
     {
         $user = Acl::user();
         $data = ($user['role'] === 'admin')
@@ -41,12 +41,12 @@ class Clients extends Controller
         exit;
     }
 
-    public function create(): void
+    public function create()
     {
         View::pageTitle('Yeni Müşteri Ekle');
     }
 
-    public function store(): void
+    public function store()
     {
         if (!Http::isRequestMethod('post')) { Redirect::action('clients/main'); return; }
         if (!CsrfGuard::verify()) { Session::insert('error', 'Geçersiz form isteği.'); Redirect::action('clients/main'); return; }
@@ -87,7 +87,7 @@ class Clients extends Controller
         Redirect::action('clients/main');
     }
 
-    public function edit(int $id): void
+    public function edit(int $id)
     {
         Acl::requireOwnership(Acl::ownsClient($id));
         View::pageTitle('Müşteri Düzenle');
@@ -96,7 +96,7 @@ class Clients extends Controller
         View::client($client);
     }
 
-    public function update(int $id): void
+    public function update(int $id)
     {
         if (!Http::isRequestMethod('post')) { Redirect::action('clients/main'); return; }
         if (!CsrfGuard::verify()) { Session::insert('error', 'Geçersiz form isteği.'); Redirect::action('clients/main'); return; }
@@ -134,7 +134,7 @@ class Clients extends Controller
         Redirect::action('clients/main');
     }
 
-    public function delete(int $id): void
+    public function delete(int $id)
     {
         Acl::requireOwnership(Acl::ownsClient($id));
         $client = $this->model->getById($id);

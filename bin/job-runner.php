@@ -79,24 +79,29 @@ function dbConn(): \PDO
 
 function claimJob(\PDO $db): ?object
 {
-    // Atomic claim: pending → running
-    $db->exec("START TRANSACTION");
+    // MariaDB 10.5 compatible atomic claim — no SKIP LOCKED needed
+    // Step 1: find the oldest pending job
     $stmt = $db->query(
-        "SELECT * FROM jobs
-          WHERE status = 'pending' AND attempts < max_attempts
-          ORDER BY priority ASC, created_at ASC
-          LIMIT 1 FOR UPDATE SKIP LOCKED"
+        "SELECT id FROM jobs WHERE status='pending' AND attempts < max_attempts
+          ORDER BY priority ASC, created_at ASC LIMIT 1"
     );
-    $job = $stmt->fetch();
-    if (!$job) {
-        $db->exec("ROLLBACK");
+    $row = $stmt->fetch();
+    if (!$row) {
         return null;
     }
-    $db->prepare(
-        "UPDATE jobs SET status='running', started_at=NOW(), attempts=attempts+1 WHERE id=?"
-    )->execute([$job->id]);
-    $db->exec("COMMIT");
-    return $job;
+
+    // Step 2: claim it by id+status check (safe against concurrent workers)
+    $upd = $db->prepare(
+        "UPDATE jobs SET status='running', started_at=NOW(), attempts=attempts+1
+          WHERE id=? AND status='pending'"
+    );
+    $upd->execute([$row->id]);
+
+    if ($upd->rowCount() === 0) {
+        return null; // Another worker got it first
+    }
+
+    return $db->query("SELECT * FROM jobs WHERE id=" . (int)$row->id)->fetch() ?: null;
 }
 
 function markDone(\PDO $db, int $id, bool $ok, array $result): void

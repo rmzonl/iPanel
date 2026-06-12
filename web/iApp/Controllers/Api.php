@@ -24,7 +24,7 @@ class Api extends Controller
     }
 
     /** Doğrulanmış kullanıcı yoksa 401 döndür */
-    private function authenticate(): void
+    private function authenticate()
     {
         $token = $this->getBearerToken();
 
@@ -123,7 +123,7 @@ class Api extends Controller
     // Yardımcılar
     // ---------------------------------------------------------------
 
-    private function requirePermission(string $permission): void
+    private function requirePermission(string $permission)
     {
         // Token izin listesi varsa onu kontrol et, yoksa rol bazlı ACL
         $perms = $this->apiUser['permissions'];
@@ -150,7 +150,7 @@ class Api extends Controller
         return null;
     }
 
-    private function json(mixed $data, int $status = 200): void
+    private function json(mixed $data, int $status = 200)
     {
         if (!headers_sent()) {
             http_response_code($status);

@@ -196,7 +196,8 @@ download_tabler_icons() {
             || ok=false
     fi
 
-    # Font dosyaları
+    # Font dosyaları — CSS hem css/fonts/ hem de ../fonts/ konumuna bakabilir, ikisine de koy
+    mkdir -p "$THEMES/fonts" "$THEMES/css/fonts"
     for SUB in "" "dist/"; do
         curl -sf --connect-timeout 15 --max-time 90 \
             "${VER_BASE}/${SUB}fonts/tabler-icons.woff2" -o "$THEMES/fonts/tabler-icons.woff2" 2>/dev/null && break || true
@@ -205,6 +206,9 @@ download_tabler_icons() {
         curl -sf --connect-timeout 15 --max-time 90 \
             "${VER_BASE}/${SUB}fonts/tabler-icons.woff" -o "$THEMES/fonts/tabler-icons.woff" 2>/dev/null && break || true
     done
+    # css/ içinden bakıldığında ../fonts/ çalışmayabilir; css/fonts/ altına da kopyala
+    cp -f "$THEMES/fonts/tabler-icons.woff2" "$THEMES/css/fonts/" 2>/dev/null || true
+    cp -f "$THEMES/fonts/tabler-icons.woff"  "$THEMES/css/fonts/" 2>/dev/null || true
 
     if $ok; then
         ok "Tabler Icons v${ICONS_VER} webfont indirildi."

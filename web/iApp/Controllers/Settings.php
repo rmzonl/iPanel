@@ -90,7 +90,7 @@ class Settings extends Controller
         $this->scopeSettingsJson('site', (int) $siteId);
     }
 
-    private function scopeSettingsJson(string $scope, int $scopeId): void
+    private function scopeSettingsJson(string $scope, int $scopeId)
     {
         header('Content-Type: application/json; charset=utf-8');
         $rows = $this->model->getByScope($scope, $scopeId)->result() ?: [];

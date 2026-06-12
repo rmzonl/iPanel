@@ -21,7 +21,7 @@ class Databases extends Controller
         $this->model = new \Project\Models\DatabaseModel();
     }
 
-    public function main(): void
+    public function main()
     {
         View::pageTitle('Veritabanları');
         View::success(Session::select('success'));
@@ -30,7 +30,7 @@ class Databases extends Controller
         Session::delete('error');
     }
 
-    public function rows(): void
+    public function rows()
     {
         $user = Acl::user();
         $data = ($user['role'] === 'admin')
@@ -41,7 +41,7 @@ class Databases extends Controller
         exit;
     }
 
-    public function create(): void
+    public function create()
     {
         $user      = Acl::user();
         $siteModel = new \Project\Models\SiteModel();
@@ -51,7 +51,7 @@ class Databases extends Controller
         View::sites($sites);
     }
 
-    public function store(): void
+    public function store()
     {
         if (!Http::isRequestMethod('post')) { Redirect::action('databases/main'); return; }
         if (!CsrfGuard::verify()) { Session::insert('error', 'Geçersiz form isteği.'); Redirect::action('databases/main'); return; }
@@ -97,7 +97,7 @@ class Databases extends Controller
         Redirect::action('databases/main');
     }
 
-    public function delete(int $id): void
+    public function delete(int $id)
     {
         Acl::requireOwnership(Acl::ownsSiteResource('site_databases', $id));
         $db = $this->model->getById($id);

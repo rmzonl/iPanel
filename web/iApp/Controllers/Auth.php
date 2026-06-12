@@ -36,7 +36,7 @@ class Auth extends Controller
         View::csrfField(CsrfGuard::field());
     }
 
-    private function handleLogin(): void
+    private function handleLogin()
     {
         $ip       = RateLimiter::clientIp();
         $username = trim((string) Post::username());
@@ -134,7 +134,7 @@ class Auth extends Controller
         View::username($pending['username']);
     }
 
-    private function handle2fa(array $pending): void
+    private function handle2fa(array $pending)
     {
         if (!CsrfGuard::verify()) {
             View::error('Geçersiz form isteği.');
@@ -191,7 +191,7 @@ class Auth extends Controller
     }
 
     /** Session'ı oluştur ve dashboard'a yönlendir */
-    private function completeLogin(object $user, string $ip): void
+    private function completeLogin(object $user, string $ip)
     {
         session_regenerate_id(true);
 
