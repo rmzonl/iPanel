@@ -24,7 +24,7 @@
             <div class="alert alert-danger mb-3"><i class="ti ti-alert-circle me-2"></i>{{ $error }}</div>
           @endif
 
-          <form method="POST" action="{{ URL::base('clients/store') }}">
+          <form method="POST" action="{{ URL::base('clients/store') }}" data-ajax="true">
         {[ echo $csrfField ?? ""; ]}
             <div class="card">
               <div class="card-header"><h3 class="card-title">Kişisel Bilgiler</h3></div>

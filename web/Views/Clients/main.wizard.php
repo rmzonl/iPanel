@@ -90,8 +90,7 @@
       + '<td><div class="btn-group btn-group-sm">'
       + '<a href="' + base + 'sites/main?client_id=' + r.id + '" class="btn btn-outline-secondary" title="Siteler"><i class="ti ti-world"></i></a>'
       + '<a href="' + base + 'clients/edit/' + r.id + '" class="btn btn-outline-primary" title="Düzenle"><i class="ti ti-edit"></i></a>'
-      + '<a href="' + base + 'clients/delete/' + r.id + '" class="btn btn-outline-danger" title="Sil"'
-      + ' onclick="return confirm(\'Bu müşteriyi silmek istediğinizden emin misiniz?\')"><i class="ti ti-trash"></i></a>'
+      + '<button class="btn btn-outline-danger" title="Sil" onclick="deleteClient(' + r.id + ',this)"><i class="ti ti-trash"></i></button>'
       + '</div></td></tr>';
   }
 
@@ -120,6 +119,38 @@
         row.style.display = row.dataset.search.includes(val) ? '' : 'none';
       });
     });
+  }
+  async function deleteClient(id, btn) {
+    if (!confirm('Bu müşteriyi silmek istediğinizden emin misiniz?')) return;
+    const csrf = document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') || '';
+    btn.disabled = true;
+    btn.innerHTML = '<span class="spinner-border spinner-border-sm"></span>';
+    try {
+      const fd = new FormData();
+      fd.append('_csrf', csrf);
+      const res  = await fetch(base + 'clients/delete/' + id, {
+        method: 'POST',
+        body: fd,
+        headers: { 'X-Requested-With': 'XMLHttpRequest' }
+      });
+      const json = await res.json();
+      if (json.success) {
+        Toast.success(json.message || 'Müşteri silindi.');
+        btn.closest('tr').remove();
+        if (json._csrf) {
+          document.querySelector('meta[name="csrf-token"]')?.setAttribute('content', json._csrf);
+          document.querySelectorAll('input[name="_csrf"]').forEach(el => { el.value = json._csrf; });
+        }
+      } else {
+        Toast.error(json.message || 'Silinemedi.');
+        btn.disabled = false;
+        btn.innerHTML = '<i class="ti ti-trash"></i>';
+      }
+    } catch(e) {
+      Toast.error('Sunucuya bağlanılamadı.');
+      btn.disabled = false;
+      btn.innerHTML = '<i class="ti ti-trash"></i>';
+    }
   }
 })();
 </script>
