@@ -194,12 +194,13 @@ download_tabler_icons() {
 
     log "Tabler Icons SVG subset indiriliyor (${#ICONS[@]} ikon)..."
 
-    # Sürüm belirle
+    # Sürüm belirle — pipeline hatalarında 3.30.0 kullan
     local ICONS_VER
     ICONS_VER=$(curl -sf --connect-timeout 10 \
-        "https://data.jsdelivr.com/v1/package/npm/@tabler/icons" \
+        "https://data.jsdelivr.com/v1/package/npm/@tabler/icons" 2>/dev/null \
         | python3 -c "import sys,json; d=json.load(sys.stdin); print(d['tags']['latest'])" 2>/dev/null \
-        || echo "3.30.0")
+    ) || ICONS_VER=""
+    [[ -z "$ICONS_VER" ]] && ICONS_VER="3.30.0"
 
     local ICONS_BASE="https://cdn.jsdelivr.net/npm/@tabler/icons@${ICONS_VER}"
 
@@ -210,26 +211,29 @@ download_tabler_icons() {
 HEADER
 
     local ok_count=0
+    local ICON SVG
 
     for ICON in "${ICONS[@]}"; do
-        local SVG
-        # v3+: outline/ altında; v2: doğrudan icons/ altında
-        SVG=$(curl -sf --connect-timeout 10 --max-time 15 \
-            "${ICONS_BASE}/icons/outline/${ICON}.svg" 2>/dev/null)
-        [[ -z "$SVG" ]] && SVG=$(curl -sf --connect-timeout 10 --max-time 15 \
-            "${ICONS_BASE}/icons/${ICON}.svg" 2>/dev/null)
+        # curl -f: HTTP 404/500 → exit 22; set -euo pipefail'den koru
+        SVG=$(curl -sf --connect-timeout 8 --max-time 10 \
+            "${ICONS_BASE}/icons/outline/${ICON}.svg" 2>/dev/null) || SVG=""
+        if [[ -z "$SVG" ]]; then
+            SVG=$(curl -sf --connect-timeout 8 --max-time 10 \
+                "${ICONS_BASE}/icons/${ICON}.svg" 2>/dev/null) || SVG=""
+        fi
 
         if [[ -n "$SVG" ]]; then
-            local ENCODED
-            ENCODED=$(echo "$SVG" | python3 -c "
+            # printf KULLANMA — $ENCODED içindeki %2F gibi karakterler format specifier sanılır.
+            # Python'a hem SVG'yi stdin'den, hem ikon adını argv'den ver; çıktıyı doğrudan yaz.
+            echo "$SVG" | python3 -c "
 import sys, urllib.parse, re
-svg = sys.stdin.read()
-svg = svg.replace(' stroke=\"currentColor\"', ' stroke=\"black\"')
-svg = re.sub(r'\s+', ' ', svg).strip()
-print(urllib.parse.quote(svg, safe=\"'/<>=;:,.#-_!\"))
-")
-            printf '.ti-%s{-webkit-mask-image:url("data:image/svg+xml,%s");mask-image:url("data:image/svg+xml,%s")}\n' \
-                "$ICON" "$ENCODED" "$ENCODED" >> "$OUT_CSS"
+icon = sys.argv[1]
+svg  = sys.stdin.read()
+svg  = svg.replace(' stroke=\"currentColor\"', ' stroke=\"black\"')
+svg  = re.sub(r'\s+', ' ', svg).strip()
+enc  = urllib.parse.quote(svg, safe=\"'/<>=;:,.#-_!\")
+print('.ti-' + icon + '{-webkit-mask-image:url(\"data:image/svg+xml,' + enc + '\");mask-image:url(\"data:image/svg+xml,' + enc + '\")}')
+" "$ICON" >> "$OUT_CSS" || true
             (( ok_count++ )) || true
         else
             warn "  İkon SVG alınamadı: ${ICON}"
